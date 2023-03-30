@@ -7,6 +7,7 @@ use App\Http\Resources\ImageResource;
 use App\Models\ChiTietTour;
 use App\Models\DiaDiem;
 use App\Models\Hinh_anh;
+use App\Models\KhachHang;
 use App\Models\LoaiTour;
 use App\Models\Question;
 use App\Models\Tour;
@@ -76,7 +77,6 @@ class TourController extends Controller
             ->where('tours.ngay_khoi_hanh', '<=', Carbon::tomorrow())
             ->limit(5)
             ->get();
-
         foreach ($lastdealsTours as $lastdealsTour) {
             $lastdealsTour->gia_nguoi_lon = number_format($lastdealsTour->gia_nguoi_lon, 0, ',', '.');
         }
@@ -111,6 +111,11 @@ class TourController extends Controller
 
     public function show($slug)
     {
+        $customer = null;
+        if (session()->has('customer')){
+            $customer = KhachHang::find(session('customer'));
+        }
+
         $detailTour = DB::table('tour_diadiems')
         ->join('tours', 'tour_diadiems.ma_tour', '=', 'tours.id')
         ->join('chi_tiet_tours', 'tours.id', '=', 'chi_tiet_tours.ma_tour')
@@ -141,22 +146,13 @@ class TourController extends Controller
         if($detailTour->do_tuoi_tu == 0) {
             $detailTour->do_tuoi_tu = 'Không giới hạn';
         }
-        
+        // dd($detailTour->ngay_khoi_hanh);
         $detailTour->ngay_khoi_hanh = date('d/m/Y', strtotime($detailTour->ngay_khoi_hanh));
-        
-        $today = Carbon::today();
-        $yesterday = Carbon::yesterday();
-        
-        $today = date('d/m/Y', strtotime($today));
-        $yesterday = date('d/m/Y', strtotime($yesterday));
-        
-        if($detailTour->ngay_khoi_hanh == $today){
-            $detailTour->ngay_khoi_hanh = 'Hôm nay';
+        $now = strtotime(Carbon::now());
+        $getdate = $now - strtotime($detailTour->ngay_khoi_hanh);
+        if($getdate > 0){
+            $detailTour->ngay_khoi_hanh = 'Đã khởi hành';
         }
-        if($detailTour->ngay_khoi_hanh == $yesterday){
-            $detailTour->ngay_khoi_hanh = 'Hôm qua';
-        }
-
         
         $extraServices = DB::table('extra_services')
         ->join('dia_diems', 'extra_services.ma_dia_diem', '=', 'dia_diems.id')
@@ -181,11 +177,7 @@ class TourController extends Controller
         $forcusAdult = request("adult");
         $forcusYouth = request("youth");
         $forcusChild = request("child");
-        // $detailTour->gia_nguoi_lon = number_format($detailTour->gia_nguoi_lon, 0, ',', '.');
-        // $detailTour->gia_thieu_nien = number_format($detailTour->gia_thieu_nien, 0, ',', '.');
-        // $detailTour->gia_tre_em = number_format($detailTour->gia_tre_em, 0, ',', '.');
-        
-        return Inertia::render('Tour/Detail-tour', compact('detailTour', 'extraServices', 'lichTrinh', 'totalPrice', 'forcusAdult', 'forcusYouth', 'forcusChild'));
+        return Inertia::render('Tour/Detail-tour', compact('detailTour', 'extraServices', 'lichTrinh', 'totalPrice', 'forcusAdult', 'forcusYouth', 'forcusChild', 'customer'));
 
     }
 

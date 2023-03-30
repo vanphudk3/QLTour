@@ -8,6 +8,7 @@ use App\Models\Hinh_anh;
 use App\Models\LichTrinh;
 use App\Models\LoaiTour;
 use App\Models\Tour;
+use App\Models\Tour_DiaDiem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -34,11 +35,17 @@ class DiaDiemController extends Controller
                     $query->where('ma_loai_tour', request('category'));
                 }
             })
-            ->paginate(4)
+            ->paginate(10)
             ->withQueryString();
-            // dd($locations);
+        $arrTour = [];
+        foreach($locations as $key => $location){
+            $arrTour[$key] = Tour_DiaDiem::where('ma_dia_diem', $location->id)->first('ma_dia_diem');
+        }
+        $arrTour = array_filter($arrTour, function($value) { return $value !== null; });
+        
+        $arrTour = array_values($arrTour);
         $category = request('category');
-        return Inertia::render('Location/Index', compact('locations', 'categories', 'category', 'extra_services', 'tours', 'schedule'));
+        return Inertia::render('Location/Index', compact('locations', 'categories', 'category', 'extra_services', 'tours', 'schedule', 'arrTour'));
     }
 
 
@@ -186,6 +193,11 @@ class DiaDiemController extends Controller
      */
     public function destroy(DiaDiem $location)
     {
+        
+        $imgOld = Hinh_anh::where('ma_dia_diem', $location->id)->get();
+        foreach($imgOld as $img){
+            $img->delete();
+        }
         $location->delete();
         return redirect()->route('location.index');
     }

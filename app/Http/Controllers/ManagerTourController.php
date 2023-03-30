@@ -12,7 +12,9 @@ use App\Models\LichTrinh;
 use App\Models\LoaiTour;
 use App\Models\Tour;
 use App\Models\Tour_DiaDiem;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class ManagerTourController extends Controller
@@ -24,6 +26,16 @@ class ManagerTourController extends Controller
         $extra_services = extra_service::all();
         $schedule = LichTrinh::all();
         $tours = Tour::paginate(6);
+
+        $arrDetailTour = [];
+        foreach($tours as $key => $tour){
+            $arrDetailTour[$key] = ChiTietTour::where('ma_tour', $tour->id)->first('ma_tour');
+        }
+
+        $arrDetailTour = array_filter($arrDetailTour, function($value) { return $value !== null; });
+        $arrDetailTour = array_values($arrDetailTour);
+        // dd($arrDetailTour);
+
         return Inertia::render('ManagerTour/Index', compact('tours', 'categories', 'locations', 'extra_services', 'schedule'));
     }
 
@@ -59,6 +71,23 @@ class ManagerTourController extends Controller
         return Inertia::render('ManagerTour/Edit', compact('tour', 'location','locations', 'detaiTour', 'categories', 'extra_services', 'tours', 'schedule'));
     }
 
+    public function proccess_slug(Request $request){
+        // dd($request->all());
+        try{
+            if(request("name")){
+                $forcusname = request("name");
+                $lug = Str::slug($request->name);
+                return redirect()->back()->with(['slug' => $lug, 'name' => $forcusname]);
+
+            }
+        }
+        catch(Exception $e){
+            return response()->json([
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
     public function store(Request $request)
     {
         // dd($request->all());
@@ -89,7 +118,7 @@ class ManagerTourController extends Controller
         }
 
         if($request->priceYoung < 1 || $request->priceYoung > 100000000){
-            return redirect()->back()->with('error', 'Giá trẻ em phải từ 1 đến 100.000.000');
+            return redirect()->back()->with('error', 'Giá thiếu niên phải từ 1 đến 100.000.000');
         }
 
         if($request->priceChild < 0 || $request->priceChild > 100000000){
@@ -281,7 +310,12 @@ class ManagerTourController extends Controller
 
     public function destroy($id)
     {
+        // dd($id);
         $tour = Tour::find($id);
+        $tour_location = new Tour_DiaDiem();
+        $detail_tour = new ChiTietTour();
+        $detail_tour->where('ma_tour', $tour->id)->delete();
+        $tour_location->where('ma_tour', $tour->id)->delete();
         $tour->delete();
 
         return redirect()->route('managerTour.index');

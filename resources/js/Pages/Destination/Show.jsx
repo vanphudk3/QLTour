@@ -48,7 +48,7 @@ export default function Show(props) {
     const lastdealTours = usePage().props;
     const faqs = usePage().props.questions;
     const destinations = usePage().props.destination;
-
+    console.log(tours);
     const breadcrumbs = [
         <Link underline="hover" key="1" color="inherit" href={route('welcome')} style={{textDecoration: "none",color: "white"}}>
             Home
@@ -216,7 +216,7 @@ export default function Show(props) {
                                             <div className="container-book">
                                                 <LogoLinkB
                                                     href={route("tour.show", {
-                                                        id: tour.ma_tour,
+                                                        slug: tour.slug,
                                                     })}
                                                     className="img-book"
                                                 >
@@ -232,7 +232,7 @@ export default function Show(props) {
                                                         href={route(
                                                             "tour.show",
                                                             {
-                                                                id: tour.ma_tour,
+                                                                slug: tour.slug,
                                                             }
                                                         )}
                                                         className="content-book"
@@ -274,7 +274,7 @@ export default function Show(props) {
                                                             href={route(
                                                                 "tour.show",
                                                                 {
-                                                                    id: tour.ma_tour,
+                                                                    slug: tour.slug,
                                                                 }
                                                             )}
                                                         >
@@ -341,38 +341,6 @@ export default function Show(props) {
                                             </div>
                                         </div>
                                     </div>
-                                    {/* <div className="widget widget-category">
-                                        <div className="title">Categories</div>
-                                        <div className="babe-search-filter-items">
-                                            <div className="term-item">
-                                                <Select
-                                                    id="category"
-                                                    name="category"
-                                                    className="mt-1 block w-full"
-                                                    value={data.category}
-                                                    handleChange={
-                                                        onHandleChange
-                                                    }
-                                                >
-                                                    <option value="0">
-                                                        --Tất cả--
-                                                    </option>
-                                                    {categories.map(
-                                                        (category) => (
-                                                            <option
-                                                                value={
-                                                                    category.id
-                                                                }
-                                                            >
-                                                                {category.ten}
-                                                            </option>
-                                                        )
-                                                    )}
-                                                </Select>
-                                            </div>
-                                    
-                                        </div>
-                                    </div> */}
                                     <div className="widget widget-destination justify-between">
                                         <div className="title">Departure</div>
                                         <Select

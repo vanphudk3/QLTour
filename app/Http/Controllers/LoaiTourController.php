@@ -19,15 +19,27 @@ class LoaiTourController extends Controller
      */
     public function index()
     {
+        $categories = LoaiTour::all();
+        $arrLocation = [];
+        foreach($categories as $key => $category){
+            $arrLocation[$key] = DiaDiem::where('ma_loai_tour', $category->id)->first('ma_loai_tour');
+            // $category->location = DiaDiem::where('ma_loai_tour', $category->id)->first();
+        }
+        // dd($arrLocation);
+
+        $arrLocation = array_filter($arrLocation, function($value) { return $value !== null; });
+
+
         $locations = DiaDiem::all();
+        
+
         $extra_services = extra_service::all();
         $tours = Tour::all();
         $schedule = LichTrinh::all();
-        $categories = LoaiTour::all();
         foreach ($categories as $category){
             $category->mo_ta = $this->Trancate($category->mo_ta, 50);
         }
-        return Inertia::render('Category/Index', compact('categories', 'locations', 'extra_services', 'tours', 'schedule'));
+        return Inertia::render('Category/Index', compact('categories', 'arrLocation', 'extra_services', 'tours', 'schedule'));
     }
 
     /**

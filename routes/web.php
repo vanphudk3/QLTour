@@ -6,9 +6,11 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\DiaDiemController;
 use App\Http\Controllers\ExtraServiceController;
+use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\LichTrinhController;
 use App\Http\Controllers\LoaiTourController;
 use App\Http\Controllers\ManagerTourController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ProfileController;
@@ -43,10 +45,19 @@ Route::get('/tour/category/{category}', [SearchController::class, 'category'])->
 Route::get('/tour/location/{location}', [SearchController::class, 'location'])->name('tour.location');
 
 Route::get('/booking', [ChiTietTourController::class, 'booking'])->name('booking');
-Route::post('/booking/getDistricts', [ChiTietTourController::class, 'getDistricts'])->name('getDistricts');
-Route::post('/booking/getWards', [ChiTietTourController::class, 'getWards'])->name('getWards');
-
 Route::get('/checkout', [ChiTietTourController::class, 'checkout'])->name('checkout');
+
+Route::get('loginMember', [KhachHangController::class, 'login'])->name('customer.login');
+Route::post('loginMember', [KhachHangController::class, 'process_login'])->name('customer.process_login');
+Route::get('registerMember', [KhachHangController::class, 'register'])->name('customer.register');
+Route::post('registerMember', [KhachHangController::class, 'process_register'])->name('customer.process_register');
+Route::get('logoutMember', [KhachHangController::class, 'logout'])->name('customer.logout');
+Route::get('profileMember', [KhachHangController::class, 'profile'])->name('customer.profile');
+
+Route::middleware('cors')->group(function(){
+    Route::post('/checkout', [ChiTietTourController::class, 'process'])->name('checkout.process');
+});
+Route::get('/checkout/success', [ChiTietTourController::class, 'success'])->name('checkout.success');
 
 Route::middleware(['auth','verified'])->group(function () {
     Route::get('/auth/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -54,6 +65,7 @@ Route::middleware(['auth','verified'])->group(function () {
     Route::resource('/auth/role', RoleController::class);
     Route::resource('/auth/account', AccountController::class);
     Route::resource('/auth/managerTour', ManagerTourController::class);
+    // Route::get('/auth/slug', [ManagerTourController::class, 'proccess_slug'])->name('managerTour.slug');
     Route::resource('/auth/category', LoaiTourController::class);
     Route::resource('/auth/location', DiaDiemController::class);
     Route::post('/auth/location', [DiaDiemController::class, 'store'])->name('location.store');
@@ -61,6 +73,8 @@ Route::middleware(['auth','verified'])->group(function () {
     Route::resource('/auth/extraService', ExtraServiceController::class);
     Route::resource('/auth/question', QuestionController::class);
     Route::resource('/auth/schedule', LichTrinhController::class);
+    Route::resource('/auth/order', OrderController::class);
+    Route::get('/auth/order/{order}/browse', [OrderController::class, 'browse_order'])->name('order.browse');
 });
 
 Route::middleware('auth')->group(function () {

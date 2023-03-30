@@ -1,10 +1,24 @@
 import Content from "@/Layouts/Tour";
 import { Head, Link, router } from "@inertiajs/react";
 import { usePage, useForm } from "@inertiajs/react";
-import { Autocomplete, Breadcrumbs, TextField, Typography } from "@mui/material";
+import {
+    Autocomplete,
+    Box,
+    Breadcrumbs,
+    Button,
+    Step,
+    StepButton,
+    Stepper,
+    TextField,
+    Typography,
+} from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { isEmpty } from "lodash";
 import React, { useRef, useState, useEffect } from "react";
+import InputError from "@/Components/InputError";
+import Validate from "validator/lib/isEmpty";
+import ValidateEmail from "validator/lib/isEmail";
+
 
 const breadcrumbs = [
     <Link
@@ -48,55 +62,71 @@ const numberFormat = (value) => {
 
 export default function TourBooking(props) {
     const detailTour = usePage().props.detailTour;
-    const cities = usePage().props.cities;
-    const districts = usePage().props.districts;
-    const wards = usePage().props.wards;
-    const forcusCity = usePage().props.forcusCity;
-    const forcusDistricts = usePage().props.forcusDistricts;
-    const getdistrict = usePage().props.booking.district;
+    const error = usePage().props.error;
 
     const [city, setcity] = useState([]);
-    const [cityId, setcityId] = useState('');
+    const [cityId, setcityId] = useState("");
+    const [district, setdistrict] = useState([]);
+    const [districtId, setdistrictId] = useState("");
+    const [ward, setward] = useState([]);
 
     useEffect(() => {
         const getCity = async () => {
-            const rescity = await fetch("https://provinces.open-api.vn/api/");
+            const rescity = await fetch(
+                `https://provinces.open-api.vn/api/?depth=2`
+            );
             const datacity = await rescity.json();
             setcity(await datacity);
         };
         getCity();
-    },[]);
+    }, []);
+
+    useEffect(() => {
+        const getDistrict = async () => {
+            const resdistrict = await fetch(
+                `https://provinces.open-api.vn/api/p/${cityId.id}?depth=2`
+            );
+            const datadistrict = await resdistrict.json();
+            setdistrict(await datadistrict.districts);
+        };
+        getDistrict();
+    }, [cityId]);
+
+    useEffect(() => {
+        const getWard = async () => {
+            const resward = await fetch(
+                `https://provinces.open-api.vn/api/d/${districtId.id}?depth=2`
+            );
+            const dataward = await resward.json();
+            setward(await dataward.wards);
+        };
+        getWard();
+    }, [districtId]);
+
+    // console.log(ward);
 
     const arrCities = [];
 
     city.map((city) => {
         arrCities.push({
             label: city.name,
-            idCity: city.id,
+            idCity: city.code,
         });
     });
 
     const arrDistricts = [];
-    if(isEmpty(districts)){
-        districts.map((district) => {
+    if (!isEmpty(district)) {
+        district.map((district) => {
             arrDistricts.push({
                 label: district.name,
-                idDistrict: district.id,
-            });
-        });
-    }
-    if(!isEmpty(getdistrict)){
-        getdistrict.map((district) => {
-            arrDistricts.push({
-                label: district.name,
-                idDistrict: district.id,
+                idDistrict: district.code,
             });
         });
     }
 
     const arrWards = [];
-    if (isEmpty(wards)) {
-        wards.map((ward) => {
+    if (!isEmpty(ward)) {
+        ward.map((ward) => {
             arrWards.push({
                 label: ward.name,
                 idWard: ward.id,
@@ -115,16 +145,51 @@ export default function TourBooking(props) {
         });
     }
 
-    const { data, setData, post, progress, processing, errors, reset } = 
-        useForm({
-            city: isEmpty(forcusCity) ? "" : forcusCity,
-            district: isEmpty(forcusDistricts) ? "" : forcusDistricts,
-            ward: "",
-            detailTour: detailTour.ky_hieu,
-
+    const ArrExtra = [];
+    if(!isEmpty(detailTour.extra)) {
+        detailTour.extra.map((extra) => {
+            ArrExtra.push({
+                id: extra.id,
+            });
         });
+    }
 
-    // console.log(data);
+    const { data, setData, post, progress, processing, errors, reset } =
+        useForm({
+            city: "",
+            district: "",
+            ward: "",
+            id: detailTour.id,
+            nameTour: detailTour.ten_tour,
+            code: detailTour.ky_hieu,
+            transpost: detailTour.transpost,
+            adults: detailTour.adults,
+            youth: detailTour.youth,
+            child: detailTour.child,
+            priceAdults: detailTour.priceAdults,
+            priceYouth: detailTour.priceYouth,
+            priceChild: detailTour.priceChild,
+            amoutDay: detailTour.so_ngay,
+            amoutNight: detailTour.so_dem,
+            age: detailTour.do_tuoi_tu,
+            amoutPeople: detailTour.so_cho,
+            departDate: detailTour.ngay_khoi_hanh,
+            address: detailTour.dia_chi,
+            image: detailTour.hinh_anh,
+            category: detailTour.loai_tour,
+            departLocation: detailTour.noi_khoi_hanh,
+            gatheringLocation: detailTour.noi_tap_chung,
+            time: detailTour.gio_khoi_hanh,
+            totalPrice: detailTour.totalPrice,
+            countTraveller: detailTour.counttraveller,
+            subtotal: detailTour.subtotal,
+            extra: ArrExtra,
+            name: "",
+            email: "",
+            phone: "",
+            address: "",
+            note: "",
+        });
 
     const onHandleChange = (event) => {
         setData(
@@ -133,16 +198,79 @@ export default function TourBooking(props) {
                 ? event.target.checked
                 : event.target.value
         );
-        if(event.target.name == "city"){
-            const getcityId = event.target.value;
-            setcityId(getcityId);
+        if (event.target.name === "phone") {
+            const rex = /^[0-9\b]+$/;
+            event.target.value = event.target.value.replace(/[^0-9]/g, "");
+            if (event.target.value === "" || rex.test(event.target.value)) {
+                setData(event.target.name, event.target.value);
+            }
         }
+        arrCount.map((count, index) => {
+            if(event.target.name === `citizen_identification_${index}`){
+                const rex = /^[0-9\b]+$/;
+                event.target.value = event.target.value.replace(/[^0-9]/g, "");
+                if(event.target.value === '' || rex.test(event.target.value)) {
+                    setData(event.target.name, event.target.value);
+                }
+            }
+            if(event.target.name === `phone_${index}`){
+                const rex = /^[0-9\b]+$/;
+                event.target.value = event.target.value.replace(/[^0-9]/g, "");
+                if(event.target.value === '' || rex.test(event.target.value)) {
+                    setData(event.target.name, event.target.value);
+                }
+            }
+        });
     };
 
-    const forcuspage = useRef(null);
-        useEffect(() => {
-            forcuspage.current.scrollIntoView({ behavior: "smooth" });
-        }, []);
+    console.log(data);
+
+    const [validationMsg, setValidationMsg] = useState({});
+
+    const validateAll = () => {
+        const msg = {};
+
+        if (Validate(data.name)) {
+            msg.name = "Name is required";
+        }
+        if (Validate(data.email)) {
+            msg.email = "Email is required";
+        }
+        if (Validate(data.phone)) {
+            msg.phone = "Phone is required";
+        }
+        if (Validate(data.address)) {
+            msg.address = "Address is required";
+        }
+        if(data.phone.length < 10 || data.phone.length > 11){
+            msg.phone = "Phone is invalid";
+        }
+        if(!ValidateEmail(data.email)){
+            msg.email = "Email is invalid";
+        }
+        if (Validate(data.city)) {
+            msg.city = "City is required";
+        }
+        if (Validate(data.district)) {
+            msg.district = "District is required";
+        }
+        if (Validate(data.ward)) {
+            msg.ward = "Ward is required";
+        }
+
+        setValidationMsg(msg);
+        if (Object.keys(msg).length > 0) {
+            return false;
+        }
+        return true;
+    };
+
+    const onHandleSubmit = (event) => {
+        event.preventDefault();
+        const isValid = validateAll();
+        if (!isValid) return;
+        router.visit("/checkout",{data});
+    };
 
     return (
         <>
@@ -170,22 +298,7 @@ export default function TourBooking(props) {
                         </div>
                     </div>
                 </div>
-                <div className="container-layout">
-                    <div className="detail-tour" style={{ marginTop: "20px" }}>
-                        <nav aria-label="breadcrumb">
-                            <ol className="breadcrumb">
-                                <li className="breadcrumb-item">
-                                    <a href="#">Select Tour</a>
-                                </li>
-                                <li
-                                    className="breadcrumb-item active"
-                                    aria-current="page"
-                                >
-                                    Contact Details
-                                </li>
-                            </ol>
-                        </nav>
-                    </div>
+                <div className="container-layout" style={{ paddingTop: "20px" }}>
                     <div className="layout-02">
                         <div className="row">
                             <div className="col-4 width-100 width-50">
@@ -276,14 +389,23 @@ export default function TourBooking(props) {
                         </div>
                     </div>
                 </div>
-                <div className="container-layout">
-                    <div className="layout-02 booking-layout">
-                        <div className="row">
-                            <div className="col-md-8">
-                                <form action="">
+                <form onSubmit={onHandleSubmit} id="booking-form">
+                    <div className="container-layout">
+                        <div className="layout-02 booking-layout">
+                            <div className="row">
+                                <div className="col-md-8">
                                     <h3 className="heading-title">
                                         Traveller Details
                                     </h3>
+                                    {/* errors */}
+                                    <div className="row">
+                                        <div className="col-md-6">
+                                            <InputError
+                                                message={error}
+                                            />
+                                        </div>
+                                    </div>
+
                                     {arrCount.map((e, index) => (
                                         <div className="contact-form">
                                             <label className="booking_form">
@@ -297,13 +419,16 @@ export default function TourBooking(props) {
                                                         className="form-control"
                                                         placeholder="First name"
                                                         aria-label="First name"
+                                                        onChange={(e) =>
+                                                            onHandleChange(e)
+                                                        }
+                                                        required
                                                     />
-                                                    {/* <TextField
-                                                        id="standard-basic"
-                                                        label={`First name ${e.id}`}
-                                                        name={`first_name_${index}`}
-                                                    /> */}
                                                 </div>
+                                                <InputError
+                                                    message={errors.first_name_1}
+                                                    className="mt-2"
+                                                />
                                                 <div className="w-48 mb-3">
                                                     <input
                                                         type="text"
@@ -311,12 +436,11 @@ export default function TourBooking(props) {
                                                         className="form-control"
                                                         placeholder="Last name"
                                                         aria-label="Last name"
+                                                        onChange={(e) =>
+                                                            onHandleChange(e)
+                                                        }
+                                                        required
                                                     />
-                                                    {/* <TextField
-                                                        id="standard-basic"
-                                                        label={`Last name ${e.id}`}
-                                                        name={`last_name_${index}`}
-                                                    /> */}
                                                 </div>
                                             </div>
                                             <div className="mb-3">
@@ -326,16 +450,24 @@ export default function TourBooking(props) {
                                                     className="form-control"
                                                     placeholder="Citizen Identification/Passport*"
                                                     aria-label="citizen identification/passport"
+                                                    onChange={(e) =>
+                                                        onHandleChange(e)
+                                                    }
+                                                    required
+                                                    // pattern="[0-9]{9,12}"
                                                 />
                                             </div>
                                             <div className="row">
                                                 <div className="col mb-3">
                                                     <select
-                                                        name={`gender_${index}`}
+                                                        name={`age_${index}`}
                                                         className="form-select"
                                                         aria-label="Default select example"
+                                                        onChange={(e) =>
+                                                            onHandleChange(e)
+                                                        }
                                                     >
-                                                        <option selected="">
+                                                        <option>
                                                             Age*
                                                         </option>
                                                         <option value="1">
@@ -355,7 +487,12 @@ export default function TourBooking(props) {
                                                         name={`phone_${index}`}
                                                         className="form-control"
                                                         placeholder="Phone*"
-                                                        aria-label="Last name"
+                                                        aria-label="phone"
+                                                        onChange={(e) =>
+                                                            onHandleChange(e)
+                                                        }
+                                                        required
+                                                        // pattern="[0-9]{10}"
                                                     />
                                                 </div>
                                             </div>
@@ -368,12 +505,20 @@ export default function TourBooking(props) {
                                         <div className="contact-infor">
                                             <div className="contact-infor__block">
                                                 <label for="name">Name*</label>
-                                                <input
-                                                    type="text"
-                                                    id="name"
-                                                    placeholder="Your Name"
-                                                />
+                                                    <input
+                                                        type="text"
+                                                        id="name"
+                                                        name="name"
+                                                        placeholder="Your Name"
+                                                        onChange={(e) =>
+                                                            onHandleChange(e)
+                                                        }
+                                                    />
                                             </div>
+                                                <InputError
+                                                    message={validationMsg.name}
+                                                    className="mt-2"
+                                                />
                                             <div className="contact-infor__block">
                                                 <label for="email">
                                                     Email*
@@ -381,9 +526,17 @@ export default function TourBooking(props) {
                                                 <input
                                                     type="email"
                                                     id="email"
+                                                    name="email"
                                                     placeholder="Your Email"
+                                                    onChange={(e) =>
+                                                        onHandleChange(e)
+                                                    }
                                                 />
                                             </div>
+                                            <InputError
+                                                message={validationMsg.email}
+                                                className="mt-2"
+                                            />
                                             <div className="contact-infor__block">
                                                 <label for="phone">
                                                     Phone*
@@ -391,9 +544,17 @@ export default function TourBooking(props) {
                                                 <input
                                                     type="text"
                                                     id="phone"
+                                                    name="phone"
                                                     placeholder="Your Phone"
+                                                    onChange={(e) =>
+                                                        onHandleChange(e)
+                                                    }
                                                 />
                                             </div>
+                                                <InputError
+                                                    message={validationMsg.phone}
+                                                    className="mt-2"
+                                                />
                                             <div className="contact-infor__block">
                                                 <label for="address">
                                                     Address*
@@ -401,47 +562,40 @@ export default function TourBooking(props) {
                                                 <input
                                                     type="text"
                                                     id="address"
+                                                    name="address"
                                                     placeholder="Your Address"
+                                                    onChange={(e) =>
+                                                        onHandleChange(e)
+                                                    }
                                                 />
                                             </div>
+                                                <InputError
+                                                    message={validationMsg.address}
+                                                    className="mt-2"
+                                                />
                                             <div className="contact-infor__block">
                                                 <label for="country">
                                                     City*
                                                 </label>
-                                                {/* <select
-                                                    className="form-select"
-                                                    aria-label="Default select example"
-                                                >
-                                                    <option selected>
-                                                        Open this select menu
-                                                    </option>
-                                                    <option value="1">
-                                                        One
-                                                    </option>
-                                                    <option value="2">
-                                                        Two
-                                                    </option>
-                                                    <option value="3">
-                                                        Three
-                                                    </option>
-                                                </select> */}
-                                                {!isEmpty(data.city) ? (
+
                                                 <Autocomplete
                                                     disablePortal
                                                     id="city"
+                                                    name="city"
                                                     options={arrCities}
-                                                    value={data.city}
                                                     onChange={(
                                                         event,
                                                         newValue
                                                     ) => {
+                                                        setcityId({
+                                                            ...cityId,
+                                                            id: newValue.idCity,
+                                                        });
                                                         setData(
                                                             "city",
                                                             newValue.label
                                                         );
-                                        
                                                     }}
-                                                    ref={forcuspage}
                                                     // sx={{ width: 300 }}
                                                     renderInput={(params) => (
                                                         <TextField
@@ -450,65 +604,34 @@ export default function TourBooking(props) {
                                                         />
                                                     )}
                                                 />
-                                                ) : (
-                                                <Autocomplete
-                                                    disablePortal
-                                                    id="city"
-                                                    options={arrCities}
-                                                    value={data.city}
-                                                    onChange={(
-                                                        event,
-                                                        newValue
-                                                    ) => {
-                                                        setData(
-                                                            "city",
-                                                            newValue.label
-                                                        );
-                                                    }}
-                                                    ref={forcuspage}
-                                                    // sx={{ width: 300 }}
-                                                    renderInput={(params) => (
-                                                        <TextField
-                                                            {...params}
-                                                            label="City"
-                                                        />
-                                                    )}
-                                                />
-                                                )}
+
                                             </div>
+                                                <InputError
+                                                    message={validationMsg.city}
+                                                    className="mt-2"
+                                                />
                                             <div className="contact-infor__block">
-                                                <label for="city">District*</label>
-                                                {/* <select
-                                                    className="form-select"
-                                                    aria-label="Default select example"
-                                                >
-                                                    <option selected>
-                                                        Open this select menu
-                                                    </option>
-                                                    <option value="1">
-                                                        One
-                                                    </option>
-                                                    <option value="2">
-                                                        Two
-                                                    </option>
-                                                    <option value="3">
-                                                        Three
-                                                    </option>
-                                                </select> */}
+                                                <label for="city">
+                                                    District*
+                                                </label>
                                                 <Autocomplete
                                                     disablePortal
                                                     id="district"
+                                                    name="district"
                                                     options={arrDistricts}
-                                                    value={data.district}
+                                                    // value={data.district}
                                                     onChange={(
                                                         event,
                                                         newValue
                                                     ) => {
+                                                        setdistrictId({
+                                                            ...districtId,
+                                                            id: newValue.idDistrict,
+                                                        });
                                                         setData(
                                                             "district",
-                                                            newValue.idDistrict
+                                                            newValue.label
                                                         );
-                                            
                                                     }}
                                                     // sx={{ width: 300 }}
                                                     renderInput={(params) => (
@@ -518,33 +641,20 @@ export default function TourBooking(props) {
                                                         />
                                                     )}
                                                 />
+
                                             </div>
+                                                <InputError
+                                                    message={validationMsg.district}
+                                                    className="mt-2"
+                                                />
                                             <div className="contact-infor__block">
-                                                <label for="city">
-                                                    Ward*
-                                                </label>
-                                                {/* <select
-                                                    className="form-select"
-                                                    aria-label="Default select example"
-                                                >
-                                                    <option selected>
-                                                        Open this select menu
-                                                    </option>
-                                                    <option value="1">
-                                                        One
-                                                    </option>
-                                                    <option value="2">
-                                                        Two
-                                                    </option>
-                                                    <option value="3">
-                                                        Three
-                                                    </option>
-                                                </select> */}
+                                                <label for="city">Ward*</label>
+
                                                 <Autocomplete
                                                     disablePortal
                                                     id="ward"
+                                                    name="ward"
                                                     options={arrWards}
-                                                    value={data.ward}
                                                     onChange={(
                                                         event,
                                                         newValue
@@ -563,44 +673,52 @@ export default function TourBooking(props) {
                                                     )}
                                                 />
                                             </div>
-                                            <div className="contact-infor__block">
+                                                <InputError
+                                                    message={validationMsg.ward}
+                                                    className="mt-2"
+                                                />
+                                            {/* <div className="contact-infor__block">
                                                 <label for="zip">Zip</label>
                                                 <input
                                                     type="text"
                                                     id="zip"
                                                     placeholder="Your Zip"
                                                 />
-                                            </div>
+                                            </div> */}
                                             <div className="contact-infor__block">
                                                 <label for="messenger">
                                                     Messenger
                                                 </label>
                                                 <textarea
-                                                    name="messenger"
+                                                    name="note"
                                                     id=""
                                                     cols="30"
                                                     rows="10"
                                                     placeholder="writing something ..."
+                                                    onChange={(e) =>
+                                                        onHandleChange(e)
+                                                    }
                                                 ></textarea>
                                             </div>
                                         </div>
                                     </div>
-                                </form>
-                            </div>
-                            <div
-                                className="col-6 col-md-4 width-100"
-                                style={{ borderLeft: "none" }}
-                            >
-                                <div className="sidebar-form">
-                                    <div className="search-available">
-                                        <div className="booking-form__block">
-                                            <h6 className="post-title">
-                                                Broome To The Bungle Bungles
-                                            </h6>
-                                            <form
-                                                action=""
+                                    {/* </form> */}
+                                </div>
+                                <div
+                                    className="col-6 col-md-4 width-100"
+                                    style={{ borderLeft: "none" }}
+                                >
+                                    <div className="sidebar-form">
+                                        <div className="search-available">
+                                            <div className="booking-form__block">
+                                                <h6 className="post-title">
+                                                    Broome To The Bungle Bungles
+                                                </h6>
+                                                {/* <form
+                                                action={onHandleSubmit}
                                                 className="booking-form"
-                                            >
+                                                id="booking-form"
+                                            > */}
                                                 <div className="input-group">
                                                     <div className="booking-block">
                                                         <span
@@ -805,18 +923,18 @@ export default function TourBooking(props) {
                                                 </div>
                                                 <div className="submit-group">
                                                     <button type="submit">
-                                                        Book Now{" "}
+                                                        NEXT STEP{" "}
                                                         <i className="fa-solid fa-arrow-right"></i>
                                                     </button>
                                                 </div>
-                                            </form>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </form>
             </Content>
         </>
     );

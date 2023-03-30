@@ -16,12 +16,14 @@ return new class extends Migration
         Schema::create('khach_hangs', function (Blueprint $table) {
             $table->id();
             $table->string('ten_khach_hang');
-            $table->string('email');
+            $table->string('email')->unique();
+            $table->string('citizen_identification_number')->unique();
             $table->char('so_dien_thoai', 10);
-            $table->string('dia_chi');
+            $table->text('dia_chi');
             $table->string('mat_khau');
             $table->date('ngay_sinh');
-            $table->string('gioi_tinh');
+            $table->string('remember_token')->nullable();
+            $table->integer('tong_so_tour_da_di')->default(0);
             $table->timestamps();
         });
     }

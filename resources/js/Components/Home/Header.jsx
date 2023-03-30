@@ -11,6 +11,11 @@ import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
+import { Avatar, Menu, MenuItem, Tooltip } from "@mui/material";
+import { Link, usePage } from "@inertiajs/react";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { isEmpty } from "lodash";
+// import { useState } from "react";
 
 const Search = styled("div")(({ theme }) => ({
     position: "relative",
@@ -73,6 +78,8 @@ const defaultOpenDestination = () => {
 };
 
 export default function Header() {
+    const login = usePage().props.login;
+    console.log(login);
     const openNav = (e) => {
         var x = document.getElementById("mySidepanel");
         x.addEventListener("click", closeNav);
@@ -86,6 +93,115 @@ export default function Header() {
         // document.getElementById("mySidepanel").style.width = "0";
         document.body.style.backgroundColor = "white";
         document.body.style.cursor = "default";
+    };
+
+    const [anchorElUser, setAnchorElUser] = React.useState(null);
+
+    const handleOpenUserMenu = (event) => {
+        setAnchorElUser(event.currentTarget);
+    };
+    const handleCloseUserMenu = () => {
+        setAnchorElUser(null);
+    };
+    const handleChangeSetting = (event) => {
+        // setAnchorElUser(null);
+    };
+
+    const changeMenu = (e) => {
+
+        if (login.customer == null && login.remember == null) {
+            return (
+                <>
+                    <MenuItem>
+                        <Link
+                            href={route("customer.login")}
+                            active={route().current("customer.login")}
+                            className="flex justify-content text-decor-none cl-black cl-primary-hover"
+                        >
+                            Login
+                        </Link>
+                    </MenuItem>
+                    <MenuItem>
+                        <Link
+                            href={route("customer.register")}
+                            active={route().current("customer.register")}
+                            className="flex justify-content text-decor-none cl-black cl-primary-hover"
+                        >
+                            Register
+                        </Link>
+                    </MenuItem>
+                </>
+            );
+        }else if (login.customer != null && login.remember == null) {
+            return (
+                <>
+                    <MenuItem>
+                        <Link
+                            href={route("customer.profile")}
+                            active={route().current("customer.profile")}
+                            className="flex justify-content text-decor-none cl-black cl-primary-hover"
+                        >
+                            Profile
+                        </Link>
+                    </MenuItem>
+                    <MenuItem>
+                        <Link
+                            href={route("customer.logout")}
+                            active={route().current("customer.logout")}
+                            className="flex justify-content text-decor-none cl-black cl-primary-hover"
+                        >
+                            Logout
+                        </Link>
+                    </MenuItem>
+                </>
+            );
+        }else if (login.customer == null && login.remember != null) {
+            return (
+                <>
+                    <MenuItem>
+                        <Link
+                            href={route("customer.profile")}
+                            active={route().current("customer.profile")}
+                            className="flex justify-content text-decor-none cl-black cl-primary-hover"
+                        >
+                            Profile
+                        </Link>
+                    </MenuItem>
+                    <MenuItem>
+                        <Link
+                            href={route("customer.logout")}
+                            active={route().current("customer.logout")}
+                            className="flex justify-content text-decor-none cl-black cl-primary-hover"
+                        >
+                            Logout
+                        </Link>
+                    </MenuItem>
+                </>
+            );
+        }else if (login.customer != null && login.remember != null) {
+            return (
+                <>
+                    <MenuItem>
+                        <Link
+                            href={route("customer.profile")}
+                            active={route().current("customer.profile")}
+                            className="flex justify-content text-decor-none cl-black cl-primary-hover"
+                        >
+                            Profile
+                        </Link>
+                    </MenuItem>
+                    <MenuItem>
+                        <Link
+                            href={route("customer.logout")}
+                            active={route().current("customer.logout")}
+                            className="flex justify-content text-decor-none cl-black cl-primary-hover"
+                        >
+                            Logout
+                        </Link>
+                    </MenuItem>
+                </>
+            );
+        }
     };
 
     return (
@@ -113,12 +229,12 @@ export default function Header() {
                         Tour
                     </FocusLink>
                     <div className="catalogues">
-                    <FocusLink
-                        href={route("destination")}
-                        active={route().current("destination")}
-                    >
-                        Destination
-                    </FocusLink>
+                        <FocusLink
+                            href={route("destination")}
+                            active={route().current("destination")}
+                        >
+                            Destination
+                        </FocusLink>
                         <div className="dropdown-content">
                             <a href={route("destination")}>
                                 All Destination{" "}
@@ -128,9 +244,7 @@ export default function Header() {
                             <div className="layout-content">
                                 <div className="detail-catalogues">
                                     <button
-                                        className={
-                                            "tablinks active"
-                                        }
+                                        className={"tablinks active"}
                                         onClick={(event) =>
                                             openDestination(event, "TayNamBo")
                                         }
@@ -165,18 +279,38 @@ export default function Header() {
                                     </button>
                                 </div>
                                 <div className="show-details">
-                                    <div id="TayNamBo" className="tabcontent" style={{flexWrap: "wrap"}}>
-                                        <a href="http://127.0.0.1:8000/destination/du-lich-phu-quoc">Phú Quốc</a>
-                                        <a href="http://127.0.0.1:8000/destination/du-lich-tien-giang">Tiền Giang</a>
-                                        <a href="http://127.0.0.1:8000/destination/du-lich-can-tho">Cần Thơ</a>
-                                        <a href="http://127.0.0.1:8000/destination/du-lich-vinh-long">Vĩnh Long</a>
-                                        <a href="http://127.0.0.1:8000/destination/du-lich-soc-trang">Sóc Trăng</a>
-                                        <a href="http://127.0.0.1:8000/destination/du-lich-an-giang">An Giang</a>
+                                    <div
+                                        id="TayNamBo"
+                                        className="tabcontent"
+                                        style={{ flexWrap: "wrap" }}
+                                    >
+                                        <a href="http://127.0.0.1:8000/destination/du-lich-phu-quoc">
+                                            Phú Quốc
+                                        </a>
+                                        <a href="http://127.0.0.1:8000/destination/du-lich-tien-giang">
+                                            Tiền Giang
+                                        </a>
+                                        <a href="http://127.0.0.1:8000/destination/du-lich-can-tho">
+                                            Cần Thơ
+                                        </a>
+                                        <a href="http://127.0.0.1:8000/destination/du-lich-vinh-long">
+                                            Vĩnh Long
+                                        </a>
+                                        <a href="http://127.0.0.1:8000/destination/du-lich-soc-trang">
+                                            Sóc Trăng
+                                        </a>
+                                        <a href="http://127.0.0.1:8000/destination/du-lich-an-giang">
+                                            An Giang
+                                        </a>
                                         <a href="#">Kiên Giang</a>
                                         <a href="#">Cà Mau</a>
                                         {/* <a href="#">Bạc Liêu</a> */}
                                     </div>
-                                    <div id="DongNamBo" className="tabcontent" style={{flexWrap: "wrap"}}>
+                                    <div
+                                        id="DongNamBo"
+                                        className="tabcontent"
+                                        style={{ flexWrap: "wrap" }}
+                                    >
                                         <a href="#">Đồng Nai</a>
                                         <a href="#">Bà Rịa - Vũng Tàu</a>
                                         <a href="#">Côn Đảo</a>
@@ -185,16 +319,23 @@ export default function Header() {
                                         <a href="#">Bình Dương</a>
                                         <a href="#">Bình Phước</a>
                                     </div>
-                                    <div id="MienTrung" className="tabcontent" style={{flexWrap: "wrap"}}>
+                                    <div
+                                        id="MienTrung"
+                                        className="tabcontent"
+                                        style={{ flexWrap: "wrap" }}
+                                    >
                                         <a href="#">Huế</a>
                                         <a href="#">Hải Phòng</a>
                                         <a href="#">Hạ Long</a>
                                         <a href="#">Bắc Ninh</a>
                                         <a href="#">Phú Thọ</a>
                                         <a href="#">Thanh Hóa</a>
-
                                     </div>
-                                    <div id="MienBac" className="tabcontent" style={{flexWrap: "wrap"}}>
+                                    <div
+                                        id="MienBac"
+                                        className="tabcontent"
+                                        style={{ flexWrap: "wrap" }}
+                                    >
                                         <a href="#">Hà Nội</a>
                                         <a href="#">Hải Phòng</a>
                                         <a href="#">Hạ Long</a>
@@ -217,19 +358,6 @@ export default function Header() {
                     </a>
                 </div>
                 <div className="contact-navbar">
-                    {/* <button type="button">
-                        <i className="fa-solid fa-phone" />
-                        <p>123 456 7890</p>
-                    </button>
-                    <button type="button" id="myBtn">
-                        <i className="fa-solid fa-search" />
-                    </button>
-                    <div id="myModal" className="modal">
-                        <div className="modal-content">
-                            <span className="close">&times;</span>
-                            <div className="input-group"></div>
-                        </div>
-                    </div> */}
                     <Search>
                         <SearchIconWrapper>
                             <SearchIcon />
@@ -240,9 +368,30 @@ export default function Header() {
                         />
                     </Search>
 
-                    <button type="button">
-                        <i className="fa-regular fa-user" />
-                    </button>
+                    <Tooltip title="Open settings">
+                        <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                            <AccountCircleIcon sx={{ width: 32, height: 32 }} />
+                        </IconButton>
+                    </Tooltip>
+                    <Menu
+                        sx={{ mt: "45px" }}
+                        id="menu-appbar"
+                        anchorEl={anchorElUser}
+                        anchorOrigin={{
+                            vertical: "top",
+                            horizontal: "right",
+                        }}
+                        keepMounted
+                        transformOrigin={{
+                            vertical: "top",
+                            horizontal: "right",
+                        }}
+                        open={Boolean(anchorElUser)}
+                        onClose={handleCloseUserMenu}
+                    >
+                        {changeMenu()}
+                    </Menu>
+
                     <div className="menu-mobile">
                         <button
                             type="button"

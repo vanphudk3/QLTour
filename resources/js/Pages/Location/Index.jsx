@@ -13,16 +13,14 @@ export default function Category(props) {
     const locations = usePage().props.locations;
     const datas = locations.data;
     const categories = usePage().props.categories;
-    // console.log(locations.data);
     const category = usePage().props.category;
-    // console.log(category);
+    const arrTour = usePage().props.arrTour;
+
+    console.log(arrTour);
 
     const { data, setData, post, progress, processing, errors, reset } = useForm({
         category: category || "",
     });
-
-
-    console.log(data.category);
 
     const onHandleChange = (event) => {
         setData(
@@ -35,6 +33,32 @@ export default function Category(props) {
                 replace: true,
                 })
         );
+    };
+    const deleteLocation = (id) => {
+        if (!arrTour.map((item) => item.ma_dia_diem).includes(id)) {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, delete it!",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    router.delete(`/auth/location/${id}`, {
+                        _method: "DELETE",
+                    });
+                    Swal.fire(
+                        "Deleted!",
+                        "Your file has been deleted.",
+                        "success"
+                    );
+                }
+            });
+        } else {
+            Swal.fire("Error!", "This category is used in location.", "error");
+        }
     };
 
     return (
@@ -126,14 +150,15 @@ export default function Category(props) {
                                                         Edit
                                                     </Link>
                                                     <Link
-                                                        href={route(
-                                                            "location.destroy",
-                                                            location.id
-                                                        )}
                                                         class="btn btn-danger"
-                                                        method="delete"
+                                                        // method="delete"
                                                         as="button"
                                                         type="button"
+                                                        onClick={() =>
+                                                            deleteLocation(
+                                                                location.id
+                                                            )
+                                                        }
                                                     >
                                                         Delete
                                                     </Link>

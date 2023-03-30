@@ -13,12 +13,13 @@ class Order extends Model
 
     protected $fillable = [
         'ma_khach_hang',
+        'ma_nhan_vien',
         'ky_hieu_tour',
         'ten_nguoi_dat',
         'so_dien_thoai',
         'email',
         'dia_chi',
-        'ngay_dat',
+        'gio_khoi_hanh',
         'tong_tien',
         'trang_thai',
         'ghi_chu',

@@ -43,6 +43,33 @@ class HandleInertiaRequests extends Middleware
                 'detailTour' => $request->session()->get('detailTour'),
                 'district' => $request->session()->get('districts'),
             ],
+            // 'getBooking' => $request->session()->get('getBooking'),
+            'error' => $request->session()->get('error'),
+            'msgorder' => [
+                'success' => $request->session()->get('success'),
+            ],
+            'slugTour' => [
+                'slug' => $request->session()->get('slug'),
+                'name' => $request->session()->get('name'),
+            ],
+            'managerTour' => [
+                'error' => $request->session()->get('error'),
+            ],
+            'login' => [
+                'error' => $request->session()->get('error_email'),
+                'error_server' => $request->session()->get('error_server'),
+                'success' => $request->session()->get('success'),
+                'customer' => $request->session()->get('customer'),
+                'remember' => $request->cookie('remember'),
+            ],
+            'register' => [
+                'error' => $request->session()->get('error_register'),
+                'success' => $request->session()->get('success'),
+            ],
+            'profile' => [
+                'error' => $request->session()->get('error'),
+                'success' => $request->session()->get('updateprofile'),
+            ],
         ]);
     }
 }

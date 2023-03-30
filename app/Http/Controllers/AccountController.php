@@ -42,28 +42,29 @@ class AccountController extends Controller
         return redirect()->route('account.index');
     }
 
-    public function edit(User $user)
+    public function edit(User $account)
     {
+        
+        #region Get Role
+        if($account->role != ''){
+            $role = Role::where('name', $account->role)->first('id');
+            $account->role = $role->id;
+        }
+        #endregion
         $roles = Role::all();
-        return Inertia::render('Account/Edit', compact('user', 'roles'));
+        return Inertia::render('Account/Edit', compact('account', 'roles'));
     }
 
-    public function update(Request $request, User $user)
+    public function update(Request $request, User $account)
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-            'role' => ['required', 'string', 'max:255'],
-        ]);
-
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-        ]);
-
-        $user->roles()->sync($request->role);
+        if($request->role_id){
+            $roles = Role::where('id', $request->role_id)->first('name');
+            $roles->name = strtolower($roles->name);
+            // dd($account);
+            $account->role = $roles->name;
+            $account->save();
+            // $account->roles()->sync($request->role);
+        }
 
         return redirect()->route('account.index');
     }

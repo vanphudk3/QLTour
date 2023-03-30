@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\KhachHangController;
+use App\Http\Controllers\ManagerTourController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -17,3 +19,6 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::post('/profileMember/{id}/update', [KhachHangController::class, 'updateProfileMember']);
+Route::post('/profileMember/{id}/cancelorder', [KhachHangController::class, 'cancelorder']);

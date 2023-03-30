@@ -15,15 +15,16 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('ma_khach_hang')->constrained('khach_hangs');
-            $table->foreignId('ma_nhan_vien')->constrained('users');
+            $table->foreignId('ma_khach_hang')->nullable()->constrained('khach_hangs');
+            $table->foreignId('ma_nhan_vien')->nullable()->constrained('users');
             $table->string('ten_nguoi_dat');
             $table->char('so_dien_thoai', 11);
             $table->string('email');
             $table->string('dia_chi');
             $table->timeTz('gio_khoi_hanh');
             $table->double('tong_tien');
-            $table->enum('trang_thai', ['Đã đặt', 'Đã thanh toán', 'Đã hủy']);
+            $table->enum('trang_thai', ['0', '1', '2']);
+            $table->enum('hinh_thuc_thanh_toan', ['0', '1', '2', '3']);
             $table->string('ghi_chu')->nullable();
             $table->timestamps();
         });

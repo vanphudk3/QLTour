@@ -1,6 +1,8 @@
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
 import { Link, usePage, useForm } from "@inertiajs/react";
+import { Button } from "@mui/material";
+import { isEmpty } from "lodash";
 
 export default function Account(props) {
 
@@ -30,7 +32,7 @@ export default function Account(props) {
                                     <th scope="col">Phone</th>
                                     <th scope="col">Address</th>
                                     <th scope="col">Role</th>
-                                    <th scope="col">Action</th>
+                                    {/* <th scope="col">Action</th> */}
                                 </tr>
                             </thead>
                             <tbody>
@@ -57,14 +59,14 @@ export default function Account(props) {
                                         {users.address != null && (
                                         <td>{users.address}</td>
                                         )}
-                                        {users.role == 'admin' ? (
+                                        {!isEmpty(users.role) ? (
                                         <td>
                                             {users.role}
                                         </td>
                                         )
                                         : (
                                         <td>
-                                            Null
+                                           Null
                                         </td>
                                         )}
                                         { users.role != 'admin' && props.auth.user.role == 'admin' ? (
@@ -101,7 +103,7 @@ export default function Account(props) {
                                                 </Link>
                                             </td>
                                         )
-                                    }
+                                        }
                                     </tr>
                                 ))}
                                 {datas.length === 0 && (

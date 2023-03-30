@@ -23,6 +23,28 @@ import "swiper/css/thumbs";
 // import required modules
 import { FreeMode, Navigation, Thumbs } from "swiper";
 import { isEmpty } from "lodash";
+import Swal from "sweetalert2";
+
+const openDescription = (evt, DesName) => {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(
+            " active",
+            ""
+        );
+    }
+    document.getElementById(DesName).style.display = "block";
+    evt.currentTarget.className += " active";
+};
+
+const defaultOpen = () => {
+    document.getElementById("defaultOpen").click();
+};
 
 export default function DetailTour(props) {
     const [thumbsSwiper, setThumbsSwiper] = useState(null);
@@ -96,35 +118,34 @@ export default function DetailTour(props) {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        router.get(route("booking"), {
-            adult: data.adult,
-            youth: data.youth,
-            child: data.child,
-            extra: data.extra,
-            timeDeparture: data.timeDeparture,
-            totalPrice: countPrice,
-            tourId: detailTour.slug,
-        });
-
-        // router.post(
-        //     route("booking"), {
-        //         adult: data.adult,
-        //         youth: data.youth,
-        //         child: data.child,
-        //         extra: data.extra,
-        //         timeDeparture: data.timeDeparture,
-        //         totalPrice: countPrice,
-        //         tourId: detailTour.slug,
-        //     }
-        // );
+        if(detailTour.so_cho == 'Hết chỗ'){
+            Swal.fire({
+                title: "OOps!",
+                text: "Tour này đã hết chỗ, bạn vui lòng chọn tour khác!",
+                icon: "error",
+                confirmButtonText: "OK",
+            });
+        }
+        if(detailTour.ngay_khoi_hanh == 'Đã khởi hành'){
+            Swal.fire({
+                title: "OOps!",
+                text: "Tour này đã hết hạn, bạn vui lòng chọn tour khác!",
+                icon: "error",
+                confirmButtonText: "OK",
+            });
+        }
+        if(detailTour.so_cho != 'Hết chỗ' && detailTour.ngay_khoi_hanh != 'Đã khởi hành'){
+            router.get(route("booking"), {
+                adult: data.adult,
+                youth: data.youth,
+                child: data.child,
+                extra: data.extra,
+                timeDeparture: data.timeDeparture,
+                totalPrice: countPrice,
+                tourId: detailTour.slug,
+            });
+        }
     };
-
-
-    // const forcuspage = useRef(null);
-
-    // useEffect(() => {
-    //     forcuspage.current.scrollIntoView({ behavior: "smooth" });
-    // }, []);
 
     const breadcrumbs = [
         <Link
@@ -149,27 +170,6 @@ export default function DetailTour(props) {
             {detailTour.ten_tour}
         </Typography>,
     ];
-
-    const openDescription = (evt, DesName) => {
-        var i, tabcontent, tablinks;
-        tabcontent = document.getElementsByClassName("tabcontent");
-        for (i = 0; i < tabcontent.length; i++) {
-            tabcontent[i].style.display = "none";
-        }
-        tablinks = document.getElementsByClassName("tablinks");
-        for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].className = tablinks[i].className.replace(
-                " active",
-                ""
-            );
-        }
-        document.getElementById(DesName).style.display = "block";
-        evt.currentTarget.className += " active";
-    };
-
-    const defaultOpen = () => {
-        document.getElementById("defaultOpen").click();
-    };
 
     return (
         <>
@@ -223,7 +223,7 @@ export default function DetailTour(props) {
                                         <div className="inner">
                                             <label>From</label>
                                             <span className="currency-amount">
-                                                {detailTour.gia_nguoi_lon}đ
+                                                {numberFormat(detailTour.gia_nguoi_lon)}
                                             </span>
                                         </div>
                                     </div>

@@ -1,6 +1,21 @@
-export default function Reply(props) {
+import { usePage, useForm } from "@inertiajs/react";
+import { Rating } from "@mui/material";
+import { isEmpty } from "lodash";
+import { useState } from "react";
 
+export default function Reply(props) {
+    const [rating, setRating] = useState(0);
+    const customer = usePage().props.customer;
     
+    const { data, setData, post, processing, errors, reset } = useForm({
+        rating: 0,
+        comment: "",
+        customer_id: isEmpty(customer) ? 0 : customer.id,
+        tour_id: props.tour_id,
+    });
+
+    console.log(data);
+
     return (
         <div className="comment-respond">
             <span className="comment-reply-title">Leave a Reply</span>
@@ -21,7 +36,7 @@ export default function Reply(props) {
                         {/* <span className="comment-form-rating-criterion">
                             Location
                         </span> */}
-                        <span
+                        {/* <span
                             className="comment-form-rating-stars stars"
                             data-rating-cr="location"
                         >
@@ -40,11 +55,18 @@ export default function Reply(props) {
                             <span className="star star-5" data-rating-val="5">
                                 <i className="fa-regular fa-star"></i>
                             </span>
-                        </span>
+                        </span> */}
+                        <Rating
+                            name="no-value"
+                            value={rating}
+                            onChange={(event, newValue) => {
+                                setRating(newValue);
+                            }}
+                        />
                     </li>
                 </ul>
                 <div className="row">
-                    <div className="col-lg-4">
+                    <div className="col">
                         <div className="form-group">
                             <input
                                 type="text"
@@ -54,7 +76,7 @@ export default function Reply(props) {
                             />
                         </div>
                     </div>
-                    <div className="col-lg-4">
+                    <div className="col">
                         <div className="form-group">
                             <input
                                 type="text"
@@ -63,7 +85,7 @@ export default function Reply(props) {
                             />
                         </div>
                     </div>
-                    <div className="col-lg-4">
+                    {/* <div className="col-lg-4">
                         <div className="form-group">
                             <input
                                 type="text"
@@ -71,7 +93,7 @@ export default function Reply(props) {
                                 placeholder="Your website*"
                             />
                         </div>
-                    </div>
+                    </div> */}
                     <div className="col-lg-12">
                         <div className="form-group">
                             <textarea

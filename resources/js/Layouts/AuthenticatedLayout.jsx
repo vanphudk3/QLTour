@@ -165,6 +165,15 @@ export default function Authenticated({ auth, header, children }) {
                                 </ul>
                             </li>
                             <li class="nav-item">
+                                <NavLinkB
+                                    aria-current="page"
+                                    href={route("order.index")}
+                                    active={route().current("order.index")}
+                                >
+                                    Order
+                                </NavLinkB>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link disabled">Disabled</a>
                             </li>
                         </ul>

@@ -63,7 +63,7 @@ class DestinationController extends Controller
         ->join('hinh_anhs', 'dia_diems.id', '=', 'hinh_anhs.ma_dia_diem')
         ->join('tours', 'tour_diadiems.ma_tour', '=', 'tours.id')
         ->join('chi_tiet_tours', 'tours.id', '=', 'chi_tiet_tours.ma_tour')
-        ->select('dia_diems.id', 'dia_diems.dia_chi', 'tours.id as ma_tour', 'tours.ten_tour', 'tours.gia_nguoi_lon', 'tours.so_ngay', 'tours.ngay_khoi_hanh', 'hinh_anhs.ten')
+        ->select('dia_diems.id', 'dia_diems.dia_chi', 'tours.slug', 'tours.id as ma_tour', 'tours.ten_tour', 'tours.gia_nguoi_lon', 'tours.so_ngay', 'tours.ngay_khoi_hanh', 'hinh_anhs.ten')
         ->where(DB::raw('hinh_anhs.id'), DB::raw('(SELECT id FROM hinh_anhs WHERE hinh_anhs.ma_dia_diem = dia_diems.id LIMIT 1)'))
         ->where('tours.status', '=', 'active')
         ->where('tour_diadiems.ma_dia_diem', $destination->id)
@@ -93,7 +93,7 @@ class DestinationController extends Controller
                 $query->where('tours.ngay_khoi_hanh', '=', request('date'));
             }
         })
-        ->groupBy('dia_diems.id', 'dia_diems.dia_chi', 'tours.id', 'tours.ten_tour', 'tours.gia_nguoi_lon', 'tours.so_ngay', 'tours.ngay_khoi_hanh', 'hinh_anhs.ten')
+        ->groupBy('dia_diems.id', 'dia_diems.dia_chi', 'tours.id', 'tours.slug', 'tours.ten_tour', 'tours.gia_nguoi_lon', 'tours.so_ngay', 'tours.ngay_khoi_hanh', 'hinh_anhs.ten')
         ->paginate(6)
         ->withQueryString();
         foreach ($tours as $tour) {
@@ -103,7 +103,7 @@ class DestinationController extends Controller
             ->join('dia_diems', 'tour_diadiems.ma_dia_diem', '=', 'dia_diems.id')
             ->join('hinh_anhs', 'dia_diems.id', '=', 'hinh_anhs.ma_dia_diem')
             ->join('tours', 'tour_diadiems.ma_tour', '=', 'tours.id')
-            ->select('dia_diems.id', 'dia_diems.dia_chi', 'tours.id as ma_tour', 'tours.ten_tour', 'tours.gia_nguoi_lon', 'tours.so_ngay', 'tours.ngay_khoi_hanh', 'hinh_anhs.ten')
+            ->select('dia_diems.id', 'dia_diems.dia_chi', 'tours.id as ma_tour', 'tours.slug', 'tours.ten_tour', 'tours.gia_nguoi_lon', 'tours.so_ngay', 'tours.ngay_khoi_hanh', 'hinh_anhs.ten')
             ->where(DB::raw('hinh_anhs.id'), DB::raw('(SELECT id FROM hinh_anhs WHERE hinh_anhs.ma_dia_diem = dia_diems.id LIMIT 1)'))
             ->where('tours.status', '=', 'active')
             ->where('tours.ngay_khoi_hanh', '<=', Carbon::tomorrow())

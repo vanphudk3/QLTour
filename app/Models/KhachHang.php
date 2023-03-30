@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use DB;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,14 +13,23 @@ class KhachHang extends Model
     protected $table = 'khach_hangs';
 
     protected $fillable = [
-        'ma_khach_hang',
         'ten_khach_hang',
-        'gioi_tinh',
-        'ngay_sinh',
-        'so_dien_thoai',
         'email',
+        'citizen_identification_number',
+        'so_dien_thoai',
         'dia_chi',
+        'mat_khau',
         'ngay_sinh',
-        'gioi_tinh',
+        'tong_so_tour_da_di',
+        'remember_token'
     ];
+
+    public function getRememberTokenName()
+    {
+        return DB::table('khach_hangs')->where('id', $this->id)->value('remember_token');
+    }
+
+    public function orders(){
+        return $this->hasMany('App\Models\Order', 'ma_khach_hang', 'id');
+    }
 }

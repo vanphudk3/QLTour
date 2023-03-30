@@ -21,6 +21,7 @@ class RoleController extends Controller
     }
 
     public function create(){
+
         return Inertia::render('Role/Create');
     }
 

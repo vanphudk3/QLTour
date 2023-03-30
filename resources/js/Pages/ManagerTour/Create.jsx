@@ -1,5 +1,5 @@
 import Authenticated from "@/Layouts/AuthenticatedLayout";
-import { Head } from "@inertiajs/react";
+import { Head, router } from "@inertiajs/react";
 import { Link } from "@inertiajs/react";
 import TextInput from "@/Components/TextInput";
 import InputLabel from "@/Components/InputLabel";
@@ -8,21 +8,61 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import { useForm, usePage } from "@inertiajs/react";
 import Selects from "@/Components/Bootstrap/Select";
 import Textarea from "@/Components/Bootstrap/Textarea";
-import { Autocomplete, TextField } from "@mui/material";
-import { useState } from "react";
-
+import { Alert, AlertTitle, Autocomplete, TextField } from "@mui/material";
+import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+import { isEmpty } from "lodash";
 
 export default function Create(props) {
+    const today = new Date().toISOString().split("T")[0];
     const locations = usePage().props.locations;
     const cities = usePage().props.cities;
-    // cities.map((city) => {
-    //     labels.push(city);
-    // });
-    // console.log(...labels);
+    const managerTour = usePage().props.managerTour;
+
+    const [slugs, setSlug] = useState("");
+
+    const getSlug = (e) => {
+        var a = document.getElementById("name").value;
+
+        //   ho tro tieng viet
+        var b = a.toLowerCase();
+        b = b.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+        b = b.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+        b = b.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+        b = b.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+        b = b.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+        b = b.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+        b = b.replace(/đ/g, "d");
+        // Xóa ký tự đặc biệt
+        b = b.replace(/([^0-9a-z-\s])/g, "");
+        // Xóa khoảng trắng thay bằng ký tự -
+        b = b.replace(/(\s+)/g, "-");
+        // xóa phần dự - ở đầu
+        b = b.replace(/^-+/g, "");
+        // xóa phần dư - ở cuối
+        b = b.replace(/-+$/g, "");
+
+        return (document.getElementById("slug").value = b);
+    };
+
+    const [amountdate, setamountdate] = useState("");
+
+    const countDate = (e) => {
+        var amountDay = document.getElementById("amountDay").value;
+        var amountNight = document.getElementById("amountNight").value;
+
+        if (amountDay == "") {
+            return (document.getElementById("amountNight").value = "");
+        }
+
+        return (document.getElementById("amountNight").value = amountDay - 1);
+    };
+
     const { data, setData, post, progress, processing, errors, reset } =
         useForm({
             code: "",
             name: "",
+            slug: "",
             transpost: "",
             agerfrom: "",
             priceAdult: "",
@@ -42,7 +82,13 @@ export default function Create(props) {
             time_depart: "",
         });
 
-    // console.log(data);
+    if (slugs != "") {
+        data.slug = slugs;
+    }
+
+    if (amountdate != "") {
+        data.amountNight = amountdate;
+    }
 
     const handlechange = (e) => {
         const ArrayImage = [];
@@ -53,6 +99,8 @@ export default function Create(props) {
         setData(e.target.name, ArrayImage);
     };
 
+    console.log(data);
+
     const onHandleChange = (event) => {
         setData(
             event.target.name,
@@ -60,7 +108,15 @@ export default function Create(props) {
                 ? event.target.checked
                 : event.target.value
         );
+        if (event.target.name === "name") {
+            setSlug(getSlug(event));
+        }
+        if (event.target.name === "amountDay") {
+            setamountdate(countDate(event));
+        }
     };
+
+    // console.log(amountdate);
 
     const submit = (e) => {
         e.preventDefault();
@@ -71,9 +127,9 @@ export default function Create(props) {
     const top100Films = useState([]);
 
     cities.map((city) => {
-        top100Films.push({ 
+        top100Films.push({
             label: city.name,
-         });
+        });
     });
 
     return (
@@ -87,6 +143,13 @@ export default function Create(props) {
             <div className="w-100 shadow flex justify-center">
                 <div className="ml-50 mr-50 pd-25 w-80">
                     <form onSubmit={submit} enctype="multipart/form-data">
+                        {!isEmpty(managerTour.error) && (
+                        <Alert severity="error">
+                            <AlertTitle>
+                                {managerTour.error}
+                            </AlertTitle>
+                        </Alert>
+                        )}
                         <div className="flex justify-between">
                             <div className="w-48 mb-3">
                                 <InputLabel
@@ -135,7 +198,7 @@ export default function Create(props) {
                             </div>
                         </div>
                         <div className="flex justify-between">
-                            <div className="w-48 mb-3">
+                            <div className="w-30 mb-3">
                                 <InputLabel
                                     forInput="location"
                                     value="Choose location*"
@@ -161,10 +224,10 @@ export default function Create(props) {
                                     className="mt-2"
                                 />
                             </div>
-                            <div className="w-48 mb-3">
+                            <div className="w-30 mb-3">
                                 <InputLabel
                                     forInput="transpost"
-                                    value="Choose transpost"
+                                    value="Choose transpost*"
                                 />
 
                                 <Selects
@@ -186,6 +249,27 @@ export default function Create(props) {
                                     className="mt-2"
                                 />
                             </div>
+
+                            <div className="w-30 mb-3">
+                                <InputLabel
+                                    forInput="slug"
+                                    value="Slug tour*"
+                                />
+                                <TextInput
+                                    id="slug"
+                                    name="slug"
+                                    value={slugs}
+                                    className="mt-1 block w-full"
+                                    autoComplete="slug"
+                                    // isFocused={true}
+                                    handleChange={onHandleChange}
+                                    required
+                                />
+                                <InputError
+                                    message={errors.slug}
+                                    className="mt-2"
+                                />
+                            </div>
                         </div>
                         <div className="flex justify-between">
                             <div className="w-30 mb-3">
@@ -193,34 +277,6 @@ export default function Create(props) {
                                     forInput="locationdepart"
                                     value="Depart location*"
                                 />
-                                {/*
-                                <TextInput
-                                    id="location_depart"
-                                    name="location_depart"
-                                    value={data.location_depart}
-                                    className="mt-1 block w-full"
-                                    autoComplete="location_depart"
-                                    isFocused={true}
-                                    handleChange={onHandleChange}
-                                    required
-                                /> */}
-                                {/* <Autocomplete
-                                    disablePortal
-                                    id="combo-box-demo"
-                                    options={labels}
-                                    sx={{ width: 300 }}
-                                    renderInput={(location) => (
-                                        <TextField {...location} label="Movie" />
-                                    )}
-                                /> */}
-                                {/* <Select
-                                    defaultValue={[colourOptions[2], colourOptions[3]]}
-                                    isMulti
-                                    name="colors"
-                                    options={colourOptions}
-                                    className="basic-multi-select"
-                                    classNamePrefix="select"
-                                /> */}
                                 <Autocomplete
                                     disablePortal
                                     id="location_depart"
@@ -231,7 +287,7 @@ export default function Create(props) {
                                             newValue.label
                                         );
                                     }}
-                                    // sx={{ width: 300 }}
+                                    // sx={{ height: 50 }}
                                     renderInput={(params) => (
                                         <TextField {...params} label="Movie" />
                                     )}
@@ -255,7 +311,7 @@ export default function Create(props) {
                                     value={data.location_general}
                                     className="mt-1 block w-full"
                                     autoComplete="location_general"
-                                    isFocused={true}
+                                    // isFocused={true}
                                     handleChange={onHandleChange}
                                     required
                                 />
@@ -279,7 +335,7 @@ export default function Create(props) {
                                     value={data.time_depart}
                                     className="mt-1 block w-full"
                                     autoComplete="time_depart"
-                                    isFocused={true}
+                                    // isFocused={true}
                                     handleChange={onHandleChange}
                                     required
                                 />
@@ -301,10 +357,12 @@ export default function Create(props) {
                                     id="agerfrom"
                                     name="agerfrom"
                                     type="number"
+                                    min="0"
+                                    max="100"
                                     value={data.agerfrom}
                                     className="mt-1 block w-full"
                                     autoComplete="agerfrom"
-                                    isFocused={true}
+                                    // isFocused={true}
                                     handleChange={onHandleChange}
                                     required
                                 />
@@ -327,7 +385,7 @@ export default function Create(props) {
                                     value={data.priceAdult}
                                     className="mt-1 block w-full"
                                     autoComplete="priceAdult"
-                                    isFocused={true}
+                                    // isFocused={true}
                                     handleChange={onHandleChange}
                                     required
                                 />
@@ -351,7 +409,7 @@ export default function Create(props) {
                                     value={data.priceYoung}
                                     className="mt-1 block w-full"
                                     autoComplete="priceYoung"
-                                    isFocused={true}
+                                    // isFocused={true}
                                     handleChange={onHandleChange}
                                     required
                                 />
@@ -375,7 +433,7 @@ export default function Create(props) {
                                     value={data.priceChild}
                                     className="mt-1 block w-full"
                                     autoComplete="priceChild"
-                                    isFocused={true}
+                                    // isFocused={true}
                                     handleChange={onHandleChange}
                                     required
                                 />
@@ -398,9 +456,10 @@ export default function Create(props) {
                                     type="date"
                                     name="dateStart"
                                     value={data.dateStart}
+                                    min={today}
                                     className="mt-1 block w-full"
                                     autoComplete="dateStart"
-                                    isFocused={true}
+                                    // isFocused={true}
                                     handleChange={onHandleChange}
                                     required
                                 />
@@ -424,7 +483,7 @@ export default function Create(props) {
                                     value={data.amountPeople}
                                     className="mt-1 block w-full"
                                     autoComplete="amountPeople"
-                                    isFocused={true}
+                                    // isFocused={true}
                                     handleChange={onHandleChange}
                                     required
                                 />
@@ -448,7 +507,7 @@ export default function Create(props) {
                                     value={data.amountDay}
                                     className="mt-1 block w-full"
                                     autoComplete="amountDay"
-                                    isFocused={true}
+                                    // isFocused={true}
                                     handleChange={onHandleChange}
                                     required
                                 />
@@ -469,11 +528,10 @@ export default function Create(props) {
                                     id="amountNight"
                                     name="amountNight"
                                     type="number"
-                                    min="1"
-                                    value={data.amountNight}
+                                    value={amountdate}
                                     className="mt-1 block w-full"
                                     autoComplete="amountNight"
-                                    isFocused={true}
+                                    // isFocused={true}
                                     handleChange={onHandleChange}
                                     required
                                 />
@@ -520,7 +578,6 @@ export default function Create(props) {
                                     className="mt-1 block w-full"
                                     autoComplete="required"
                                     placeholder="Required"
-                                    isFocused={true}
                                     handleChange={onHandleChange}
                                 />
 
@@ -540,13 +597,7 @@ export default function Create(props) {
                                     className="mt-1 block w-full"
                                     autoComplete="notice"
                                     placeholder="Notice"
-                                    isFocused={true}
                                     handleChange={onHandleChange}
-                                />
-
-                                <InputError
-                                    message={errors.notice}
-                                    className="mt-2"
                                 />
                             </div>
                         </div>

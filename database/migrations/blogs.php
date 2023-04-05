@@ -16,12 +16,10 @@ return new class extends Migration
         Schema::create('blogs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->foreignId('ma_loai_tour')->constrained('loai_tours');
             $table->string('title');
-            $table->string('content');
+            $table->text('content');
             $table->string('image')->nullable();
             $table->string('slug');
-            $table->date('date_post');
 
             $table->timestamps();
         });

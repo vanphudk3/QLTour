@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Blog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Inertia\Inertia;
 
 class BlogController extends Controller
 {
@@ -14,7 +16,16 @@ class BlogController extends Controller
      */
     public function index()
     {
-        //
+        $specialBlogs = Blog::orderBy('created_at', 'desc')->first();
+        $specialBlogs->nameUser = $specialBlogs->user->name;
+        $forcusBlogs = Blog::orderBy('created_at', 'desc')->take(3)->get();
+        foreach($forcusBlogs as $key => $forcusBlog){
+            $forcusBlogs[$key]->nameUser = $forcusBlog->user->name;
+            $forcusBlogs[$key]->formartDate = Carbon::parse($forcusBlog->created_at)->format('d/m/Y');
+        }
+        $specialBlogs->formartDate = Carbon::parse($specialBlogs->created_at)->format('d/m/Y');
+        $blogs = Blog::take(3)->paginate(10)->except($specialBlogs->id);
+        return Inertia::render('Blog/Blog', compact('specialBlogs', 'forcusBlogs','blogs'));
     }
 
     /**
@@ -44,9 +55,13 @@ class BlogController extends Controller
      * @param  \App\Models\Blog  $blog
      * @return \Illuminate\Http\Response
      */
-    public function show(Blog $blog)
+    public function show($slug)
     {
-        //
+        $blog = Blog::where('slug', $slug)->first();
+        $blog->nameUser = $blog->user->name;
+        $blog->formartDate = Carbon::parse($blog->created_at)->format('d/m/Y');
+        
+        return Inertia::render('Blog/Detail-Blog', compact('blog'));
     }
 
     /**
@@ -81,5 +96,12 @@ class BlogController extends Controller
     public function destroy(Blog $blog)
     {
         //
+    }
+
+    public function Trancate($string, $length){
+        if(strlen($string) > $length){
+            $string = substr($string, 0, $length) . '...';
+        }
+        return $string;
     }
 }

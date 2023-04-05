@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\BinhLuanController;
+use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ChiTietTourController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DestinationController;
@@ -9,6 +11,7 @@ use App\Http\Controllers\ExtraServiceController;
 use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\LichTrinhController;
 use App\Http\Controllers\LoaiTourController;
+use App\Http\Controllers\ManagerBlogController;
 use App\Http\Controllers\ManagerTourController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\QuestionController;
@@ -17,6 +20,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TourController;
 use App\Http\Controllers\WelcomeController;
+use App\Http\Middleware\CheckLoginCustomer;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -35,6 +39,7 @@ use Inertia\Inertia;
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 Route::get('/tour', [TourController::class, 'index'])->name('tour');
 Route::get('/tour/{slug}', [TourController::class, 'show'])->name('tour.show');
+Route::post('/tour/review', [BinhLuanController::class, 'store'])->name('review.store');
 Route::get('destination', [DestinationController::class, 'index'])->name('destination');
 Route::get('destination/{slug}', [DestinationController::class, 'show'])->name('destination.show');
 // seeking for price tour
@@ -47,12 +52,19 @@ Route::get('/tour/location/{location}', [SearchController::class, 'location'])->
 Route::get('/booking', [ChiTietTourController::class, 'booking'])->name('booking');
 Route::get('/checkout', [ChiTietTourController::class, 'checkout'])->name('checkout');
 
+Route::get('/blog', [BlogController::class, 'index'])->name('blog');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
+
 Route::get('loginMember', [KhachHangController::class, 'login'])->name('customer.login');
 Route::post('loginMember', [KhachHangController::class, 'process_login'])->name('customer.process_login');
 Route::get('registerMember', [KhachHangController::class, 'register'])->name('customer.register');
 Route::post('registerMember', [KhachHangController::class, 'process_register'])->name('customer.process_register');
 Route::get('logoutMember', [KhachHangController::class, 'logout'])->name('customer.logout');
-Route::get('profileMember', [KhachHangController::class, 'profile'])->name('customer.profile');
+
+Route::group(['middleware' => CheckLoginCustomer::class], function () {
+    Route::get('profileMember', [KhachHangController::class, 'profile'])->name('customer.profile');
+});
+
 
 Route::middleware('cors')->group(function(){
     Route::post('/checkout', [ChiTietTourController::class, 'process'])->name('checkout.process');
@@ -61,7 +73,7 @@ Route::get('/checkout/success', [ChiTietTourController::class, 'success'])->name
 
 Route::middleware(['auth','verified'])->group(function () {
     Route::get('/auth/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
+    Route::resource('/auth/managerblog', ManagerBlogController::class);
     Route::resource('/auth/role', RoleController::class);
     Route::resource('/auth/account', AccountController::class);
     Route::resource('/auth/managerTour', ManagerTourController::class);

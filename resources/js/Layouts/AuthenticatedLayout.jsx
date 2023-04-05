@@ -10,6 +10,8 @@ import { usePage } from "@inertiajs/react";
 export default function Authenticated({ auth, header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
+
+    console.log(auth.user);
     return (
         <div className="bd-btn">
             <nav class="navbar navbar-expand-lg bg-body-tertiary bd-btn shadow">
@@ -64,13 +66,21 @@ export default function Authenticated({ auth, header, children }) {
                                     >
                                         Role
                                     </NavLinkB>
+                                ) : auth.user.role == "manager" ? (
+                                    <NavLinkB
+                                        aria-current="page"
+                                        href={route("managerblog.index")}
+                                        active={route().current("managerblog.index")}
+                                    >
+                                        Blog
+                                    </NavLinkB>
                                 ) : (
                                     <NavLinkB
                                         aria-current="page"
                                         href={route("dashboard")}
                                         active={route().current("dashboard")}
                                     >
-                                        User
+                                        Blog
                                     </NavLinkB>
                                 )}
                             </li>
@@ -177,7 +187,7 @@ export default function Authenticated({ auth, header, children }) {
                                 <a class="nav-link disabled">Disabled</a>
                             </li>
                         </ul>
-                        <div className="hidden sm:flex sm:items-center sm:ml-6">
+                        <div className="sm:flex sm:items-center sm:ml-6">
                             <div className="ml-3 relative">
                                 <div class="btn-group">
                                     <button

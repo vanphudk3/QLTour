@@ -13,11 +13,19 @@ class Blog extends Model
 
     protected $fillable = [
         'user_id',
-        'ma_loaitour',
         'title',
         'content',
         'image',
         'slug',
-        'date_post',
     ];
+
+    public function getFromDateAttribute($value)
+    {
+        $blog = Blog::all();
+        return $blog->created_at->diffForHumans();
+    }
+
+    public function user(){
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

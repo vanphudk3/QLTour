@@ -24,6 +24,19 @@ class KhachHang extends Model
         'remember_token'
     ];
 
+    protected $hidden = [
+        'mat_khau',
+        'remember_token',
+        'created_at',
+        'updated_at',
+        'deleted_at'
+    ];
+
+    public function getAuthPassword()
+    {
+        return $this->mat_khau;
+    }
+
     public function getRememberTokenName()
     {
         return DB::table('khach_hangs')->where('id', $this->id)->value('remember_token');
@@ -31,5 +44,9 @@ class KhachHang extends Model
 
     public function orders(){
         return $this->hasMany('App\Models\Order', 'ma_khach_hang', 'id');
+    }
+
+    public function binhLuan(){
+        return $this->hasMany('App\Models\BinhLuan', 'ma_khach_hang', 'id');
     }
 }

@@ -80,9 +80,6 @@ export default function Checkout(props) {
         total: getBooking.totalPrice,
         travellers: getBooking.travellers,
         time: detailTour.gio_khoi_hanh,
-        status: "1",
-        url: "",
-        redirect: "",
     });
 
     console.log(data);

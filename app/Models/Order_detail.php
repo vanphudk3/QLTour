@@ -18,4 +18,12 @@ class Order_detail extends Model
         'total',
         'ghi_chu',
     ];
+
+    public function order(){
+        return $this->belongsTo('App\Models\Order', 'order_id', 'id');
+    }
+
+    public function tour(){
+        return $this->belongsTo('App\Models\Tour', 'ma_tour', 'id');
+    }
 }

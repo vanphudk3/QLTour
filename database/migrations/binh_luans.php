@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('ma_khach_hang')->constrained('khach_hangs');
             $table->string('noi_dung');
             $table->integer('so_sao');
+            $table->boolean('trang_thai')->default(0);
             $table->timestamps();
         });
     }

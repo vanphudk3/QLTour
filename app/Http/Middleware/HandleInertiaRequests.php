@@ -70,6 +70,10 @@ class HandleInertiaRequests extends Middleware
                 'error' => $request->session()->get('error'),
                 'success' => $request->session()->get('updateprofile'),
             ],
+            'blog' => [
+                'error' => $request->session()->get('errorBlog'),
+                'success' => $request->session()->get('successBlog'),
+            ],
         ]);
     }
 }

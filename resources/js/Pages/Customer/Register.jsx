@@ -376,7 +376,8 @@ export default function RegisterMember(props) {
                                                                 </label>
                                                                 <InputError
                                                                     message={
-                                                                        validationMsg.first_name
+                                                                        validationMsg.first_name ||
+                                                                        errors.first_name
                                                                     }
                                                                     className="mt-2"
                                                                 />
@@ -399,7 +400,8 @@ export default function RegisterMember(props) {
                                                                 </label>
                                                                 <InputError
                                                                     message={
-                                                                        validationMsg.last_name
+                                                                        validationMsg.last_name ||
+                                                                        errors.last_name
                                                                     }
                                                                     className="mt-2"
                                                                 />
@@ -425,7 +427,8 @@ export default function RegisterMember(props) {
                                                                 </label>
                                                                 <InputError
                                                                     message={
-                                                                        validationMsg.phone
+                                                                        validationMsg.phone ||
+                                                                        errors.phone
                                                                     }
                                                                     className="mt-2"
                                                                 />
@@ -440,7 +443,8 @@ export default function RegisterMember(props) {
                                                             </h6>
                                                             <InputError
                                                                 message={
-                                                                    validationMsg.day
+                                                                    validationMsg.day ||
+                                                                    errors.day
                                                                 }
                                                                 // style={{
                                                                 //     fontSize: 10,
@@ -697,7 +701,8 @@ export default function RegisterMember(props) {
                                                         </label>
                                                         <InputError
                                                             message={
-                                                                validationMsg.citizen_identification
+                                                                validationMsg.citizen_identification ||
+                                                                errors.citizen_identification
                                                             }
                                                             className="mt-2"
                                                         />

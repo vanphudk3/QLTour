@@ -148,7 +148,7 @@ class KhachHangController extends Controller
                 'email' => 'required|email',
                 'password' => 'required',
                 'password_confirmation' => 'required|same:password',
-                'citizen_identification' => 'required|numeric',
+                'citizen_identification' => 'required|numeric|unique:khach_hangs,citizen_identification_number',
                 'phone' => 'required|numeric',
                 'address' => 'required',
                 'city' => 'required',
@@ -193,22 +193,29 @@ class KhachHangController extends Controller
         try{
             if(request()->cookie('remember')){
                 $customer = KhachHang::where('remember_token', request()->cookie('remember'))->first();
+            }
+            if (session()->has('customer')){
+                $customer = KhachHang::find(session('customer'));
+            }
+            if (session()->has('customer') || request()->cookie('remember')){
                 $list_order = $customer->orders()->select('id', 'trang_thai','hinh_thuc_thanh_toan', 'created_at')->get();
-                $order_id = $customer->orders()->select('id')->get();
-                foreach ($list_order as $order){
-                    $order->detail = DB::table('order_details')
-                    ->where('order_id', $order->id)
-                    ->select('total', 'ma_tour', 'so_luong_nguoi')
-                    ->first();
-                    $order->guest = DB::table('guest_register_tours')
-                    ->where('order_id', $order->id)
-                    ->select('name', 'phone', 'CMND', 'age')
-                    ->get();
-                    $order->tour = DB::table('tours')->where('id', $order->detail->ma_tour)
-                    ->select('ten_tour', 'ngay_khoi_hanh', 'slug')
-                    ->get();
-                    foreach($order->tour as $tour){
-                        $tour->ngay_khoi_hanh = date('d/m/Y', strtotime($tour->ngay_khoi_hanh));
+                if ($list_order != null){
+                    $order_id = $customer->orders()->select('id')->get();
+                    foreach ($list_order as $order){
+                        $order->detail = DB::table('order_details')
+                        ->where('order_id', $order->id)
+                        ->select('total', 'ma_tour', 'so_luong_nguoi')
+                        ->first();
+                        $order->guest = DB::table('guest_register_tours')
+                        ->where('order_id', $order->id)
+                        ->select('name', 'phone', 'CMND', 'age')
+                        ->get();
+                        $order->tour = DB::table('tours')->where('id', $order->detail->ma_tour)
+                        ->select('ten_tour', 'ngay_khoi_hanh', 'slug')
+                        ->get();
+                        foreach($order->tour as $tour){
+                            $tour->ngay_khoi_hanh = date('d/m/Y', strtotime($tour->ngay_khoi_hanh));
+                        }
                     }
                 }
                 return Inertia::render('Customer/Profile', [
@@ -216,32 +223,9 @@ class KhachHangController extends Controller
                     'list_order' => $list_order,
                 ]);
             }
-            $customer = KhachHang::find(session('customer'));
-            $list_order = $customer->orders()->select('id', 'trang_thai','hinh_thuc_thanh_toan', 'created_at')->get();
-                $order_id = $customer->orders()->select('id')->get();
-                foreach ($list_order as $order){
-                    $order->detail = DB::table('order_details')
-                    ->where('order_id', $order->id)
-                    ->select('total', 'ma_tour', 'so_luong_nguoi')
-                    ->first();
-                    $order->guest = DB::table('guest_register_tours')
-                    ->where('order_id', $order->id)
-                    ->select('name', 'phone', 'CMND', 'age')
-                    ->get();
-                    $order->tour = DB::table('tours')->where('id', $order->detail->ma_tour)
-                    ->select('ten_tour', 'ngay_khoi_hanh', 'slug')
-                    ->get();
-                    foreach($order->tour as $tour){
-                        $tour->ngay_khoi_hanh = date('d/m/Y', strtotime($tour->ngay_khoi_hanh));
-                    }
-                }
-                return Inertia::render('Customer/Profile', [
-                    'customer' => $customer,
-                    'list_order' => $list_order,
-                ]);
         }
         catch(\Exception $e){
-            return redirect()->route('welcome');
+            return $e;
         }
     }
 

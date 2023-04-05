@@ -15,6 +15,7 @@ import { Avatar, Menu, MenuItem, Tooltip } from "@mui/material";
 import { Link, usePage } from "@inertiajs/react";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { isEmpty } from "lodash";
+import HeaderMobile from "./HeaderMobile";
 // import { useState } from "react";
 
 const Search = styled("div")(({ theme }) => ({
@@ -79,21 +80,6 @@ const defaultOpenDestination = () => {
 
 export default function Header() {
     const login = usePage().props.login;
-    console.log(login);
-    const openNav = (e) => {
-        var x = document.getElementById("mySidepanel");
-        x.addEventListener("click", closeNav);
-        document.body.style.backgroundColor = "rgba(0,0,0,0.4)";
-        document.body.style.cursor = "pointer";
-    };
-
-    const closeNav = (e) => {
-        var x = document.getElementById("mySidepanel");
-        x.style.width = "0";
-        // document.getElementById("mySidepanel").style.width = "0";
-        document.body.style.backgroundColor = "white";
-        document.body.style.cursor = "default";
-    };
 
     const [anchorElUser, setAnchorElUser] = React.useState(null);
 
@@ -108,7 +94,6 @@ export default function Header() {
     };
 
     const changeMenu = (e) => {
-
         if (login.customer == null && login.remember == null) {
             return (
                 <>
@@ -347,11 +332,15 @@ export default function Header() {
                             </div>
                         </div>
                     </div>
-                    <a href="http://127.0.0.1:5500/components/blog.html">
+                    <FocusLink
+                        href={route("blog")}
+                        active={route().current("blog")}
+                        className="flex justify-content"
+                    >
                         Blog
-                    </a>
+                    </FocusLink>
                     <a href="http://127.0.0.1:5500/components/aboutUs.html">
-                        Page
+                        About
                     </a>
                     <a href="http://127.0.0.1:5500/components/contact.html">
                         Contact
@@ -365,6 +354,7 @@ export default function Header() {
                         <StyledInputBase
                             placeholder="Search…"
                             inputProps={{ "aria-label": "search" }}
+
                         />
                     </Search>
 
@@ -393,36 +383,7 @@ export default function Header() {
                     </Menu>
 
                     <div className="menu-mobile">
-                        <button
-                            type="button"
-                            className="openbtn"
-                            onClick={(event) => openNav(event)}
-                        >
-                            <i className="fa-solid fa-bars" />
-                        </button>
-                    </div>
-                    <div id="mySidepanel" className="sidepanel">
-                        <a
-                            href="javascript:void(0)"
-                            className="closebtn"
-                            onClick={(event) => closeNav(event)}
-                        >
-                            <i className="fa-solid fa-xmark" />
-                        </a>
-                        <a href="#home">Home</a>
-                        <a href="#tour">Tour</a>
-                        <a href="#news" className="dropdown-btn">
-                            Destination
-                            <i className="fa-solid fa-chevron-down" />
-                        </a>
-                        <div className="dropdown-container">
-                            <a href="#">Link 1</a>
-                            <a href="#">Link 2</a>
-                            <a href="#">Link 3</a>
-                        </div>
-                        <a href="#blog">Blog</a>
-                        <a href="#page">Page</a>
-                        <a href="#contact">Contact</a>
+                        <HeaderMobile />
                     </div>
                 </div>
             </div>

@@ -6,24 +6,29 @@ import { Breadcrumbs, Link, Typography } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 
 export default function Destination(props) {
-
     const destinations1 = usePage().props.destinations1;
     const destinations2 = usePage().props.destinations2;
 
     const breadcrumbs = [
-        <Link underline="hover" key="1" color="inherit" href={route('welcome')} style={{textDecoration: "none",color: "white"}}>
+        <Link
+            underline="hover"
+            key="1"
+            color="inherit"
+            href={route("welcome")}
+            style={{ textDecoration: "none", color: "white" }}
+        >
             Home
         </Link>,
         <Typography key="2" color="text.primary" style={{ color: "white" }}>
             Destination
         </Typography>,
-      ];
+    ];
 
     return (
         <>
             <Head title="Destination" />
             <Content>
-            <div className="breadcrumb-layout">
+                <div className="breadcrumb-layout">
                     <div className="bg-overlay"></div>
                     <div
                         className="container-layout"
@@ -34,7 +39,10 @@ export default function Destination(props) {
                             <div className="flex justify-content-center">
                                 <Breadcrumbs
                                     separator={
-                                        <NavigateNextIcon fontSize="small" style={{color:"white"}} />
+                                        <NavigateNextIcon
+                                            fontSize="small"
+                                            style={{ color: "white" }}
+                                        />
                                     }
                                     aria-label="breadcrumb"
                                 >

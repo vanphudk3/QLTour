@@ -6,6 +6,7 @@ use App\Models\ChiTietTour;
 use App\Models\City;
 use App\Models\District;
 use App\Models\GuestRegisterTour;
+use App\Models\KhachHang;
 use App\Models\Order;
 use App\Models\Order_detail;
 use App\Models\Tour;
@@ -154,10 +155,14 @@ class ChiTietTourController extends Controller
     public function process(Request $request){
         try{
             $data = $request->all();
-            // dd(isset($request->redirect));
             $order = new Order();
             if(session()->has("customer")){
                 $order->ma_khach_hang = session()->get("customer");
+            }
+            if (isset($_COOKIE['remember'])){
+                $remember = request()->cookie('remember');
+                $customer = KhachHang::where('remember_token', $remember)->first();
+                $order->ma_khach_hang = $customer->id;
             }
             if($data['user'] != null){
                 $order->ma_nhan_vien = $data['user'];
@@ -172,7 +177,7 @@ class ChiTietTourController extends Controller
             $order->hinh_thuc_thanh_toan = $data['payment'];
             $order->ghi_chu = $data['note'];
             if($data['payment'] == "0"){
-                $order->trang_thai = "0";
+                $order->trang_thai = "1";
                 if($order->save()){
                     // $partinations = [];
                     for($i=0;$i<count($data['travellers']);$i++){
@@ -367,7 +372,8 @@ class ChiTietTourController extends Controller
             return redirect()->back()->with('error', 'Đặt tour thất bại');
         }
         catch(\Exception $e){
-            return redirect()->back()->with('error', $e->getMessage());
+            // return redirect()->back()->with('error', $e->getMessage());
+            return $e->getMessage();
         }
     }
 

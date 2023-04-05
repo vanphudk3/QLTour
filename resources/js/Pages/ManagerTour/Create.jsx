@@ -99,8 +99,6 @@ export default function Create(props) {
         setData(e.target.name, ArrayImage);
     };
 
-    console.log(data);
-
     const onHandleChange = (event) => {
         setData(
             event.target.name,

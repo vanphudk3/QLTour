@@ -24,4 +24,17 @@ class Order extends Model
         'trang_thai',
         'ghi_chu',
     ];
+
+
+    public function customer(){
+        return $this->belongsTo('App\Models\KhachHang', 'ma_khach_hang', 'id');
+    }
+
+    public function employee(){
+        return $this->belongsTo('App\Models\NhanVien', 'ma_nhan_vien', 'id');
+    }
+
+    public function order_detail(){
+        return $this->hasMany('App\Models\Order_detail', 'order_id', 'id');
+    }
 }

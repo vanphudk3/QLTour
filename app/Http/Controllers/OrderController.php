@@ -106,7 +106,7 @@ class OrderController extends Controller
         ]);
 
         $order->update([
-            "trang_thai" => "1"
+            "trang_thai" => "2"
         ]);
 
         if($order->ma_khach_hang !== null){

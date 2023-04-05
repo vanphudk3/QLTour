@@ -1,9 +1,20 @@
+import { usePage } from "@inertiajs/react";
+
+const formartFloat = (number, n) => {
+    var _pow = Math.pow(10, n);
+    return Math.round(number * _pow) / _pow;
+};
+
 export default function Rating() {
+    const detailCmt = usePage().props.detailCmt;
+    console.log(detailCmt['start']['five']);
     return (
+        <>
+        {detailCmt['countCmt'] > 0 && detailCmt['agvRate'] > 0 && (
         <div className="container-rw">
             <div className="inner-rw">
                 <div className="rating">
-                    <span className="rating-num">4.0 /5</span>
+                    <span className="rating-num">{formartFloat(detailCmt["agvRate"], 1)} /5</span>
                     <div className="rating-stars">
                         <span>
                             <i className="active icon-star"></i>
@@ -22,18 +33,21 @@ export default function Rating() {
                         </span>
                     </div>
                     <div className="rating-users">
-                        <i className="icon-user"></i> 1,014,004 total
+                        <i className="icon-user"></i> {detailCmt['countCmt']} total
                     </div>
                 </div>
-
                 <div className="histo">
                     <div className="five histo-rate">
                         <span className="histo-star">
                             <i className="active icon-star"></i> 5{" "}
                         </span>
                         <span className="bar-block">
-                            <span id="bar-five" className="bar">
-                                <span>566,784</span>
+                            <span id="bar-five" className="bar" style={{
+                                width: `${detailCmt['start']['five']}0%`
+                            }}>
+                                <span>
+                                    {detailCmt['start']['five']}
+                                </span>
                                 &nbsp;
                             </span>
                         </span>
@@ -44,8 +58,12 @@ export default function Rating() {
                             <i className="active icon-star"></i> 4{" "}
                         </span>
                         <span className="bar-block">
-                            <span id="bar-four" className="bar">
-                                <span>171,298</span>
+                            <span id="bar-four" className="bar" style={{
+                                width: `${detailCmt['start']['four']}0%`
+                            }}>
+                                <span>
+                                    {detailCmt['start']['four']}
+                                </span>
                                 &nbsp;
                             </span>
                         </span>
@@ -56,8 +74,12 @@ export default function Rating() {
                             <i className="active icon-star"></i> 3{" "}
                         </span>
                         <span className="bar-block">
-                            <span id="bar-three" className="bar">
-                                <span>94,940</span>
+                            <span id="bar-three" className="bar" style={{
+                                width: `${detailCmt['start']['three']}0%`
+                            }}>
+                                <span>
+                                    {detailCmt['start']['three']}
+                                </span>
                                 &nbsp;
                             </span>
                         </span>
@@ -68,8 +90,12 @@ export default function Rating() {
                             <i className="active icon-star"></i> 2{" "}
                         </span>
                         <span className="bar-block">
-                            <span id="bar-two" className="bar">
-                                <span>44,525</span>
+                            <span id="bar-two" className="bar" style={{
+                                width: `${detailCmt['start']['two']}0%`
+                            }}>
+                                <span>
+                                    {detailCmt['start']['two']}
+                                </span>
                                 &nbsp;
                             </span>
                         </span>
@@ -80,8 +106,12 @@ export default function Rating() {
                             <i className="active icon-star"></i> 1{" "}
                         </span>
                         <span className="bar-block">
-                            <span id="bar-one" className="bar">
-                                <span>0</span>
+                            <span id="bar-one" className="bar"  style={{
+                                width: `${detailCmt['start']['one']}0%`
+                            }}>
+                                <span>
+                                    {detailCmt['start']['one']}
+                                </span>
                                 &nbsp;
                             </span>
                         </span>
@@ -89,5 +119,7 @@ export default function Rating() {
                 </div>
             </div>
         </div>
+        )}
+        </>
     );
 }

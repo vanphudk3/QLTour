@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\TranspostRole;
 use App\Http\Resources\ImageResource;
+use App\Models\BinhLuan;
 use App\Models\ChiTietTour;
 use App\Models\DiaDiem;
 use App\Models\Hinh_anh;
@@ -112,20 +113,127 @@ class TourController extends Controller
     public function show($slug)
     {
         $customer = null;
-        if (session()->has('customer')){
-            $customer = KhachHang::find(session('customer'));
-        }
-
         $detailTour = DB::table('tour_diadiems')
         ->join('tours', 'tour_diadiems.ma_tour', '=', 'tours.id')
         ->join('chi_tiet_tours', 'tours.id', '=', 'chi_tiet_tours.ma_tour')
         ->join('dia_diems', 'tour_diadiems.ma_dia_diem', '=', 'dia_diems.id')
         ->join('loai_tours', 'dia_diems.ma_loai_tour', '=', 'loai_tours.id')
         ->join('hinh_anhs', 'dia_diems.id', '=', 'hinh_anhs.ma_dia_diem')
-        ->select('tours.ten_tour', 'tours.slug','tours.gia_nguoi_lon', 'tours.gia_thieu_nien', 'tours.gia_tre_em','tours.so_ngay','tours.do_tuoi_tu', 'tours.so_cho', 'tours.mo_ta', 'tours.ngay_khoi_hanh', 'dia_diems.dia_chi', 'dia_diems.id', 'dia_diems.du_lieu_map', 'hinh_anhs.ten as hinh_anh', 'loai_tours.ten as loai_tour', 'chi_tiet_tours.noi_khoi_hanh','chi_tiet_tours.noi_tap_chung','chi_tiet_tours.gio_khoi_hanh')
+        ->select('tours.id as ma_tour','tours.ten_tour', 'tours.slug','tours.gia_nguoi_lon', 'tours.gia_thieu_nien', 'tours.gia_tre_em','tours.so_ngay','tours.do_tuoi_tu', 'tours.so_cho', 'tours.mo_ta', 'tours.ngay_khoi_hanh', 'dia_diems.dia_chi', 'dia_diems.id', 'dia_diems.du_lieu_map', 'hinh_anhs.ten as hinh_anh', 'loai_tours.ten as loai_tour', 'chi_tiet_tours.noi_khoi_hanh','chi_tiet_tours.noi_tap_chung','chi_tiet_tours.gio_khoi_hanh')
         ->where('tours.slug', $slug)
-        ->groupBy('tours.ten_tour', 'tours.slug','tours.gia_nguoi_lon', 'tours.gia_thieu_nien', 'tours.gia_tre_em','tours.so_ngay','tours.do_tuoi_tu', 'tours.so_cho', 'tours.mo_ta', 'tours.ngay_khoi_hanh', 'dia_diems.dia_chi', 'dia_diems.id', 'dia_diems.du_lieu_map', 'hinh_anhs.ten', 'loai_tours.ten', 'chi_tiet_tours.noi_khoi_hanh','chi_tiet_tours.noi_tap_chung','chi_tiet_tours.gio_khoi_hanh')
+        ->groupBy('tours.id','tours.ten_tour', 'tours.slug','tours.gia_nguoi_lon', 'tours.gia_thieu_nien', 'tours.gia_tre_em','tours.so_ngay','tours.do_tuoi_tu', 'tours.so_cho', 'tours.mo_ta', 'tours.ngay_khoi_hanh', 'dia_diems.dia_chi', 'dia_diems.id', 'dia_diems.du_lieu_map', 'hinh_anhs.ten', 'loai_tours.ten', 'chi_tiet_tours.noi_khoi_hanh','chi_tiet_tours.noi_tap_chung','chi_tiet_tours.gio_khoi_hanh')
         ->first();
+
+        $comments = DB::table('binh_luans')
+        ->join('khach_hangs', 'binh_luans.ma_khach_hang', '=', 'khach_hangs.id')
+        ->select('binh_luans.id', 'binh_luans.so_sao', 'binh_luans.noi_dung', 'binh_luans.created_at', 'khach_hangs.ten_khach_hang')
+        ->where('binh_luans.ma_tour', $detailTour->ma_tour)
+        ->get();
+        $detailCmt = [];
+        if ($comments != null) {
+            $amoutRate = 0;
+            $start = [];
+            // dem so sao
+            $flag5 = 0;
+            $flag4 = 0;
+            $flag3 = 0;
+            $flag2 = 0;
+            $flag1 = 0;
+            $start['five'] = 0;
+            $start['four'] = 0;
+            $start['three'] = 0;
+            $start['two'] = 0;
+            $start['one'] = 0;
+            foreach ($comments as $key => $comment) {
+                $amoutRate += $comment->so_sao;
+                if($comment->so_sao == 5){
+                    $flag5 += 1;
+                    $start['five'] = $flag5;
+                }
+                if($comment->so_sao == 4){
+                    $flag4 += 1;
+                    $start['four'] = $flag4;
+                }
+                if($comment->so_sao == 3){
+                    $flag3 += 1;
+                    $start['three'] = $flag3;
+                }
+                if($comment->so_sao == 2){
+                    $flag2 += 1;
+                    $start['two'] = $flag2;
+                }
+                if($comment->so_sao == 1){
+                    $flag1 += 1;
+                    $start['one'] = $flag1;
+                }
+            }
+            if ($comments->count() == 0) {
+                $agvRate = 0;
+            }else{
+                $agvRate = (float)($amoutRate / $comments->count());
+            }
+            $detailCmt['amountRate'] = $amoutRate;
+            $detailCmt['agvRate'] = $agvRate;
+            $detailCmt['countCmt'] = $comments->count();
+            $detailCmt['start'] = $start;
+        }
+        // dd($detailCmt);
+        // kiểm tra tour đã đặt chưa
+        $detailTour->isBooked = false;
+        // kiểm tra mỗi tour chỉ cho phép được comment 1 lần
+        $detailTour->isCommented = false;
+        
+        if (session()->has('customer')){
+            $customer = KhachHang::find(session('customer'));
+            $order = $customer->orders()->get();
+        }
+        if (isset($_COOKIE['remember'])){
+            $remember = request()->cookie('remember');
+            $customer = KhachHang::where('remember_token', $remember)->first();
+        }
+        if(session()->has('customer') || isset($_COOKIE['remember'])){
+            $order = $customer->orders()->get();
+            $arrListTourFormCustomer = [];
+            foreach ($order as $key => $item) {
+                $arrListTourFormCustomer['status'][$key] = $item->trang_thai;
+                $order_detail = $item->order_detail()->get();
+                foreach ($order_detail as $item) {
+                    $arrListTourFormCustomer['TourID'][$key] = $item->tour()->first('id');
+                }
+            }
+            // kiểm tra tour đã đặt chưa
+            if ($arrListTourFormCustomer != null){
+                foreach ($arrListTourFormCustomer as $key => $item) {
+                    if($key == 'status'){
+                        foreach ($item as $key => $value) {
+                            // neu trang thai = 2 thi tour da dat thanh cong
+                            if($value == 2){
+                                if ($arrListTourFormCustomer['TourID'][$key]->id == $detailTour->ma_tour){
+                                    $detailTour->isBooked = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            // kiểm tra mỗi tour chỉ cho phép được comment 1 lần
+            $comment = $customer->binhLuan()->get();
+            $arrListTourFormCustomer = [];
+            foreach ($comment as $key => $item) {
+                $arrListTourFormCustomer['TourID'][$key] = $item->tour()->first('id');
+            }
+            if ($arrListTourFormCustomer != null){
+                foreach ($arrListTourFormCustomer as $key => $item) {
+                    if($key == 'TourID'){
+                        foreach ($item as $key => $value) {
+                            if ($value->id == $detailTour->ma_tour){
+                                $detailTour->isCommented = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         $lichTrinh = DB::table('lich_trinhs')
         ->join('tours', 'lich_trinhs.ma_tour', '=', 'tours.id')
@@ -177,7 +285,7 @@ class TourController extends Controller
         $forcusAdult = request("adult");
         $forcusYouth = request("youth");
         $forcusChild = request("child");
-        return Inertia::render('Tour/Detail-tour', compact('detailTour', 'extraServices', 'lichTrinh', 'totalPrice', 'forcusAdult', 'forcusYouth', 'forcusChild', 'customer'));
+        return Inertia::render('Tour/Detail-tour', compact('detailTour', 'extraServices', 'lichTrinh', 'totalPrice', 'forcusAdult', 'forcusYouth', 'forcusChild', 'customer', 'comments', 'detailCmt'));
 
     }
 

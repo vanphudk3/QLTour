@@ -3,11 +3,12 @@
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\BinhLuanController;
 use App\Http\Controllers\BlogController;
-use App\Http\Controllers\ChiTietTourController;
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\DiaDiemController;
 use App\Http\Controllers\ExtraServiceController;
+use App\Http\Controllers\JobController;
 use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\LichTrinhController;
 use App\Http\Controllers\LoaiTourController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\SendEmailController;
 use App\Http\Controllers\TourController;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Middleware\CheckLoginCustomer;
@@ -49,8 +51,8 @@ Route::get('/tour/category/{category}', [SearchController::class, 'category'])->
 // seeking for location tour
 Route::get('/tour/location/{location}', [SearchController::class, 'location'])->name('tour.location');
 
-Route::get('/booking', [ChiTietTourController::class, 'booking'])->name('booking');
-Route::get('/checkout', [ChiTietTourController::class, 'checkout'])->name('checkout');
+Route::get('/booking', [BookingController::class, 'booking'])->name('booking');
+Route::get('/checkout', [BookingController::class, 'checkout'])->name('checkout');
 
 Route::get('/blog', [BlogController::class, 'index'])->name('blog');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
@@ -67,9 +69,11 @@ Route::group(['middleware' => CheckLoginCustomer::class], function () {
 
 
 Route::middleware('cors')->group(function(){
-    Route::post('/checkout', [ChiTietTourController::class, 'process'])->name('checkout.process');
+    Route::post('/checkout', [BookingController::class, 'process'])->name('checkout.process');
 });
-Route::get('/checkout/success', [ChiTietTourController::class, 'success'])->name('checkout.success');
+Route::get('/checkout/success', [BookingController::class, 'success'])->name('checkout.success');
+
+Route::get('/test-mail', [SendEmailController::class, 'index'])->name('test-mail');
 
 Route::middleware(['auth','verified'])->group(function () {
     Route::get('/auth/dashboard', [DashboardController::class, 'index'])->name('dashboard');

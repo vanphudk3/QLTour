@@ -3,7 +3,8 @@ import { Head, Link, usePage } from "@inertiajs/react";
 import { Breadcrumbs, Typography } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-
+import { Alert, Snackbar } from "@mui/material";
+import { useState } from "react";
 export default function Success(props) {
 
     const getSlug = usePage().props.getSlug;

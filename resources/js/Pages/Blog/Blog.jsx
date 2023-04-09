@@ -2,6 +2,7 @@ import Content from "@/Layouts/DetailTour";
 import { Head, Link, usePage } from "@inertiajs/react";
 import { Breadcrumbs, Typography } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import Pagination from "@/Components/Pagination";
 
 const breadcrumbs = [
     <Link
@@ -17,6 +18,10 @@ const breadcrumbs = [
         Blog
     </Typography>,
 ];
+
+const Trancate = (str, n) => {
+    return str?.length > n ? str.substr(0, n - 1) + "..." : str;
+};
 
 export default function Blog(props) {
     const specialBlogs = usePage().props.specialBlogs;
@@ -94,15 +99,25 @@ export default function Blog(props) {
                                             <span className="line"></span>
                                         </div>
                                         <div className="content">
-                                            <p>{specialBlogs.content}</p>
+                                            <p
+                                                dangerouslySetInnerHTML={{
+                                                    __html: Trancate(
+                                                        specialBlogs.content,
+                                                        200
+                                                    ),
+                                                }}
+                                            />
                                             <div className="more-link-wrap">
-                                                <a
-                                                    href="#"
+                                                <Link
+                                                    href={route(
+                                                        "blog.show",
+                                                        specialBlogs.slug
+                                                    )}
                                                     className="more-link"
                                                 >
                                                     Read More{" "}
                                                     <i className="fa-solid fa-arrow-right"></i>
-                                                </a>
+                                                </Link>
                                             </div>
                                         </div>
                                     </div>
@@ -122,23 +137,21 @@ export default function Blog(props) {
                                                 <div className="header-inner">
                                                     <div className="meta">
                                                         <div className="posted-on">
-                                                            <a href="#">
-                                                                {
-                                                                    item.formartDate
-                                                                }
-                                                            </a>
+                                                            {item.formartDate}
                                                         </div>
                                                         <div className="post-author">
-                                                            <a href="#">
-                                                                By
-                                                                {item.nameUser}
-                                                            </a>
+                                                            By {item.nameUser}
                                                         </div>
                                                     </div>
                                                     <h3 className="title">
-                                                        <a href="#">
+                                                        <Link
+                                                            href={route(
+                                                                "blog.show",
+                                                                item.slug
+                                                            )}
+                                                        >
                                                             {item.title}
-                                                        </a>
+                                                        </Link>
                                                     </h3>
                                                 </div>
                                             </div>
@@ -149,183 +162,70 @@ export default function Blog(props) {
                         </div>
                     </div>
                     <div className="layout-02">
-                        <div className="row layout-wrap">
-                            <div className="col-4 width-100 width-50">
-                                <div className="img-detail-blog">
-                                    <img
-                                        src="../public/images/home/tour_1.jpg"
-                                        alt=""
-                                    />
+                        {blogs.map((item, index) => (
+                            <div className="row layout-wrap">
+                                <div className="col-4 width-100 width-50">
+                                    <div className="img-detail-blog">
+                                        <img
+                                            src={`http://localhost:8000/storage/${item.image}`}
+                                            alt=""
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="col-8 width-100 width-50">
-                                <div className="content-detail">
-                                    <div className="content-inner">
-                                        <div className="header-inner">
-                                            <div className="meta">
-                                                <div className="posted-on">
-                                                    <a href="#">May 20, 2020</a>
+                                <div className="col-8 width-100 width-50">
+                                    <div className="content-detail">
+                                        <div className="content-inner">
+                                            <div className="header-inner">
+                                                <div className="meta">
+                                                    <div className="posted-on">
+                                                        {item.formartDate}
+                                                    </div>
+                                                    <div className="post-author">
+                                                        <a href="#">
+                                                            By {item.nameUser}
+                                                        </a>
+                                                    </div>
                                                 </div>
-                                                <div className="post-author">
-                                                    <a href="#">By Admin</a>
-                                                </div>
+                                                <h3 className="title-blog">
+                                                    <Link
+                                                        href={route(
+                                                            "blog.show",
+                                                            item.slug
+                                                        )}
+                                                    >
+                                                        {item.title}
+                                                    </Link>
+                                                </h3>
+                                                <span className="line"></span>
                                             </div>
-                                            <h3 className="title-blog">
-                                                <a href="#">
-                                                    Hành trình “Áo Ấm Cho Em
-                                                    2023”: Đưa trẻ em từ vùng
-                                                    miền cao có thành tích học
-                                                    tập xuất sắc về thăm Thủ đô
-                                                    Hà Nội
-                                                </a>
-                                            </h3>
-                                            <span className="line"></span>
-                                        </div>
-                                        <div className="content">
-                                            <p>
-                                                Tiếp nối hành trình từ thiện 10
-                                                năm tới vùng miền núi Đông - Tây
-                                                Bắc, ngày 7-9/1/2023, Công ty Du
-                                                lịch Vietravel tổ chức chương
-                                                trình thiện nguyện “Áo ấm cho
-                                                em”, đưa 15 em học sinh ưu tú từ
-                                                trường Đức Xuân, huyện Bắc
-                                                Quang, Hà Giang về thăm thủ đô
-                                                Hà Nội và tham quan di sản thiên
-                                                nhiên – Vịnh Hạ Long.
-                                            </p>
-                                            <div className="more-link-wrap">
-                                                <a
-                                                    href="#"
-                                                    className="more-link"
-                                                >
-                                                    Read More{" "}
-                                                    <i className="fa-solid fa-arrow-right"></i>
-                                                </a>
+                                            <div className="content">
+                                                <p
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: Trancate(
+                                                            item.content,
+                                                            250
+                                                        ),
+                                                    }}
+                                                />
+                                                <div className="more-link-wrap">
+                                                    <Link
+                                                        href={route(
+                                                            "blog.show",
+                                                            item.slug
+                                                        )}
+                                                        className="more-link"
+                                                    >
+                                                        Read More{" "}
+                                                        <i className="fa-solid fa-arrow-right"></i>
+                                                    </Link>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div className="row layout-wrap">
-                            <div className="col-4 width-100 width-50">
-                                <div className="img-detail-blog">
-                                    <img
-                                        src="../public/images/home/tour_1.jpg"
-                                        alt=""
-                                    />
-                                </div>
-                            </div>
-                            <div className="col-8 width-100 width-50">
-                                <div className="content-detail">
-                                    <div className="content-inner">
-                                        <div className="header-inner">
-                                            <div className="meta">
-                                                <div className="posted-on">
-                                                    <a href="#">May 20, 2020</a>
-                                                </div>
-                                                <div className="post-author">
-                                                    <a href="#">By Admin</a>
-                                                </div>
-                                            </div>
-                                            <h3 className="title-blog">
-                                                <a href="#">
-                                                    Hành trình “Áo Ấm Cho Em
-                                                    2023”: Đưa trẻ em từ vùng
-                                                    miền cao có thành tích học
-                                                    tập xuất sắc về thăm Thủ đô
-                                                    Hà Nội
-                                                </a>
-                                            </h3>
-                                            <span className="line"></span>
-                                        </div>
-                                        <div className="content">
-                                            <p>
-                                                Tiếp nối hành trình từ thiện 10
-                                                năm tới vùng miền núi Đông - Tây
-                                                Bắc, ngày 7-9/1/2023, Công ty Du
-                                                lịch Vietravel tổ chức chương
-                                                trình thiện nguyện “Áo ấm cho
-                                                em”, đưa 15 em học sinh ưu tú từ
-                                                trường Đức Xuân, huyện Bắc
-                                                Quang, Hà Giang về thăm thủ đô
-                                                Hà Nội và tham quan di sản thiên
-                                                nhiên – Vịnh Hạ Long.
-                                            </p>
-                                            <div className="more-link-wrap">
-                                                <a
-                                                    href="#"
-                                                    className="more-link"
-                                                >
-                                                    Read More{" "}
-                                                    <i className="fa-solid fa-arrow-right"></i>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="row layout-wrap">
-                            <div className="col-4 width-100 width-50">
-                                <div className="img-detail-blog">
-                                    <img
-                                        src="../public/images/home/tour_1.jpg"
-                                        alt=""
-                                    />
-                                </div>
-                            </div>
-                            <div className="col-8 width-100 width-50">
-                                <div className="content-detail">
-                                    <div className="content-inner">
-                                        <div className="header-inner">
-                                            <div className="meta">
-                                                <div className="posted-on">
-                                                    <a href="#">May 20, 2020</a>
-                                                </div>
-                                                <div className="post-author">
-                                                    <a href="#">By Admin</a>
-                                                </div>
-                                            </div>
-                                            <h3 className="title-blog">
-                                                <a href="#">
-                                                    Hành trình “Áo Ấm Cho Em
-                                                    2023”: Đưa trẻ em từ vùng
-                                                    miền cao có thành tích học
-                                                    tập xuất sắc về thăm Thủ đô
-                                                    Hà Nội
-                                                </a>
-                                            </h3>
-                                            <span className="line"></span>
-                                        </div>
-                                        <div className="content">
-                                            <p>
-                                                Tiếp nối hành trình từ thiện 10
-                                                năm tới vùng miền núi Đông - Tây
-                                                Bắc, ngày 7-9/1/2023, Công ty Du
-                                                lịch Vietravel tổ chức chương
-                                                trình thiện nguyện “Áo ấm cho
-                                                em”, đưa 15 em học sinh ưu tú từ
-                                                trường Đức Xuân, huyện Bắc
-                                                Quang, Hà Giang về thăm thủ đô
-                                                Hà Nội và tham quan di sản thiên
-                                                nhiên – Vịnh Hạ Long.
-                                            </p>
-                                            <div className="more-link-wrap">
-                                                <a
-                                                    href="#"
-                                                    className="more-link"
-                                                >
-                                                    Read More{" "}
-                                                    <i className="fa-solid fa-arrow-right"></i>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        ))}
+                        <Pagination links={usePage().props.blogs.links} />
                     </div>
                 </div>
             </Content>

@@ -1,7 +1,6 @@
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
 import { Link, usePage, useForm } from "@inertiajs/react";
-import { Button } from "@mui/material";
 import { isEmpty } from "lodash";
 
 export default function Account(props) {

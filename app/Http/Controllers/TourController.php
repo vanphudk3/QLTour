@@ -17,6 +17,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Session;
 
 class TourController extends Controller
 {
@@ -177,7 +178,6 @@ class TourController extends Controller
             $detailCmt['countCmt'] = $comments->count();
             $detailCmt['start'] = $start;
         }
-        // dd($detailCmt);
         // kiểm tra tour đã đặt chưa
         $detailTour->isBooked = false;
         // kiểm tra mỗi tour chỉ cho phép được comment 1 lần
@@ -206,6 +206,8 @@ class TourController extends Controller
                 foreach ($arrListTourFormCustomer as $key => $item) {
                     if($key == 'status'){
                         foreach ($item as $key => $value) {
+                            // lưu trạng thái đặt tour vào session
+                            
                             // neu trang thai = 2 thi tour da dat thanh cong
                             if($value == 2){
                                 if ($arrListTourFormCustomer['TourID'][$key]->id == $detailTour->ma_tour){
@@ -254,10 +256,9 @@ class TourController extends Controller
         if($detailTour->do_tuoi_tu == 0) {
             $detailTour->do_tuoi_tu = 'Không giới hạn';
         }
-        // dd($detailTour->ngay_khoi_hanh);
-        $detailTour->ngay_khoi_hanh = date('d/m/Y', strtotime($detailTour->ngay_khoi_hanh));
         $now = strtotime(Carbon::now());
         $getdate = $now - strtotime($detailTour->ngay_khoi_hanh);
+        $detailTour->ngay_khoi_hanh = date('d/m/Y', strtotime($detailTour->ngay_khoi_hanh));
         if($getdate > 0){
             $detailTour->ngay_khoi_hanh = 'Đã khởi hành';
         }

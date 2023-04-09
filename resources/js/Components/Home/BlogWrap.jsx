@@ -1,4 +1,12 @@
-export default function BlogWrap() {
+import { Link, usePage } from "@inertiajs/react";
+
+const Trancate = (str, n) => {
+    return str?.length > n ? str.substr(0, n - 1) + "..." : str;
+};
+
+export default function BlogWrap(props) {
+    const specialBlogs = usePage().props.specialBlogs;
+    const forcusBlogs = usePage().props.forcusBlogs;
     return (
         <div className="blog-wrap">
             <div className="row">
@@ -6,7 +14,7 @@ export default function BlogWrap() {
                     <div className="column-item">
                         <div className="post-inner">
                             <img
-                                src="./images/home/blog_10-500x280.jpeg"
+                                src={`http://localhost:8000/storage/${specialBlogs.image}`}
                                 alt=""
                             />
                         </div>
@@ -14,125 +22,91 @@ export default function BlogWrap() {
                             <div className="header-inner">
                                 <div className="meta">
                                     <div className="categories-link">
-                                        <a href="#">Travel</a>
+                                        <Link href={route("welcome")}>
+                                            Travel
+                                        </Link>
                                     </div>
                                     <div className="posted-on">
-                                        <a href="#">May 20, 2020</a>
+                                        {specialBlogs.formartDate}
                                     </div>
                                     <div className="post-author">
-                                        <a href="#">By Admin</a>
+                                        By {specialBlogs.nameUser}
                                     </div>
                                 </div>
                                 <h3 className="title">
-                                    <a href="#">
-                                        10 Best Places to Visit in Dalhousie,
-                                        Himachal
-                                    </a>
+                                    <Link
+                                        href={route(
+                                            "blog.show",
+                                            specialBlogs.slug
+                                        )}
+                                    >
+                                        {specialBlogs.title}
+                                    </Link>
                                 </h3>
                                 <span className="line"></span>
                             </div>
                             <div className="content">
-                                <p>
-                                    Lorem ipsum dolor sit amet, consectetur
-                                    adipisicing elit, sed do eiusmod tempor
-                                    incididunt ut labore et dolore magna lirabe
-                                    ites ipsum dolor sit amet...
-                                </p>
+                                <p
+                                    dangerouslySetInnerHTML={{
+                                        __html: Trancate(
+                                            specialBlogs.content,
+                                            200
+                                        ),
+                                    }}
+                                />
                                 <div className="more-link-wrap">
-                                    <a href="#" className="more-link">
+                                    <Link
+                                        href={route(
+                                            "blog.show",
+                                            specialBlogs.slug
+                                        )}
+                                        className="more-link"
+                                    >
                                         Read More{" "}
                                         <i className="fa-solid fa-arrow-right"></i>
-                                    </a>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div className="col">
-                    <div className="column-inner">
-                        <div className="post-inner">
-                            <div className="post-thumb">
-                                <img
-                                    src="./images/home/blog_9-500x280.jpeg"
-                                    alt=""
-                                />
-                            </div>
-                            <div className="content-inner">
-                                <div className="header-inner">
-                                    <div className="meta">
-                                        <div className="posted-on">
-                                            <a href="#">May 20, 2020</a>
+                    {forcusBlogs.map((item) => (
+                        <div className="column-inner">
+                            <div className="post-inner">
+                                <div className="post-thumb">
+                                    <img
+                                        src={`http://localhost:8000/storage/${item.image}`}
+                                        alt=""
+                                    />
+                                </div>
+                                <div className="content-inner">
+                                    <div className="header-inner">
+                                        <div className="meta">
+                                            <div className="posted-on">
+                                                {item.formartDate}
+                                            </div>
+                                            <div className="post-author">
+                                                <a href="#">
+                                                    By {item.nameUser}
+                                                </a>
+                                            </div>
                                         </div>
-                                        <div className="post-author">
-                                            <a href="#">By Admin</a>
-                                        </div>
+                                        <h3 className="title">
+                                            <Link
+                                                href={route(
+                                                    "blog.show",
+                                                    item.slug
+                                                )}
+                                            >
+                                                {item.title}
+                                            </Link>
+                                        </h3>
                                     </div>
-                                    <h3 className="title">
-                                        <a href="#">
-                                            10 Best Places to Visit in
-                                            Dalhousie, Himachal
-                                        </a>
-                                    </h3>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="column-inner">
-                        <div className="post-inner">
-                            <div className="post-thumb">
-                                <img
-                                    src="./images/home/blog_8-500x280.jpeg"
-                                    alt=""
-                                />
-                            </div>
-                            <div className="content-inner">
-                                <div className="header-inner">
-                                    <div className="meta">
-                                        <div className="posted-on">
-                                            <a href="#">May 20, 2020</a>
-                                        </div>
-                                        <div className="post-author">
-                                            <a href="#">By Admin</a>
-                                        </div>
-                                    </div>
-                                    <h3 className="title">
-                                        <a href="#">
-                                            10 Best Places to Visit in
-                                            Dalhousie, Himachal
-                                        </a>
-                                    </h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="column-inner">
-                        <div className="post-inner">
-                            <div className="post-thumb">
-                                <img
-                                    src="./images/home/blog_7-500x280.jpeg"
-                                    alt=""
-                                />
-                            </div>
-                            <div className="content-inner">
-                                <div className="header-inner">
-                                    <div className="meta">
-                                        <div className="posted-on">
-                                            <a href="#">May 20, 2020</a>
-                                        </div>
-                                        <div className="post-author">
-                                            <a href="#">By Admin</a>
-                                        </div>
-                                    </div>
-                                    <h3 className="title">
-                                        <a href="#">
-                                            10 Best Places to Visit in
-                                            Dalhousie, Himachal
-                                        </a>
-                                    </h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    ))}
                 </div>
             </div>
         </div>

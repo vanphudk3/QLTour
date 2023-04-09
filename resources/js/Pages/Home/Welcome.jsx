@@ -24,11 +24,20 @@ import InputSearchDate from "@/Components/Search/InputSearchDate";
 import Select from "@/Components/Bootstrap/Select";
 import { now } from "lodash";
 
+const Trancate = (str, n) => {
+    return str?.length > n ? str.substr(0, n - 1) + "..." : str;
+};
+
+const formartFloat = (number, n) => {
+    var _pow = Math.pow(10, n);
+    return Math.round(number * _pow) / _pow;
+};
+
 export default function Welcome(props) {
     const today = new Date().toISOString().split("T")[0];
     const tours = usePage().props;
     const data_tours = tours.tours;
-
+    console.log(data_tours);
     const locations = usePage().props.locations;
     const categories = usePage().props.categories;
     // console.log(locations);
@@ -136,33 +145,6 @@ export default function Welcome(props) {
                                             handleChange={onHandleChange}
                                         />
                                         <i className="fa-solid fa-chevron-down"></i>
-                                        
-                                        {/* <LocalizationProvider
-                                            dateAdapter={AdapterDayjs}
-                                        >
-                                            <DemoContainer
-                                                components={["DateRangePicker"]}
-                                            >
-                                                <DateRangePicker
-                                                    localeText={{
-                                                        start: "Check-in",
-                                                        end: "Check-out",
-                                                    }}
-                                                    name="date"
-                                                    id="datepicker"
-                                                    onChange={(newValue) => {
-                                                        setData(
-                                                            "date",
-                                                            newValue
-                                                        );
-                                                        console.log(
-                                                            newValue
-                                                        );
-                                                    }}
-                                                    // value={data.date}
-                                                />
-                                            </DemoContainer>
-                                        </LocalizationProvider> */}
                                     </div>
                                 </div>
                                 <div className="col">
@@ -212,7 +194,7 @@ export default function Welcome(props) {
                                                     <div className="content-slider">
                                                         <p>Kathmandu, Nepal</p>
                                                         <NavLinkB
-                                                            href={`/tour/${tours.id}`}
+                                                            href={`/tour/${tours.slug}`}
                                                             aria-current="page"
                                                         >
                                                             {tours.ten_tour}
@@ -228,22 +210,22 @@ export default function Welcome(props) {
                                                                 </span>
                                                             </li>
                                                             <li>
-                                                                {
+                                                                {/* {
                                                                     tours.ngay_khoi_hanh
-                                                                }
-                                                                {/* <i className="fa-sharp fa-solid fa-star"></i>
+                                                                } */}
+                                                                <i className="fa-sharp fa-solid fa-star"></i>
                                                                 <i className="fa-sharp fa-solid fa-star"></i>
                                                                 <i className="fa-sharp fa-solid fa-star"></i>
                                                                 <i className="fa-sharp fa-solid fa-star"></i>
                                                                 <i className="fa-sharp fa-solid fa-star"></i>
                                                                 <span>
-                                                                    4,5/5
-                                                                </span> */}
+                                                                    {formartFloat(tours.rating, 1)}
+                                                                </span>
                                                             </li>
                                                         </ul>
                                                         <div className="read-more-item">
                                                             <NavLinkB
-                                                                href={`/tour/${tours.id}`}
+                                                                href={`/tour/${tours.slug}`}
                                                                 aria-current="page"
                                                             >
                                                                 More Information{" "}
@@ -321,7 +303,7 @@ export default function Welcome(props) {
                                 {destinations1.map((destination) => (
                                     <div className="location-item">
                                         <NavLinkB
-                                            href={`/destination/${destination.id}`}
+                                            href={`/destination/${destination.slug}`}
                                             aria-current="page"
                                         >
                                             <div className="img-location">
@@ -341,30 +323,12 @@ export default function Welcome(props) {
                                         </NavLinkB>
                                     </div>
                                 ))}
-                                {/* <div className="location-item">
-                                    <a href="">
-                                        <div className="img-location">
-                                            <img
-                                                src="./images/home/location3.jpg"
-                                                alt=""
-                                            />
-                                            <div className="location-content">
-                                                <span className="location-name">
-                                                    Oceania
-                                                </span>
-                                                <span className="location-count">
-                                                    6 Tours+
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div> */}
                             </div>
                             <div className="layout-row">
                                 {destinations2.map((destination) => (
                                     <div className="location-item">
                                         <NavLinkB
-                                            href={`/destination/${destination.id}`}
+                                            href={`/destination/${destination.slug}`}
                                             aria-current="page"
                                         >
                                             <div className="img-location">
@@ -384,42 +348,6 @@ export default function Welcome(props) {
                                         </NavLinkB>
                                     </div>
                                 ))}
-                                {/* <div className="location-item">
-                                    <a href="">
-                                        <div className="img-location">
-                                            <img
-                                                src="./images/home/location5.jpg"
-                                                alt=""
-                                            />
-                                            <div className="location-content">
-                                                <span className="location-name">
-                                                    Oceania
-                                                </span>
-                                                <span className="location-count">
-                                                    6 Tours+
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                                <div className="location-item">
-                                    <a href="">
-                                        <div className="img-location">
-                                            <img
-                                                src="./images/home/location6.jpg"
-                                                alt=""
-                                            />
-                                            <div className="location-content">
-                                                <span className="location-name">
-                                                    Oceania
-                                                </span>
-                                                <span className="location-count">
-                                                    6 Tours+
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div> */}
                             </div>
                         </div>
                     </div>
@@ -682,9 +610,9 @@ export default function Welcome(props) {
                     <div className="explore" style={{ paddingTop: "120px" }}>
                         <div className="container-explore">
                             <div className="section-title">
-                                <p className="sectitle">BOOK NOW AND SAVE</p>
+                                <p className="sectitle">Ideal tour</p>
                                 <h2 className="subtitle">
-                                    Last Minute Travel Deals
+                                    Suggestions for your next trip
                                 </h2>
                                 <div className="wrap-divider">
                                     <div className="container-divider">
@@ -717,7 +645,7 @@ export default function Welcome(props) {
                                                 )}
                                                 className="content-book"
                                             >
-                                                {tour.ten_tour}
+                                                {Trancate(tour.ten_tour, 30)}
                                             </LogoLinkB>
                                             <ul>
                                                 <li>

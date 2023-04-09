@@ -74,6 +74,7 @@ class HandleInertiaRequests extends Middleware
                 'error' => $request->session()->get('errorBlog'),
                 'success' => $request->session()->get('successBlog'),
             ],
+            'tourBooked' => $request->session()->get('tourBooked'),
         ]);
     }
 }

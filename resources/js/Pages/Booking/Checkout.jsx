@@ -13,12 +13,17 @@ import {
     Typography,
 } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import { isEmpty } from "lodash";
+import { isEmpty, round } from "lodash";
 import { useState } from "react";
 import InputError from "@/Components/InputError";
 import validator from "validator/lib/isEmpty";
-
-const steps = ["Select tour", "Fill in the information", "Payment"];
+// import ButtonPaypal from "@/Components/Paypal/ButtonPaypal";
+import { useEffect } from "react";
+import {
+    PayPalScriptProvider,
+    PayPalButtons,
+    usePayPalScriptReducer,
+} from "@paypal/react-paypal-js";
 
 const breadcrumbs = [
     <Link
@@ -64,9 +69,6 @@ export default function Checkout(props) {
     const getBooking = usePage().props.getBooking;
     const detailTour = usePage().props.detailTour;
     const managerTour = usePage().props.managerTour;
-
-    console.log(managerTour);
-
     const { data, setData, post, processing, errors, reset } = useForm({
         tour_id: detailTour.tourId,
         customer: "",
@@ -81,15 +83,71 @@ export default function Checkout(props) {
         travellers: getBooking.travellers,
         time: detailTour.gio_khoi_hanh,
     });
+    const total = data.total / 23447;
+    const gettotal = round(total, 2);
+    const amount = `${gettotal}`;
+    const currency = "USD";
+    const style = { layout: "vertical" };
 
-    console.log(data);
+    // Custom component to wrap the PayPalButtons and handle currency changes
+    const ButtonWrapper = ({ currency, showSpinner }) => {
+        // usePayPalScriptReducer can be use only inside children of PayPalScriptProviders
+        // This is the main reason to wrap the PayPalButtons in a new component
+        const [{ options, isPending }, dispatch] = usePayPalScriptReducer();
+
+        useEffect(() => {
+            dispatch({
+                type: "resetOptions",
+                value: {
+                    ...options,
+                    currency: currency,
+                },
+            });
+        }, [currency, showSpinner]);
+
+        return (
+            <>
+                {showSpinner && isPending && <div className="spinner" />}
+                <PayPalButtons
+                    style={style}
+                    disabled={false}
+                    forceReRender={[amount, currency, style]}
+                    fundingSource={undefined}
+                    createOrder={(data, actions) => {
+                        return actions.order
+                            .create({
+                                purchase_units: [
+                                    {
+                                        amount: {
+                                            currency_code: currency,
+                                            value: amount,
+                                        },
+                                    },
+                                ],
+                            })
+                            .then((orderId) => {
+                                return orderId;
+                            });
+                    }}
+                    onApprove={function (data, actions) {
+                        return actions.order.capture().then(function () {
+                            post(route("checkout.process"), {
+                                _method: "POST",
+                                preserveScroll: true,
+                            });
+                        });
+                    }}
+                />
+            </>
+        );
+    };
 
     const [validationMsg, setValidationMsg] = useState({});
     const validateAll = () => {
         const msg = {};
 
-        if(validator(data.payment)){
-            msg.payment = "The payment field is required."
+        if (validator(data.payment)) {
+            msg.payment = "The payment field is required.";
         }
 
         setValidationMsg(msg);
@@ -103,111 +161,46 @@ export default function Checkout(props) {
         event.preventDefault();
         const isValid = validateAll();
         if (!isValid) return;
-        if(data.payment == 0){
+        if (data.payment == 0) {
             post(route("checkout.process"), {
                 _method: "POST",
                 preserveScroll: true,
-                });
-        }else if(data.payment == 3){
-            data.redirect = "http://localhost:8000/checkout/success";
-            data.url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-            post(route("checkout.process"),
-            {
-                _method: "POST",
-                preserveScroll: true,
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                },
             });
-            
         }
-
-
-    };
-
-    const [activeStep, setActiveStep] = useState(0);
-    const [completed, setCompleted] = useState({});
-
-    const totalSteps = () => {
-        return steps.length;
-    };
-
-    const completedSteps = () => {
-        return Object.keys(completed).length;
-    };
-
-    const isLastStep = () => {
-        return activeStep === totalSteps() - 1;
-    };
-
-    const allStepsCompleted = () => {
-        return completedSteps() === totalSteps();
-    };
-
-    const handleNext = () => {
-        const newActiveStep =
-            isLastStep() && !allStepsCompleted()
-                ? // It's the last step, but not all steps have been completed,
-                  // find the first step that has been completed
-                  steps.findIndex((step, i) => !(i in completed))
-                : activeStep + 1;
-        setActiveStep(newActiveStep);
-    };
-
-    const handleBack = () => {
-        setActiveStep((prevActiveStep) => prevActiveStep - 1);
-    };
-
-    const handleStep = (step) => () => {
-        setActiveStep(step);
-    };
-
-    const handleComplete = () => {
-        const newCompleted = completed;
-        newCompleted[activeStep] = true;
-        setCompleted(newCompleted);
-        handleNext();
-    };
-
-    const handleReset = () => {
-        setActiveStep(0);
-        setCompleted({});
     };
 
     const handlePayment = () => {
         const byCash = document.getElementById("byCash");
-        const byMomo = document.getElementById("byMomo");
+        const bypaypal = document.getElementById("bypaypal");
         const byTransfer = document.getElementById("byTransfer");
         const byVNPay = document.getElementById("byvnpay");
         const getcash = document.getElementById("cash");
         const gettransfer = document.getElementById("transfer");
-        const getmomo = document.getElementById("momo");
+        const getpaypal = document.getElementById("paypal");
         const getvnpay = document.getElementById("vnpay");
 
         if (getcash.checked) {
             setData("payment", "0");
             byCash.style.display = "block";
-            byMomo.style.display = "none";
+            bypaypal.style.display = "none";
             byTransfer.style.display = "none";
             byVNPay.style.display = "none";
         } else if (gettransfer.checked) {
             setData("payment", "1");
             byCash.style.display = "none";
-            byMomo.style.display = "none";
+            bypaypal.style.display = "none";
             byTransfer.style.display = "block";
             byVNPay.style.display = "none";
-        } else if (getmomo.checked) {
+        } else if (getpaypal.checked) {
             setData("payment", "2");
             byCash.style.display = "none";
-            byMomo.style.display = "block";
+            bypaypal.style.display = "block";
             byTransfer.style.display = "none";
             byVNPay.style.display = "none";
         } else if (getvnpay.checked) {
             setData("payment", "3");
             byCash.style.display = "none";
-            byMomo.style.display = "none";
+            bypaypal.style.display = "none";
             byTransfer.style.display = "none";
             byVNPay.style.display = "block";
         }
@@ -243,107 +236,6 @@ export default function Checkout(props) {
                     className="container-layout"
                     style={{ paddingTop: "25px" }}
                 >
-                    {/* <div className="detail-tour" style={{ marginTop: "20px" }}>
-                        <nav aria-label="breadcrumb">
-                            <ol className="breadcrumb">
-                                <li className="breadcrumb-item">
-                                    <a href="#">Select Tour</a>
-                                </li>
-                                <li
-                                    className="breadcrumb-item active"
-                                    aria-current="page"
-                                >
-                                    Contact Details
-                                </li>
-                            </ol>
-                        </nav>
-                    </div> */}
-                    <Box sx={{ width: "80%", paddingBottom: "20px" }}>
-                        <Stepper nonLinear activeStep={activeStep}>
-                            {steps.map((label, index) => (
-                                <Step key={label} completed={completed[index]}>
-                                    <StepButton
-                                        color="inherit"
-                                        onClick={handleStep(index)}
-                                    >
-                                        {label}
-                                    </StepButton>
-                                </Step>
-                            ))}
-                        </Stepper>
-                        {/* <div>
-                            {allStepsCompleted() ? (
-                                <div>
-                                    <Typography sx={{ mt: 2, mb: 1 }}>
-                                        All steps completed - you&apos;re
-                                        finished
-                                    </Typography>
-                                    <Box
-                                        sx={{
-                                            display: "flex",
-                                            flexDirection: "row",
-                                            pt: 2,
-                                        }}
-                                    >
-                                        <Box sx={{ flex: "1 1 auto" }} />
-                                        <Button onClick={handleReset}>
-                                            Reset
-                                        </Button>
-                                    </Box>
-                                </div>
-                            ) : (
-                                <div>
-                                    <Typography sx={{ mt: 2, mb: 1, py: 1 }}>
-                                        Step {activeStep + 1}
-                                    </Typography>
-                                    <Box
-                                        sx={{
-                                            display: "flex",
-                                            flexDirection: "row",
-                                            pt: 2,
-                                        }}
-                                    >
-                                        <Button
-                                            color="inherit"
-                                            disabled={activeStep === 0}
-                                            onClick={handleBack}
-                                            sx={{ mr: 1 }}
-                                        >
-                                            Back
-                                        </Button>
-                                        <Box sx={{ flex: "1 1 auto" }} />
-                                        <Button
-                                            onClick={handleNext}
-                                            sx={{ mr: 1 }}
-                                        >
-                                            Next
-                                        </Button>
-                                        {activeStep !== steps.length &&
-                                            (completed[activeStep] ? (
-                                                <Typography
-                                                    variant="caption"
-                                                    sx={{
-                                                        display: "inline-block",
-                                                    }}
-                                                >
-                                                    Step {activeStep + 1}{" "}
-                                                    already completed
-                                                </Typography>
-                                            ) : (
-                                                <Button
-                                                    onClick={handleComplete}
-                                                >
-                                                    {completedSteps() ===
-                                                    totalSteps() - 1
-                                                        ? "Finish"
-                                                        : "Complete Step"}
-                                                </Button>
-                                            ))}
-                                    </Box>
-                                </div>
-                            )}
-                        </div> */}
-                    </Box>
                     <div className="layout-02">
                         <div className="row">
                             <div className="col-4 width-100 width-50">
@@ -490,9 +382,7 @@ export default function Checkout(props) {
                                                             Identification:
                                                         </td>
                                                         <td>
-                                                            {
-                                                                traveller.CMND
-                                                            }
+                                                            {traveller.CMND}
                                                         </td>
                                                     </tr>
                                                     <tr>
@@ -608,7 +498,7 @@ export default function Checkout(props) {
                                                         <input
                                                             type="radio"
                                                             name="cash"
-                                                            id="momo"
+                                                            id="paypal"
                                                             className="checked"
                                                             onChange={
                                                                 handlePayment
@@ -616,16 +506,16 @@ export default function Checkout(props) {
                                                         />
                                                     </div>
                                                     <label for="cash">
-                                                        Payment Momo
+                                                        Payment Paypal
                                                     </label>
                                                 </div>
                                                 <i className="fa-solid fa-qrcode"></i>
                                             </div>
                                             <div
                                                 className="content-method"
-                                                id="byMomo"
+                                                id="bypaypal"
                                             >
-                                                Please pay by wallet Momo.
+                                                Please pay by port payment
                                             </div>
                                         </div>
                                         <div className="detail-method">
@@ -768,52 +658,6 @@ export default function Checkout(props) {
                                                             </ul>
                                                         </div>
                                                     </div>
-
-                                                    {/* <div className="services-block">
-                                                    <label className="booking_form">
-                                                        Extra services
-                                                    </label>
-                                                    <div className="list-services">
-                                                        <i
-                                                            className="qtip tip-left"
-                                                            data-tip="Lorem ipsum dolor sit amet, utinam munere antiopam vel ad. Qui eros iusto te. Nec ad feugiat honestatis. Quo illum detraxit an. Ius eius quodsi molestiae at, nostrum definitiones his cu. Discere referrentur mea id, an pri novum possim deterruisset. Eum oratio reprehendunt cu. Nec te quem assum postea."
-                                                        >
-                                                            <label for="booking-extra">
-                                                                Service per
-                                                                booking
-                                                            </label>
-                                                            <span className="price-extra">
-                                                                300.000đ
-                                                            </span>
-                                                        </i>
-
-                                                        <i
-                                                            className="qtip tip-left"
-                                                            data-tip="Lorem ipsum dolor sit amet, utinam munere antiopam vel ad. Qui eros iusto te. Nec ad feugiat honestatis. Quo illum detraxit an. Ius eius quodsi molestiae at, nostrum definitiones his cu. Discere referrentur mea id, an pri novum possim deterruisset. Eum oratio reprehendunt cu. Nec te quem assum postea."
-                                                        >
-                                                            <label for="booking-extra">
-                                                                Service per
-                                                                booking
-                                                            </label>
-                                                            <span className="price-extra">
-                                                                300.000đ
-                                                            </span>
-                                                        </i>
-
-                                                        <i
-                                                            className="qtip tip-left"
-                                                            data-tip="Lorem ipsum dolor sit amet, utinam munere antiopam vel ad. Qui eros iusto te. Nec ad feugiat honestatis. Quo illum detraxit an. Ius eius quodsi molestiae at, nostrum definitiones his cu. Discere referrentur mea id, an pri novum possim deterruisset. Eum oratio reprehendunt cu. Nec te quem assum postea."
-                                                        >
-                                                            <label for="booking-extra">
-                                                                Service per
-                                                                booking
-                                                            </label>
-                                                            <span className="price-extra">
-                                                                300.000đ
-                                                            </span>
-                                                        </i>
-                                                    </div>
-                                                </div> */}
                                                     {!isEmpty(
                                                         detailTour.extra
                                                     ) && (
@@ -879,14 +723,14 @@ export default function Checkout(props) {
                                                                 </span>
                                                             </div>
                                                         )}
-                                                        <div className="detail-price__item">
+                                                        {/* <div className="detail-price__item">
                                                             <span className="detail-price__title">
                                                                 Coupon
                                                             </span>
                                                             <span className="detail-price__price">
                                                                 -300.000đ
                                                             </span>
-                                                        </div>
+                                                        </div> */}
                                                     </div>
                                                 </div>
                                                 <div className="total-group">
@@ -902,11 +746,45 @@ export default function Checkout(props) {
                                                         )}
                                                     </span>
                                                 </div>
-                                                <div className="submit-group">
-                                                    <button type="submit" name="redirect">
-                                                        Book Now{" "}
-                                                        <i className="fa-solid fa-arrow-right"></i>
-                                                    </button>
+                                                <div className="submit-group mb-3">
+                                                    {data.payment === "2" ? (
+                                                        <div
+                                                            style={{
+                                                                maxWidth:
+                                                                    "750px",
+                                                                minHeight:
+                                                                    "200px",
+                                                            }}
+                                                        >
+                                                            <PayPalScriptProvider
+                                                                options={{
+                                                                    "client-id":
+                                                                        "test",
+                                                                    components:
+                                                                        "buttons",
+                                                                    currency:
+                                                                        "USD",
+                                                                }}
+                                                            >
+                                                                <ButtonWrapper
+                                                                    currency={
+                                                                        currency
+                                                                    }
+                                                                    showSpinner={
+                                                                        false
+                                                                    }
+                                                                />
+                                                            </PayPalScriptProvider>
+                                                        </div>
+                                                    ) : (
+                                                        <button
+                                                            type="submit"
+                                                            name="redirect"
+                                                        >
+                                                            Book Now{" "}
+                                                            <i className="fa-solid fa-arrow-right"></i>
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </form>
                                         </div>

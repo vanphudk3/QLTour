@@ -1,8 +1,8 @@
 import Pagination from "@/Components/Pagination";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 import { Head, router } from "@inertiajs/react";
-import { Link, usePage, useForm } from "@inertiajs/react";
-import { Alert, AlertTitle, Button, Chip } from "@mui/material";
+import { Link, usePage } from "@inertiajs/react";
+import { Alert, AlertTitle, Chip } from "@mui/material";
 import { isEmpty } from "lodash";
 import Swal from "sweetalert2";
 
@@ -11,6 +11,10 @@ const numberFormat = (value) => {
         style: "currency",
         currency: "VND",
     }).format(value);
+};
+
+const Trancate = (str, n) => {
+    return str?.length > n ? str.substr(0, n - 1) + "..." : str;
 };
 
 export default function Order(props) {
@@ -76,7 +80,7 @@ export default function Order(props) {
                                         <td>{order.ten_nguoi_dat}</td>
                                         <td>{order.email}</td>
                                         <td>{order.so_dien_thoai}</td>
-                                        <td>{order.dia_chi}</td>
+                                        <td>{Trancate(order.dia_chi, 30)}</td>
                                         <td>{numberFormat(order.tong_tien)}</td>
                                         <td>
                                             <Chip

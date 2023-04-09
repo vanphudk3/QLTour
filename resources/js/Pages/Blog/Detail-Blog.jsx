@@ -1,20 +1,22 @@
 import Content from "@/Layouts/DetailTour";
 import { Head, Link, usePage } from "@inertiajs/react";
-import { Breadcrumbs, Grid, Typography } from "@mui/material";
+import { Breadcrumbs, Button, Grid, Typography } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import { styled } from '@mui/material/styles';
-import Paper from '@mui/material/Paper';
+import { styled } from "@mui/material/styles";
+import Paper from "@mui/material/Paper";
+import FacebookIcon from '@mui/icons-material/Facebook';
 
 const Item = styled(Paper)(({ theme }) => ({
-    backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+    backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
     ...theme.typography.body2,
     padding: theme.spacing(1),
-    textAlign: 'center',
+    textAlign: "center",
     color: theme.palette.text.secondary,
-  }));
+}));
 
 export default function DetailBlog(props) {
     const blog = usePage().props.blog;
+    const relatedBlogs = usePage().props.relatedBlogs;
     const breadcrumbs = [
         <Link
             underline="hover"
@@ -72,44 +74,72 @@ export default function DetailBlog(props) {
                     style={{ paddingTop: "50px" }}
                 >
                     <div className="blog-wrap">
-                        {/* <div class="row">
-                            <div class="col-8">
-                                <div className="content-detail">
-                                    <div className="content-inner">
-                                        <div className="header-inner">
-                                            <h3 className="title-blog">
-                                                {blog.title}
-                                            </h3>
-                                            <span className="line"></span>
-                                        </div>
-                                        <div className="content" 
-                                            dangerouslySetInnerHTML={{ __html: blog.content }}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-4">col-4</div>
-                        </div> */}
                         <Grid container spacing={2}>
                             <Grid xs={8}>
-                            <div className="content-detail">
+                                <div className="content-detail">
                                     <div className="content-inner">
                                         <div className="header-inner">
                                             <h1 className="news-detail__title">
                                                 {blog.title}
                                             </h1>
+
+                                            <div
+                                                class="fb-share-button mb-3"
+                                                data-href="https://developers.facebook.com/docs/plugins/"
+                                                data-layout=""
+                                                data-size=""
+                                            >
+                                                <a
+                                                    target="_blank"
+                                                    href={`https://www.facebook.com/sharer/sharer.php?u=${route(
+                                                        "blog.show",
+                                                        blog.slug
+                                                    )}&amp;src=sdkpreparse`}
+                                                    class="fb-xfbml-parse-ignore"
+                                                >
+                                                    <Button
+                                                        variant="contained"
+                                                        size="small"
+                                                        startIcon={
+                                                            <FacebookIcon />
+                                                        }
+                                                    >
+                                                        Share
+                                                    </Button>
+                                                </a>
+                                            </div>
                                             <span className="line"></span>
                                         </div>
-                                        <div className="content" 
-                                            dangerouslySetInnerHTML={{ __html: blog.content }}
+                                        <div
+                                            className="content"
+                                            dangerouslySetInnerHTML={{
+                                                __html: blog.content,
+                                            }}
                                         />
                                     </div>
                                 </div>
                             </Grid>
                             <Grid xs={4}>
+                                <div className="content-detail">
                                     <h3 className="Heading-title text-center">
                                         Tin tức liên quan
                                     </h3>
+                                    <ul className="align-justify">
+                                        {relatedBlogs.map((blog) => (
+                                            <li className="item-news">
+                                                <Link
+                                                    href={route(
+                                                        "blog.show",
+                                                        blog.slug
+                                                    )}
+                                                    className="text-decor-none cl-black text-capitalize font-weight-bold d-block mb-2 cl-primary-hover"
+                                                >
+                                                    {blog.title}
+                                                </Link>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                             </Grid>
                         </Grid>
                     </div>

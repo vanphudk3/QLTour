@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Blog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class BlogController extends Controller
@@ -18,35 +19,18 @@ class BlogController extends Controller
     {
         $specialBlogs = Blog::orderBy('created_at', 'desc')->first();
         $specialBlogs->nameUser = $specialBlogs->user->name;
-        $forcusBlogs = Blog::orderBy('created_at', 'desc')->take(3)->get();
+        $forcusBlogs = Blog::orderBy('created_at', 'desc')->take(3)->skip(1)->get();
         foreach($forcusBlogs as $key => $forcusBlog){
             $forcusBlogs[$key]->nameUser = $forcusBlog->user->name;
             $forcusBlogs[$key]->formartDate = Carbon::parse($forcusBlog->created_at)->format('d/m/Y');
         }
         $specialBlogs->formartDate = Carbon::parse($specialBlogs->created_at)->format('d/m/Y');
-        $blogs = Blog::take(3)->paginate(10)->except($specialBlogs->id);
+        $blogs = Blog::orderBy('created_at', 'desc')->take(6)->skip(4)->paginate(6);
+        foreach($blogs as $key => $blog){
+            $blogs[$key]->nameUser = $blog->user->name;
+            $blogs[$key]->formartDate = Carbon::parse($blog->created_at)->format('d/m/Y');
+        }
         return Inertia::render('Blog/Blog', compact('specialBlogs', 'forcusBlogs','blogs'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
     }
 
     /**
@@ -59,49 +43,9 @@ class BlogController extends Controller
     {
         $blog = Blog::where('slug', $slug)->first();
         $blog->nameUser = $blog->user->name;
+        $relatedBlogs = Blog::where('id', '!=', $blog->id)->take(3)->get();
         $blog->formartDate = Carbon::parse($blog->created_at)->format('d/m/Y');
         
-        return Inertia::render('Blog/Detail-Blog', compact('blog'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Blog  $blog
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Blog $blog)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Blog  $blog
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Blog $blog)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Blog  $blog
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Blog $blog)
-    {
-        //
-    }
-
-    public function Trancate($string, $length){
-        if(strlen($string) > $length){
-            $string = substr($string, 0, $length) . '...';
-        }
-        return $string;
+        return Inertia::render('Blog/Detail-Blog', compact('blog', 'relatedBlogs'));
     }
 }

@@ -10,11 +10,6 @@ use Inertia\Inertia;
 
 class OrderController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $orders = Order::orderBy('id', 'desc')->paginate(6);
@@ -28,17 +23,10 @@ class OrderController extends Controller
             else if($order->trang_thai === "2"){
                 $order->trang_thai = "Success";
             }
-            $order->dia_chi = $this->Trancate($order->dia_chi, 15);
         }
         return Inertia::render('Order/Index', compact("orders"));
     }
 
-    public function Trancate($string, $length){
-        if(strlen($string) > $length){
-            $string = substr($string, 0, $length) . '...';
-        }
-        return $string;
-    }
 
     /**
      * Show the form for creating a new resource.

@@ -13,8 +13,10 @@
         <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
         
         <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-        
-        
+
+        {{-- paypal --}}
+        <script src="https://www.paypal.com/sdk/js?client-id=AVmyO09hADyVzThJkiZaBhRgg32nPWsM71i40MYPpPPFmtKIxRJAhZFB180d1_0UqhA5xJU3rs-4XhWl"></script>
+
         <!-- Scripts -->
         <script
         src="https://code.jquery.com/jquery-3.6.0.min.js"

@@ -10,8 +10,6 @@ import { usePage } from "@inertiajs/react";
 export default function Authenticated({ auth, header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
-
-    console.log(auth.user);
     return (
         <div className="bd-btn">
             <nav class="navbar navbar-expand-lg bg-body-tertiary bd-btn shadow">

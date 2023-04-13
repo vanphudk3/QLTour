@@ -7,12 +7,14 @@ import {
     Checkbox,
     FormControlLabel,
     Typography,
+    Snackbar,
 } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { isEmpty } from "lodash";
 import Validate from "validator/lib/isEmpty";
 import InputError from "@/Components/InputError";
 import { useState } from "react";
+import Notification from "@/Components/Notification";
 
 const breadcrumbs = [
     <Link
@@ -31,11 +33,13 @@ const breadcrumbs = [
 
 export default function LoginMember(props) {
     const login = usePage().props.login;
+    const redirect = usePage().props.redirect;
 
     const { data, setData, post, processing, errors, reset } = useForm({
         email: "",
         password: "",
         remember: "",
+        redirect: redirect,
     });
 
     console.log(data);
@@ -43,12 +47,9 @@ export default function LoginMember(props) {
     const onHandleChange = (e) => {
         setData(
             e.target.name,
-            e.target.type === "checkbox"
-                ? e.target.checked
-                : e.target.value
+            e.target.type === "checkbox" ? e.target.checked : e.target.value
         );
     };
-    console.log(login);
     const [validationMsg, setValidationMsg] = useState({});
 
     const validateAll = () => {
@@ -81,7 +82,7 @@ export default function LoginMember(props) {
                     >
                         <div className="breadcrumb-main">
                             <h1 className="zourney-title"> Login</h1>
-                            <div className="flex justify-content-center">
+                            {/* <div className="flex justify-content-center">
                                 <Breadcrumbs
                                     separator={
                                         <NavigateNextIcon
@@ -93,7 +94,7 @@ export default function LoginMember(props) {
                                 >
                                     {breadcrumbs}
                                 </Breadcrumbs>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>
@@ -152,9 +153,7 @@ export default function LoginMember(props) {
                                                     className="mt-2 flex justify-content-start"
                                                 />
                                                 <InputError
-                                                    message={
-                                                        errors.email
-                                                    }
+                                                    message={errors.email}
                                                     className="mt-2 flex justify-content-start"
                                                 />
                                             </div>
@@ -177,9 +176,7 @@ export default function LoginMember(props) {
                                                     className="mt-2 flex justify-content-start"
                                                 />
                                                 <InputError
-                                                    message={
-                                                        errors.password
-                                                    }
+                                                    message={errors.password}
                                                     className="mt-2 flex justify-content-start"
                                                 />
                                             </div>
@@ -194,19 +191,14 @@ export default function LoginMember(props) {
                                                                     },
                                                             }}
                                                             name="remember"
-                                                            onChange={onHandleChange}
+                                                            onChange={
+                                                                onHandleChange
+                                                            }
                                                         />
                                                     }
                                                     label="Remember password"
                                                 />
                                             </div>
-
-                                            {/* <button
-                                            className="btn btn-primary btn-lg btn-block"
-                                            type="submit"
-                                        >
-                                            Login
-                                        </button> */}
 
                                             <Button
                                                 variant="contained"
@@ -228,18 +220,7 @@ export default function LoginMember(props) {
                                                 Login
                                             </Button>
 
-                                            <hr className="my-4" />
-
-                                            {/* <button
-                                            className="btn btn-lg btn-block btn-primary"
-                                            style={{
-                                                backgroundColor: "#dd4b39",
-                                            }}
-                                            type="submit"
-                                        >
-                                            <i className="fab fa-google me-2"></i>{" "}
-                                            Sign in with google
-                                        </button> */}
+                                            {/* <hr className="my-4" />
 
                                             <Button
                                                 variant="contained"
@@ -260,17 +241,6 @@ export default function LoginMember(props) {
                                                 Sign in with google
                                             </Button>
 
-                                            {/* <button
-                                            className="btn btn-lg btn-block btn-primary mb-2"
-                                            style={{
-                                                backgroundColor: "#3b5998",
-                                            }}
-                                            type="submit"
-                                        >
-                                            <i className="fab fa-facebook-f me-2"></i>
-                                            Sign in with facebook
-                                        </button> */}
-
                                             <Button
                                                 variant="contained"
                                                 disableElevation
@@ -287,7 +257,7 @@ export default function LoginMember(props) {
                                             >
                                                 <i className="fab fa-facebook-f me-2"></i>
                                                 Sign in with facebook
-                                            </Button>
+                                            </Button> */}
 
                                             <hr className="my-4" />
                                             <div className="d-flex justify-content-start mb-2">

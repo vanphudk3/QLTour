@@ -11,10 +11,6 @@ import { Link, Head, usePage, useForm, router } from "@inertiajs/react";
 import SwiperPopularLayout from "@/Components/Home/SwiperPopularLayout";
 import { Swiper, SwiperSlide } from "swiper/react";
 import * as React from "react";
-// import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
-// import { LocalizationProvider } from "@mui/x-date-pickers";
-// import { AdapterDayjs } from "@mui/x-date-pickers-pro/AdapterDayjs";
-// import { DateRangePicker } from "@mui/x-date-pickers-pro/DateRangePicker";
 
 import "swiper/css";
 import "swiper/css/navigation";

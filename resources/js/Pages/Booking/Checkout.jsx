@@ -24,6 +24,7 @@ import {
     PayPalButtons,
     usePayPalScriptReducer,
 } from "@paypal/react-paypal-js";
+import TextInput from "@/Components/TextInput";
 
 const breadcrumbs = [
     <Link
@@ -82,7 +83,9 @@ export default function Checkout(props) {
         total: getBooking.totalPrice,
         travellers: getBooking.travellers,
         time: detailTour.gio_khoi_hanh,
+        date: detailTour.ngay_khoi_hanh,
     });
+    console.log(data);
     const total = data.total / 23447;
     const gettotal = round(total, 2);
     const amount = `${gettotal}`;
@@ -564,6 +567,15 @@ export default function Checkout(props) {
                                                 className="booking-form"
                                                 encType="application/x-www-form-urlencoded"
                                             >
+                                                <input
+                                                    name="date"
+                                                    type="date"
+                                                    hidden
+                                                    value={detailTour.ngay_khoi_hanh}
+                                                    onChange={
+                                                        (e) => setData("date", e.target.value)
+                                                    }
+                                                />
                                                 <div className="input-group">
                                                     <div className="booking-block">
                                                         <span

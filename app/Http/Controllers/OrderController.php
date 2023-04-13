@@ -27,28 +27,6 @@ class OrderController extends Controller
         return Inertia::render('Order/Index', compact("orders"));
     }
 
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
     /**
      * Display the specified resource.
      *
@@ -84,12 +62,12 @@ class OrderController extends Controller
         ->join("order_details","order_details.order_id","orders.id")
         ->where("orders.id", $order->id)
         ->get();
-
+        
         $tour = DB::table("tours")
         ->join("order_details","tours.id","order_details.ma_tour")
         ->where("order_details.order_id", $order->id)
         ->update([
-            "so_cho_da_ban" => count($travellers),
+            "so_cho_da_ban" => DB::raw("so_cho_da_ban + " . count($travellers)),
             "so_cho" => DB::raw("so_cho - " . count($travellers))
         ]);
 

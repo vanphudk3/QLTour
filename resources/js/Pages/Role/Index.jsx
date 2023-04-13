@@ -22,20 +22,10 @@ export default function Role(props) {
             <div className="w-100">
                 <div className="ml-50 mr-50">
                     <div class="flex justify-end m-2 p-2">
-                        {data_user.role == 'admin' && (
-                        
-                        <Link
-                            href={route("role.create")}
-                            class="btn btn-primary"
-                        >
-                            Create
-                        </Link>
-                        )}
-                        {data_user.role != 'admin' && (
-                          <Link
+                        {data_user.role == "admin" && (
+                            <Link
                                 href={route("role.create")}
-                                class="btn btn-primary disabled"
-                                aria-disabled="true"
+                                class="btn btn-primary"
                             >
                                 Create
                             </Link>
@@ -48,7 +38,9 @@ export default function Role(props) {
                                     <th scope="col">#</th>
                                     <th scope="col">Name</th>
                                     <th scope="col">Description</th>
-                                    <th scope="col">Actions</th>
+                                    {data_user.role !== "admin" && (
+                                        <th scope="col">Actions</th>
+                                    )}
                                 </tr>
                             </thead>
                             <tbody>
@@ -57,42 +49,33 @@ export default function Role(props) {
                                         <th scope="row">{role.id}</th>
                                         <td>{role.name}</td>
                                         <td>{role.description}</td>
-                                        <td>
-                                          {data_user.role == 'admin' && (
-                                            <><Link
-                                          href={route("role.edit", role.id)}
-                                          class="btn btn-primary"
-                                        >
-                                          Edit
-                                        </Link><Link
-                                          href={route("role.destroy", role.id)}
-                                          class="btn btn-danger"
-                                          method="delete"
-                                          as="button"
-                                          type="button"
-                                        >
-                                            Delete
-                                          </Link></>
-                                          )}
-                                          {data_user.role != 'admin' && (
-                                            <><Link
-                                            href={route("role.edit", role.id)}
-                                            class="btn btn-primary disabled"
-                                            aria-disabled="true"
-                                          >
-                                            Edit
-                                          </Link><Link
-                                            href={route("role.destroy", role.id)}
-                                            class="btn btn-danger disabled"
-                                            aria-disabled="true"
-                                            method="delete"
-                                            as="button"
-                                            type="button"
-                                          >
-                                              Delete
-                                            </Link></>
-                                          )}
-                                        </td>
+                                        {data_user.role == "admin" && (
+                                            <td>
+                                                <>
+                                                    <Link
+                                                        href={route(
+                                                            "role.edit",
+                                                            role.id
+                                                        )}
+                                                        class="btn btn-primary"
+                                                    >
+                                                        Edit
+                                                    </Link>
+                                                    <Link
+                                                        href={route(
+                                                            "role.destroy",
+                                                            role.id
+                                                        )}
+                                                        class="btn btn-danger"
+                                                        method="delete"
+                                                        as="button"
+                                                        type="button"
+                                                    >
+                                                        Delete
+                                                    </Link>
+                                                </>
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                                 {data.length === 0 && (

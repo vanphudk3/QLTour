@@ -72,8 +72,19 @@ export default function Reply(props) {
         if (!checkComment()) {
             Swal.fire({
                 title: "Bạn chưa đăng nhập",
-                error: "Bạn cần đăng nhập để comment",
+                text: "Bạn cần đăng nhập để comment",
                 icon: "error",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Đăng nhập",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = route("customer.login", {
+                        redirect: window.location.href,
+                        
+                    });
+                }
             });
             return;
         }

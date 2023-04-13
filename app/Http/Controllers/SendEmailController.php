@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 class SendEmailController extends Controller
 {
     public function index(){
-        dispatch(new TestMailJob())->delay(now()->addSeconds(5));
+        dispatch(new TestMailJob());
         return 'Email Send Successfully';
     }
 }

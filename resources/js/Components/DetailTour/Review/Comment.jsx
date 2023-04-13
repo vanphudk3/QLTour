@@ -4,7 +4,6 @@ import { Rating } from "@mui/material";
 
 export default function Comment() {
     const comments = usePage().props.comments;
-    console.log(comments);
 
     return (
         <ol className="comment-list">

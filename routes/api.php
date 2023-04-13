@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\ManagerTourController;
+use App\Http\Controllers\SearchController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,3 +23,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('/profileMember/{id}/update', [KhachHangController::class, 'updateProfileMember']);
 Route::post('/profileMember/{id}/cancelorder', [KhachHangController::class, 'cancelorder']);
+
+Route::get('/search/{search}', [SearchController::class, 'search'])->name('search');

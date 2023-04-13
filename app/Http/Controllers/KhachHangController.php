@@ -14,7 +14,11 @@ use Inertia\Inertia;
 class KhachHangController extends Controller
 {
     public function login(){
-        return Inertia::render('Customer/Login');
+        $redirect = '';
+        if (request('redirect')){
+            $redirect = request('redirect');
+        }
+        return Inertia::render('Customer/Login', compact('redirect'));
     }
 
     public function process_login(Request $request){
@@ -44,6 +48,10 @@ class KhachHangController extends Controller
                         // setcookie('remember', $token, time() + 60*60*24*30);
                         Cookie::queue('remember', $token, 60*60*24*30);
                     }
+                    if ($request->redirect != ''){
+                        return redirect($request->redirect);
+                    }
+
                     return redirect()->route('welcome');
                 }
             }

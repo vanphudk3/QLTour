@@ -330,39 +330,6 @@ export default function Tour(props) {
                                             </div>
                                         </div>
                                     </div>
-                                    {/* <div className="widget widget-category">
-                                        <div className="title">Categories</div>
-                                        <div className="babe-search-filter-items">
-                                            
-                                            <div className="term-item">
-                                
-                                                <Select
-                                                    id="category"
-                                                    name="category"
-                                                    className="mt-1 block w-full"
-                                                    value={data.category}
-                                                    handleChange={
-                                                        onHandleChange
-                                                    }
-                                                >
-                                                    <option value="0">
-                                                        --Tất cả--
-                                                    </option>
-                                                    {categories.map(
-                                                        (category) => (
-                                                            <option
-                                                                value={
-                                                                    category.id
-                                                                }
-                                                            >
-                                                                {category.ten}
-                                                            </option>
-                                                        )
-                                                    )}
-                                                </Select>
-                                            </div>
-                                        </div>
-                                    </div> */}
                                     <div className="widget widget-destination justify-between">
                                         <div className="title">Departure</div>
                                         <Select

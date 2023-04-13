@@ -68,7 +68,9 @@ export default function Authenticated({ auth, header, children }) {
                                     <NavLinkB
                                         aria-current="page"
                                         href={route("managerblog.index")}
-                                        active={route().current("managerblog.index")}
+                                        active={route().current(
+                                            "managerblog.index"
+                                        )}
                                     >
                                         Blog
                                     </NavLinkB>
@@ -91,99 +93,113 @@ export default function Authenticated({ auth, header, children }) {
                                     Account
                                 </NavLinkB>
                             </li>
-                            <li class="nav-item">
-                                <NavLinkB
-                                    aria-current="page"
-                                    href={route("question.index")}
-                                    active={route().current("question.index")}
-                                >
-                                    Q&A
-                                </NavLinkB>
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a
-                                    class="nav-link dropdown-toggle"
-                                    href="#"
-                                    role="button"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false"
-                                >
-                                    Manage Tour
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li>
+                            {auth.user.role === "admin" && (
+                                <>
+                                    <li class="nav-item">
                                         <NavLinkB
                                             aria-current="page"
-                                            href={route("category.index")}
+                                            href={route("question.index")}
                                             active={route().current(
-                                                "category.index"
+                                                "question.index"
                                             )}
                                         >
-                                            Category
+                                            Q&A
                                         </NavLinkB>
                                     </li>
-                                    <li>
-                                        <NavLinkB
-                                            aria-current="page"
-                                            href={route("location.index")}
-                                            active={route().current(
-                                                "location.index"
-                                            )}
+                                    <li class="nav-item dropdown">
+                                        <a
+                                            class="nav-link dropdown-toggle"
+                                            href="#"
+                                            role="button"
+                                            data-bs-toggle="dropdown"
+                                            aria-expanded="false"
                                         >
-                                            Location
-                                        </NavLinkB>
+                                            Manage Tour
+                                        </a>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <NavLinkB
+                                                    aria-current="page"
+                                                    href={route(
+                                                        "category.index"
+                                                    )}
+                                                    active={route().current(
+                                                        "category.index"
+                                                    )}
+                                                >
+                                                    Category
+                                                </NavLinkB>
+                                            </li>
+                                            <li>
+                                                <NavLinkB
+                                                    aria-current="page"
+                                                    href={route(
+                                                        "location.index"
+                                                    )}
+                                                    active={route().current(
+                                                        "location.index"
+                                                    )}
+                                                >
+                                                    Location
+                                                </NavLinkB>
+                                            </li>
+                                            <li>
+                                                <NavLinkB
+                                                    aria-current="page"
+                                                    href={route(
+                                                        "extraService.index"
+                                                    )}
+                                                    active={route().current(
+                                                        "extraService.index"
+                                                    )}
+                                                >
+                                                    Extra Service
+                                                </NavLinkB>
+                                            </li>
+                                            <li>
+                                                <hr class="dropdown-divider" />
+                                            </li>
+                                            <li>
+                                                <NavLinkB
+                                                    aria-current="page"
+                                                    href={route(
+                                                        "managerTour.index"
+                                                    )}
+                                                    active={route().current(
+                                                        "managerTour.index"
+                                                    )}
+                                                >
+                                                    Tour
+                                                </NavLinkB>
+                                            </li>
+                                            <li>
+                                                <NavLinkB
+                                                    aria-current="page"
+                                                    href={route(
+                                                        "schedule.index"
+                                                    )}
+                                                    active={route().current(
+                                                        "schedule.index"
+                                                    )}
+                                                >
+                                                    Schedule Tour
+                                                </NavLinkB>
+                                            </li>
+                                        </ul>
                                     </li>
-                                    <li>
-                                        <NavLinkB
-                                            aria-current="page"
-                                            href={route("extraService.index")}
-                                            active={route().current(
-                                                "extraService.index"
-                                            )}
-                                        >
-                                            Extra Service
-                                        </NavLinkB>
-                                    </li>
-                                    <li>
-                                        <hr class="dropdown-divider" />
-                                    </li>
-                                    <li>
-                                        <NavLinkB
-                                            aria-current="page"
-                                            href={route("managerTour.index")}
-                                            active={route().current(
-                                                "managerTour.index"
-                                            )}
-                                        >
-                                            Tour
-                                        </NavLinkB>
-                                    </li>
-                                    <li>
-                                        <NavLinkB
-                                            aria-current="page"
-                                            href={route("schedule.index")}
-                                            active={route().current(
-                                                "schedule.index"
-                                            )}
-                                        
-                                        >
-                                            Schedule Tour
-                                        </NavLinkB>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li class="nav-item">
-                                <NavLinkB
-                                    aria-current="page"
-                                    href={route("order.index")}
-                                    active={route().current("order.index")}
-                                >
-                                    Order
-                                </NavLinkB>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link disabled">Disabled</a>
-                            </li>
+                                </>
+                            )}
+                            {auth.user.role === "manager" && (
+                                <li class="nav-item">
+                                    <NavLinkB
+                                        aria-current="page"
+                                        href={route("order.index")}
+                                        active={route().current("order.index")}
+                                    >
+                                        Order
+                                    </NavLinkB>
+                                </li>
+                            )}
                         </ul>
                         <div className="sm:flex sm:items-center sm:ml-6">
                             <div className="ml-3 relative">

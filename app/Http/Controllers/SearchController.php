@@ -74,4 +74,19 @@ class SearchController extends Controller
         $countTour = Tour::count();
         return Inertia::render('Tour', compact('tours', 'countTour'));
     }
+
+    public function search($search){
+        $tours = DB::table('tours')
+            ->join('tour_diadiems', 'tours.id', '=', 'tour_diadiems.ma_tour')
+            ->join('dia_diems', 'tour_diadiems.ma_dia_diem', '=', 'dia_diems.id')
+            ->join('hinh_anhs', 'dia_diems.id', '=', 'hinh_anhs.ma_dia_diem')
+            ->select('tours.ten_tour', 'tours.slug', 'tours.gia_nguoi_lon', 'hinh_anhs.ten')
+            ->where(DB::raw('hinh_anhs.id'), DB::raw('(SELECT id FROM hinh_anhs WHERE hinh_anhs.ma_dia_diem = dia_diems.id LIMIT 1)'))
+            ->where('ten_tour', 'like', '%'.$search.'%')
+            ->limit(5)
+            ->get();
+        return response()->json([
+            'tours' => $tours,
+        ]);
+    }
 }

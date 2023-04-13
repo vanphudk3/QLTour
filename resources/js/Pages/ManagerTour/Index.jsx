@@ -66,7 +66,7 @@ export default function Tour(props) {
                                     <th scope="col">Tranport</th>
                                     <th scope="col">Age from</th>
                                     <th scope="col">Amount People</th>
-                                    <th scope="col">Status</th>
+                                    <th scope="col">Date</th>
                                     <th scope="col">Actions</th>
                                 </tr>
                             </thead>
@@ -79,7 +79,7 @@ export default function Tour(props) {
                                         <td>{tour.transpost}</td>
                                         <td>{tour.do_tuoi_tu}</td>
                                         <td>{tour.so_cho}</td>
-                                        <td>{tour.status}</td>
+                                        <td>{tour.ngay_khoi_hanh}</td>
                                         <td>
                                             {user.role == "admin" && (
                                                 <>
@@ -104,33 +104,6 @@ export default function Tour(props) {
                                                         onClick={() =>
                                                             deleteTour(tour.id)
                                                         }
-                                                    >
-                                                        Delete
-                                                    </Link>
-                                                </>
-                                            )}
-                                            {user.role != "admin" && (
-                                                <>
-                                                    <Link
-                                                        href={route(
-                                                            "managerTour.edit",
-                                                            tour.id
-                                                        )}
-                                                        class="btn btn-primary disabled"
-                                                        aria-disabled="true"
-                                                    >
-                                                        Edit
-                                                    </Link>
-                                                    <Link
-                                                        href={route(
-                                                            "managerTour.destroy",
-                                                            tour.id
-                                                        )}
-                                                        class="btn btn-danger disabled"
-                                                        aria-disabled="true"
-                                                        method="delete"
-                                                        as="button"
-                                                        type="button"
                                                     >
                                                         Delete
                                                     </Link>

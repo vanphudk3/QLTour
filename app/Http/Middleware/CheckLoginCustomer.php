@@ -16,8 +16,8 @@ class CheckLoginCustomer
      */
     public function handle(Request $request, Closure $next)
     {
-        if(!session()->has('customer') && !isset($_COOKIE['remember'])){
-            return redirect()->route('customer.login');
+        if(session()->has('customer') || isset($_COOKIE['remember'])){
+            return redirect()->route('welcome');
         }
         return $next($request);
     }

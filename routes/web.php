@@ -57,15 +57,16 @@ Route::get('/checkout', [BookingController::class, 'checkout'])->name('checkout'
 Route::get('/blog', [BlogController::class, 'index'])->name('blog');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
-Route::get('loginMember', [KhachHangController::class, 'login'])->name('customer.login');
 Route::post('loginMember', [KhachHangController::class, 'process_login'])->name('customer.process_login');
-Route::get('registerMember', [KhachHangController::class, 'register'])->name('customer.register');
 Route::post('registerMember', [KhachHangController::class, 'process_register'])->name('customer.process_register');
 Route::get('logoutMember', [KhachHangController::class, 'logout'])->name('customer.logout');
 
+
 Route::group(['middleware' => CheckLoginCustomer::class], function () {
-    Route::get('profileMember', [KhachHangController::class, 'profile'])->name('customer.profile');
+    Route::get('loginMember', [KhachHangController::class, 'login'])->name('customer.login');
+    Route::get('registerMember', [KhachHangController::class, 'register'])->name('customer.register');
 });
+Route::get('profileMember', [KhachHangController::class, 'profile'])->name('customer.profile');
 
 
 Route::middleware('cors')->group(function(){
@@ -74,6 +75,7 @@ Route::middleware('cors')->group(function(){
 Route::get('/checkout/success', [BookingController::class, 'success'])->name('checkout.success');
 
 Route::get('/test-mail', [SendEmailController::class, 'index'])->name('test-mail');
+// Route::get('/search/{search}', [SearchController::class, 'search'])->name('search');
 
 Route::middleware(['auth','verified'])->group(function () {
     Route::get('/auth/dashboard', [DashboardController::class, 'index'])->name('dashboard');

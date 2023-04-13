@@ -70,7 +70,9 @@ export default function Order(props) {
                                     <th scope="col">Total</th>
                                     <th scope="col">Status</th>
                                     <th scope="col">Created at</th>
-                                    <th scope="col">Action</th>
+                                    {data_user.role === "admin" && (
+                                        <th scope="col">Action</th>
+                                    )}
                                 </tr>
                             </thead>
                             <tbody>
@@ -90,7 +92,7 @@ export default function Order(props) {
                                         </td>
                                         <td>{order.created_at}</td>
                                         <td>
-                                            {data_user.role == "admin" && (
+                                            {(data_user.role === "admin" || data_user.role === "manager") && (
                                                 <>
                                                     <Link
                                                         href={route(
@@ -111,34 +113,6 @@ export default function Order(props) {
                                                                 order.id
                                                             )
                                                         }
-                                                    >
-                                                        Delete
-                                                    </Link>
-                                                </>
-                                            )}
-                                            {data_user.role != "admin" && (
-                                                <>
-                                                    <Link
-                                                        href={route(
-                                                            "order.edit",
-                                                            order.id
-                                                        )}
-                                                        class="btn btn-primary disabled"
-                                                        aria-disabled="true"
-                                                    >
-                                                        Edit
-                                                    </Link>
-                                                    <Link
-                                                        href={route(
-                                                            "order.destroy",
-                                                            order.id
-                                                        )}
-                                                        class="btn btn-danger disabled"
-                                                        aria-disabled="true"
-                                                        method="delete"
-                                                        name="delete"
-                                                        as="button"
-                                                        type="button"
                                                     >
                                                         Delete
                                                     </Link>

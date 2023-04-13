@@ -64,6 +64,8 @@ class ManagerTourController extends Controller
         $tours = Tour::all();
         $schedule = LichTrinh::all();
         $tour = Tour::where('id', $managerTour)->get();
+        $tour[0]->dateStart = date("Y-m-d", strtotime($tour[0]->ngay_khoi_hanh));
+        
         $detaiTour = ChiTietTour::where('ma_tour', $managerTour)->get();
         $locations = DiaDiem::all();
         $getLocations = Tour_DiaDiem::where('ma_tour', $managerTour)->get();

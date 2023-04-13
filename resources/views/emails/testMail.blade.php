@@ -7,23 +7,6 @@
     <title>Document</title>
 </head>
 
-<style>
-    .container {
-        width: 100%;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-    .flex {
-        display: flex;
-    }
-    .flex-wrap {
-        flex-wrap: wrap;
-    }
-    .col-md-12 {
-        width: 100%;
-    }
-</style>
-
 <body>
     <div class="container">
         <div class="flex flex-wrap">

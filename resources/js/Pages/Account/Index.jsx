@@ -68,7 +68,7 @@ export default function Account(props) {
                                            Null
                                         </td>
                                         )}
-                                        { users.role != 'admin' && props.auth.user.role == 'admin' ? (
+                                        { users.role != 'admin' && props.auth.user.role == 'admin' && (
                                             <td>
                                                 <Link
                                                     href={route("account.edit", users.id)}
@@ -84,25 +84,7 @@ export default function Account(props) {
                                                     Delete
                                                 </Link>
                                             </td>
-                                        ) : (
-                                            <td>
-                                                <Link
-                                                    href={route("account.edit", users.id)}
-                                                    class="btn btn-primary disabled"
-
-                                                >
-                                                    Edit
-                                                </Link>
-
-                                                <Link
-                                                    href={route("account.destroy", users.id)}
-                                                    class="btn btn-danger disabled"
-                                                >
-                                                    Delete
-                                                </Link>
-                                            </td>
-                                        )
-                                        }
+                                        )}
                                     </tr>
                                 ))}
                                 {datas.length === 0 && (

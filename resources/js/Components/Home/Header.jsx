@@ -11,11 +11,22 @@ import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
-import { Avatar, Menu, MenuItem, Tooltip } from "@mui/material";
-import { Link, usePage } from "@inertiajs/react";
+import {
+    Avatar,
+    Menu,
+    MenuItem,
+    Tooltip,
+    TextField,
+    Autocomplete,
+} from "@mui/material";
+import { Link, router, usePage } from "@inertiajs/react";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { isEmpty } from "lodash";
 import HeaderMobile from "./HeaderMobile";
+import { event } from "jquery";
+import { useState } from "react";
+import { useEffect } from "react";
+import NavLinkB from "@/Components/Bootstrap/NavLink";
 // import { useState } from "react";
 
 const Search = styled("div")(({ theme }) => ({
@@ -78,6 +89,13 @@ const defaultOpenDestination = () => {
     document.getElementById("defaultOpenDestination").click();
 };
 
+const numberFormat = (value) => {
+    return new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+    }).format(value);
+};
+
 export default function Header() {
     const login = usePage().props.login;
 
@@ -117,7 +135,7 @@ export default function Header() {
                     </MenuItem>
                 </>
             );
-        }else if (login.customer != null && login.remember == null) {
+        } else if (login.customer != null && login.remember == null) {
             return (
                 <>
                     <MenuItem>
@@ -140,7 +158,7 @@ export default function Header() {
                     </MenuItem>
                 </>
             );
-        }else if (login.customer == null && login.remember != null) {
+        } else if (login.customer == null && login.remember != null) {
             return (
                 <>
                     <MenuItem>
@@ -163,7 +181,7 @@ export default function Header() {
                     </MenuItem>
                 </>
             );
-        }else if (login.customer != null && login.remember != null) {
+        } else if (login.customer != null && login.remember != null) {
             return (
                 <>
                     <MenuItem>
@@ -189,6 +207,27 @@ export default function Header() {
         }
     };
 
+    const [getTour, setGetTour] = useState([]);
+    const handleSearch = (e) => {
+        e.preventDefault();
+        const search = document.getElementById("search").value;
+        if (search != "") {
+            const getTour = async () => {
+                const response = await fetch("api/search/" + search, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+                const data = await response.json();
+                setGetTour(data.tours);
+            };
+            getTour();
+        }else{
+            setGetTour([]);
+        }
+    };
+    console.log(getTour.map((tour) => tour.ten_tour));
     return (
         <header className="Navigation flex justify-content">
             <div className="navbar-header">
@@ -347,17 +386,73 @@ export default function Header() {
                     </a>
                 </div>
                 <div className="contact-navbar">
-                    <Search>
-                        <SearchIconWrapper>
-                            <SearchIcon />
-                        </SearchIconWrapper>
-                        <StyledInputBase
-                            placeholder="Search…"
-                            inputProps={{ "aria-label": "search" }}
-
-                        />
-                    </Search>
-
+                    <div className="catalogues">
+                        <Search>
+                            <SearchIconWrapper>
+                                <SearchIcon />
+                            </SearchIconWrapper>
+                            <StyledInputBase
+                                placeholder="Search…"
+                                inputProps={{ "aria-label": "search" }}
+                                name="search"
+                                id="search"
+                                onChange={handleSearch}
+                            />
+                        </Search>
+                        {getTour.length > 0 && (
+                        <div
+                            className="dropdown-content sidebar"
+                            style={{ top: "81%" }}
+                        >
+                            <div className="widget widget-post-list">
+                                        <div className="babe-search-filter-items">
+                                            {getTour.map(
+                                                (tour) => (
+                                                    <div className="babe-items">
+                                                        <div className="babe-items__inner">
+                                                            <div className="item-img">
+                                                                <div className="img-thumb">
+                                                                    <img
+                                                                        src={`http://localhost:8000/storage/${tour.ten}`}
+                                                                        alt=""
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                            <div className="item-text">
+                                                                <div className="item-title">
+                                                                    <NavLink
+                                                                        href={`/tour/${tour.slug}`}
+                                                                    >
+                                                                        {
+                                                                            tour.ten_tour
+                                                                        }
+                                                                    </NavLink>
+                                                                </div>
+                                                                <div className="item-info-price">
+                                                                    <label for="">
+                                                                        From
+                                                                    </label>
+                                                                    <span className="item-info-price-new">
+                                                                        <span
+                                                                            className="currency-amount"
+                                                                            data-amount="177"
+                                                                        >
+                                                                            {
+                                                                                numberFormat(tour.gia_nguoi_lon)
+                                                                            }
+                                                                        </span>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            )}
+                                        </div>
+                                    </div>
+                        </div>
+                        )}
+                    </div>
                     <Tooltip title="Open settings">
                         <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                             <AccountCircleIcon sx={{ width: 32, height: 32 }} />

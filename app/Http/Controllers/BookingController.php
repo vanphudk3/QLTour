@@ -12,6 +12,7 @@ use App\Models\Order;
 use App\Models\Order_detail;
 use App\Models\Tour;
 use App\Models\Ward;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
@@ -25,6 +26,13 @@ class BookingController extends Controller
     public function booking(){
         
         $detailTour = null;
+        $customer = null;
+        if(request()->cookie('remember')){
+            $customer = KhachHang::where('remember_token', request()->cookie('remember'))->first();
+        }
+        if (session()->has('customer')){
+            $customer = KhachHang::find(session('customer'));
+        }
         if(request("tourId")){
             $detailTour = DB::table('tour_diadiems')
             ->join('tours', 'tour_diadiems.ma_tour', '=', 'tours.id')
@@ -80,7 +88,7 @@ class BookingController extends Controller
             }
             
         }
-        return Inertia::render("Booking/TourBooking", compact('detailTour'));
+        return Inertia::render("Booking/TourBooking", compact('detailTour', 'customer'));
     }
     
     public function checkout()
@@ -165,12 +173,13 @@ class BookingController extends Controller
                 $customer = KhachHang::where('remember_token', $remember)->first();
                 $order->ma_khach_hang = $customer->id;
             }
-    
+            $formatDate = Carbon::createFromFormat('d/m/Y', $data['date'])->toDateString();
             $order->ten_nguoi_dat = $data['name'];
             $order->so_dien_thoai = $data['phone'];
             $order->email = $data['email'];
             $order->dia_chi = $data['address'];
             $order->gio_khoi_hanh = $data['time'];
+            $order->ngay_khoi_hanh = $formatDate;
             $order->tong_tien = $data['total'];
             $order->hinh_thuc_thanh_toan = $data['payment'];
             $order->ghi_chu = $data['note'];
@@ -179,6 +188,14 @@ class BookingController extends Controller
             }
             if($data['payment'] == "2"){
                 $order->trang_thai = "2";
+                if($order->ma_khach_hang !== null){
+                    $customer = KhachHang::find($order->ma_khach_hang);
+                    $countTour = $customer->tong_so_tour_da_di;
+                    $customer->update([
+                        "tong_so_tour_da_di" => $countTour + 1
+                    ]);
+
+                }
             }
             if($order->save()){
                 // luu thong tin khach hang da dat tour vao session
@@ -197,6 +214,13 @@ class BookingController extends Controller
                     $order_detail->ghi_chu = $data['note'];
                 }
                 $order_detail->save();
+                if ($data['payment'] == "2"){
+                    $tour = Tour::find($data['tour_id']);
+                    $tour->so_cho = $tour->so_cho - count($data['travellers']);
+                    $tour->so_cho_da_ban = $tour->so_cho_da_ban + count($data['travellers']);
+                    $tour->saveOrFail();
+
+                }
                 return redirect()->route("checkout.success", ['order' => $order->id]);
             }
             return redirect()->back()->with('error', 'Đặt tour thất bại');
@@ -219,7 +243,6 @@ class BookingController extends Controller
             'name' => $customer,
             'tour' => $getNameTour->ten_tour,
         ];
-
         dispatch(new TestMailJob($messages, $email))->delay(now()->addMinutes(1));
         return Inertia::render('Booking/Success', compact('getSlug'));
     }

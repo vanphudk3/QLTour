@@ -13,8 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('dia_diems', function (Blueprint $table) {
-            $table->text('slug')->nullable();
+        Schema::table('orders', function (Blueprint $table) {
+            $table->date('ngay_khoi_hanh')->nullable()->after('gio_khoi_hanh');
         });
     }
 
@@ -25,8 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('dia_diems', function (Blueprint $table) {
-            $table->dropColumn('slug');
+        Schema::table('orders', function (Blueprint $table) {
+            //
         });
     }
 };

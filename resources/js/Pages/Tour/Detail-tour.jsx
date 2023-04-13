@@ -125,6 +125,7 @@ export default function DetailTour(props) {
                 icon: "error",
                 confirmButtonText: "OK",
             });
+            return;
         }
         if(detailTour.ngay_khoi_hanh == 'Đã khởi hành'){
             Swal.fire({
@@ -133,26 +134,34 @@ export default function DetailTour(props) {
                 icon: "error",
                 confirmButtonText: "OK",
             });
+            return;
         }
-        if(detailTour.isBooked){
+        if(detailTour.isBooked == 2){
             Swal.fire({
                 title: "OOps!",
                 text: "Bạn đã đặt tour này rồi, bạn vui lòng chọn tour khác!",
                 icon: "error",
                 confirmButtonText: "OK",
             });
-        }
-        if(detailTour.so_cho != 'Hết chỗ' && detailTour.ngay_khoi_hanh != 'Đã khởi hành' && !detailTour.isBooked){
-            router.get(route("booking"), {
-                adult: data.adult,
-                youth: data.youth,
-                child: data.child,
-                extra: data.extra,
-                timeDeparture: data.timeDeparture,
-                totalPrice: countPrice,
-                tourId: detailTour.slug,
+            return;
+        }else if (detailTour.isBooked == 1){
+            Swal.fire({
+                title: "OOps!",
+                text: "Tour bạn đặt đang trong quá trình xử lý, bạn vui lòng chọn tour khác!",
+                icon: "error",
+                confirmButtonText: "OK",
             });
+            return;
         }
+        router.get(route("booking"), {
+            adult: data.adult,
+            youth: data.youth,
+            child: data.child,
+            extra: data.extra,
+            timeDeparture: data.timeDeparture,
+            totalPrice: countPrice,
+            tourId: detailTour.slug,
+        });
     };
 
     const breadcrumbs = [

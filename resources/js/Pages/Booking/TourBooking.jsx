@@ -11,6 +11,8 @@ import {
     Stepper,
     TextField,
     Typography,
+    FormControlLabel,
+    Checkbox,
 } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { isEmpty } from "lodash";
@@ -18,7 +20,6 @@ import React, { useRef, useState, useEffect } from "react";
 import InputError from "@/Components/InputError";
 import Validate from "validator/lib/isEmpty";
 import ValidateEmail from "validator/lib/isEmail";
-
 
 const breadcrumbs = [
     <Link
@@ -63,7 +64,8 @@ const numberFormat = (value) => {
 export default function TourBooking(props) {
     const detailTour = usePage().props.detailTour;
     const error = usePage().props.error;
-
+    const login = usePage().props.login;
+    const customer = usePage().props.customer;
     const [city, setcity] = useState([]);
     const [cityId, setcityId] = useState("");
     const [district, setdistrict] = useState([]);
@@ -102,8 +104,6 @@ export default function TourBooking(props) {
         };
         getWard();
     }, [districtId]);
-
-    // console.log(ward);
 
     const arrCities = [];
 
@@ -146,7 +146,7 @@ export default function TourBooking(props) {
     }
 
     const ArrExtra = [];
-    if(!isEmpty(detailTour.extra)) {
+    if (!isEmpty(detailTour.extra)) {
         detailTour.extra.map((extra) => {
             ArrExtra.push({
                 id: extra.id,
@@ -174,7 +174,7 @@ export default function TourBooking(props) {
             age: detailTour.do_tuoi_tu,
             amoutPeople: detailTour.so_cho,
             departDate: detailTour.ngay_khoi_hanh,
-            address: detailTour.dia_chi,
+            address_tour: detailTour.dia_chi,
             image: detailTour.hinh_anh,
             category: detailTour.loai_tour,
             departLocation: detailTour.noi_khoi_hanh,
@@ -206,24 +206,69 @@ export default function TourBooking(props) {
             }
         }
         arrCount.map((count, index) => {
-            if(event.target.name === `citizen_identification_${index}`){
+            if (event.target.name === `citizen_identification_${index}`) {
                 const rex = /^[0-9\b]+$/;
                 event.target.value = event.target.value.replace(/[^0-9]/g, "");
-                if(event.target.value === '' || rex.test(event.target.value)) {
+                if (event.target.value === "" || rex.test(event.target.value)) {
                     setData(event.target.name, event.target.value);
                 }
             }
-            if(event.target.name === `phone_${index}`){
+            if (event.target.name === `phone_${index}`) {
                 const rex = /^[0-9\b]+$/;
                 event.target.value = event.target.value.replace(/[^0-9]/g, "");
-                if(event.target.value === '' || rex.test(event.target.value)) {
+                if (event.target.value === "" || rex.test(event.target.value)) {
                     setData(event.target.name, event.target.value);
                 }
             }
         });
     };
 
-    console.log(data);
+    const [inforcustomerName, setinforcustomerName] = useState({});
+    const [inforcustomerEmail, setinforcustomerEmail] = useState({});
+    const [inforcustomerPhone, setinforcustomerPhone] = useState({});
+    const [inforcustomerAddress, setinforcustomerAddress] = useState({});
+
+    const [checked, setChecked] = useState(false);
+
+    const onHandleCheckCustomer = (event) => {
+        setChecked(event.target.checked);
+        if (event.target.checked) {
+            setinforcustomerName({
+                name: customer.ten_khach_hang,
+            });
+            setinforcustomerEmail({
+                email: customer.email,
+            });
+            setinforcustomerPhone({
+                phone: customer.so_dien_thoai,
+            });
+            setinforcustomerAddress({
+                address: customer.dia_chi,
+            });
+            data.name = customer.ten_khach_hang;
+            data.email = customer.email;
+            data.phone = customer.so_dien_thoai;
+            data.address = customer.dia_chi;
+        }else{
+            setinforcustomerName({
+                name: "",
+            });
+            setinforcustomerEmail({
+                email: "",
+            });
+            setinforcustomerPhone({
+                phone: "",
+            });
+            setinforcustomerAddress({
+                address: "",
+            });
+            data.name = "";
+            data.email = "";
+            data.phone = "";
+            data.address = "";
+        }
+    };
+
 
     const [validationMsg, setValidationMsg] = useState({});
 
@@ -242,20 +287,22 @@ export default function TourBooking(props) {
         if (Validate(data.address)) {
             msg.address = "Address is required";
         }
-        if(data.phone.length < 10 || data.phone.length > 11){
+        if (data.phone.length < 10 || data.phone.length > 11) {
             msg.phone = "Phone is invalid";
         }
-        if(!ValidateEmail(data.email)){
+        if (!ValidateEmail(data.email)) {
             msg.email = "Email is invalid";
         }
-        if (Validate(data.city)) {
-            msg.city = "City is required";
-        }
-        if (Validate(data.district)) {
-            msg.district = "District is required";
-        }
-        if (Validate(data.ward)) {
-            msg.ward = "Ward is required";
+        if (!checked){
+            if (Validate(data.city)) {
+                msg.city = "City is required";
+            }
+            if (Validate(data.district)) {
+                msg.district = "District is required";
+            }
+            if (Validate(data.ward)) {
+                msg.ward = "Ward is required";
+            }
         }
 
         setValidationMsg(msg);
@@ -269,7 +316,7 @@ export default function TourBooking(props) {
         event.preventDefault();
         const isValid = validateAll();
         if (!isValid) return;
-        router.visit("/checkout",{data});
+        router.visit("/checkout", { data });
     };
 
     return (
@@ -298,7 +345,10 @@ export default function TourBooking(props) {
                         </div>
                     </div>
                 </div>
-                <div className="container-layout" style={{ paddingTop: "20px" }}>
+                <div
+                    className="container-layout"
+                    style={{ paddingTop: "20px" }}
+                >
                     <div className="layout-02">
                         <div className="row">
                             <div className="col-4 width-100 width-50">
@@ -400,9 +450,7 @@ export default function TourBooking(props) {
                                     {/* errors */}
                                     <div className="row">
                                         <div className="col-md-6">
-                                            <InputError
-                                                message={error}
-                                            />
+                                            <InputError message={error} />
                                         </div>
                                     </div>
 
@@ -426,7 +474,9 @@ export default function TourBooking(props) {
                                                     />
                                                 </div>
                                                 <InputError
-                                                    message={errors.first_name_1}
+                                                    message={
+                                                        errors.first_name_1
+                                                    }
                                                     className="mt-2"
                                                 />
                                                 <div className="w-48 mb-3">
@@ -467,9 +517,7 @@ export default function TourBooking(props) {
                                                             onHandleChange(e)
                                                         }
                                                     >
-                                                        <option>
-                                                            Age*
-                                                        </option>
+                                                        <option>Age*</option>
                                                         <option value="1">
                                                             0-12
                                                         </option>
@@ -501,24 +549,47 @@ export default function TourBooking(props) {
                                     <h3 className="heading-title">
                                         Contact Details
                                     </h3>
+                                    {(login.customer != null || login.remember != null)  && (
+                                        <div className="d-flex justify-content-start mb-4">
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        sx={{
+                                                            "&.Mui-checked": {
+                                                                color: "var(--primary)",
+                                                            },
+                                                        }}
+                                                        className="useAccountInfo"
+                                                        name="useAccountInfo"
+                                                        id="useAccountInfo"
+                                                        onChange={
+                                                            onHandleCheckCustomer
+                                                        }
+                                                    />
+                                                }
+                                                label="Use account information for contact details"
+                                            />
+                                        </div>
+                                    )}
                                     <div className="contact-form">
                                         <div className="contact-infor">
                                             <div className="contact-infor__block">
                                                 <label for="name">Name*</label>
-                                                    <input
-                                                        type="text"
-                                                        id="name"
-                                                        name="name"
-                                                        placeholder="Your Name"
-                                                        onChange={(e) =>
-                                                            onHandleChange(e)
-                                                        }
-                                                    />
-                                            </div>
-                                                <InputError
-                                                    message={validationMsg.name}
-                                                    className="mt-2"
+                                                <input
+                                                    type="text"
+                                                    id="name"
+                                                    name="name"
+                                                    value={data.name}
+                                                    placeholder="Your Name"
+                                                    onChange={(e) =>
+                                                        onHandleChange(e)
+                                                    }
                                                 />
+                                            </div>
+                                            <InputError
+                                                message={validationMsg.name}
+                                                className="mt-2"
+                                            />
                                             <div className="contact-infor__block">
                                                 <label for="email">
                                                     Email*
@@ -527,6 +598,7 @@ export default function TourBooking(props) {
                                                     type="email"
                                                     id="email"
                                                     name="email"
+                                                    value={data.email}
                                                     placeholder="Your Email"
                                                     onChange={(e) =>
                                                         onHandleChange(e)
@@ -545,16 +617,17 @@ export default function TourBooking(props) {
                                                     type="text"
                                                     id="phone"
                                                     name="phone"
+                                                    value={data.phone}
                                                     placeholder="Your Phone"
                                                     onChange={(e) =>
                                                         onHandleChange(e)
                                                     }
                                                 />
                                             </div>
-                                                <InputError
-                                                    message={validationMsg.phone}
-                                                    className="mt-2"
-                                                />
+                                            <InputError
+                                                message={validationMsg.phone}
+                                                className="mt-2"
+                                            />
                                             <div className="contact-infor__block">
                                                 <label for="address">
                                                     Address*
@@ -563,16 +636,19 @@ export default function TourBooking(props) {
                                                     type="text"
                                                     id="address"
                                                     name="address"
+                                                    value={data.address}
                                                     placeholder="Your Address"
                                                     onChange={(e) =>
                                                         onHandleChange(e)
                                                     }
                                                 />
                                             </div>
-                                                <InputError
-                                                    message={validationMsg.address}
-                                                    className="mt-2"
-                                                />
+                                            <InputError
+                                                message={validationMsg.address}
+                                                className="mt-2"
+                                            />
+                                            {!checked  && (
+                                            <>
                                             <div className="contact-infor__block">
                                                 <label for="country">
                                                     City*
@@ -604,12 +680,11 @@ export default function TourBooking(props) {
                                                         />
                                                     )}
                                                 />
-
                                             </div>
-                                                <InputError
-                                                    message={validationMsg.city}
-                                                    className="mt-2"
-                                                />
+                                            <InputError
+                                                message={validationMsg.city}
+                                                className="mt-2"
+                                            />
                                             <div className="contact-infor__block">
                                                 <label for="city">
                                                     District*
@@ -641,12 +716,11 @@ export default function TourBooking(props) {
                                                         />
                                                     )}
                                                 />
-
                                             </div>
-                                                <InputError
-                                                    message={validationMsg.district}
-                                                    className="mt-2"
-                                                />
+                                            <InputError
+                                                message={validationMsg.district}
+                                                className="mt-2"
+                                            />
                                             <div className="contact-infor__block">
                                                 <label for="city">Ward*</label>
 
@@ -673,18 +747,12 @@ export default function TourBooking(props) {
                                                     )}
                                                 />
                                             </div>
-                                                <InputError
-                                                    message={validationMsg.ward}
-                                                    className="mt-2"
-                                                />
-                                            {/* <div className="contact-infor__block">
-                                                <label for="zip">Zip</label>
-                                                <input
-                                                    type="text"
-                                                    id="zip"
-                                                    placeholder="Your Zip"
-                                                />
-                                            </div> */}
+                                            <InputError
+                                                message={validationMsg.ward}
+                                                className="mt-2"
+                                            />
+                                            </>
+                                            )}
                                             <div className="contact-infor__block">
                                                 <label for="messenger">
                                                     Messenger
@@ -702,7 +770,6 @@ export default function TourBooking(props) {
                                             </div>
                                         </div>
                                     </div>
-                                    {/* </form> */}
                                 </div>
                                 <div
                                     className="col-6 col-md-4 width-100"
@@ -714,11 +781,6 @@ export default function TourBooking(props) {
                                                 <h6 className="post-title">
                                                     Broome To The Bungle Bungles
                                                 </h6>
-                                                {/* <form
-                                                action={onHandleSubmit}
-                                                className="booking-form"
-                                                id="booking-form"
-                                            > */}
                                                 <div className="input-group">
                                                     <div className="booking-block">
                                                         <span

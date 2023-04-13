@@ -15,7 +15,6 @@ export default function Edit(props) {
     const locations = usePage().props.locations;
     const tours = usePage().props.tour;
     const detaiTour = usePage().props.detaiTour;
-    console.log(tours);
 
     const { data, setData, post, progress, processing, errors, reset } = useForm({
         code: tours[0].ky_hieu || "",
@@ -26,7 +25,7 @@ export default function Edit(props) {
         priceYoung: tours[0].gia_thieu_nien || "",
         priceChild: tours[0].gia_tre_em || "",
         description: tours[0].mo_ta || "",
-        dateStart: tours[0].ngay_khoi_hanh || "",
+        dateStart: tours[0].dateStart || "",
         amountPeople: tours[0].so_cho || "",
         amountDay: tours[0].so_ngay || "",
         amountNight: tours[0].so_dem || "",
@@ -38,8 +37,6 @@ export default function Edit(props) {
         location_general: detaiTour[0].noi_tap_chung || "",
         time_depart: detaiTour[0].gio_khoi_hanh || "",
     });
-
-    console.log(data);
 
     const onHandleChange = (event) => {
         setData(
@@ -77,6 +74,7 @@ export default function Edit(props) {
 
         });
     };
+    console.log(data);
 
     return (
         <Authenticated

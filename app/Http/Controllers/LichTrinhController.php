@@ -66,8 +66,6 @@ class LichTrinhController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
-        // dd(count($request->schedule));
         for($i = 0; $i < count($request->schedule); $i++){
             $request->validate([
                 'idTour' => 'required',
@@ -76,7 +74,7 @@ class LichTrinhController extends Controller
                 'schedule' => 'required',
             ]);
         }
-        // dd($request->all());
+
         $tour = Tour::where('ten_tour',$request->idTour)->first('id');
         for($i = 0; $i < count($request->schedule); $i++){
             $data = array(
@@ -102,10 +100,12 @@ class LichTrinhController extends Controller
         $request->validate([
             'title' => 'required',
             'content' => 'required',
+            'schedule' => 'required',
         ]);
         $id = LichTrinh::find($id);
         $id->tieu_de = $request->title;
         $id->noi_dung = $request->content;
+        $id->lich_trinh_ngay = $request->schedule;
         $id->save();
         
         return redirect()->route('schedule.index')->with('success', 'Schedule updated successfully');

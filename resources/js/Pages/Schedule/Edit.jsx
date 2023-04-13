@@ -8,7 +8,6 @@ import { TextField } from "@mui/material";
 
 export default function Edit(props) {
     const schedule = usePage().props.schedule;
-    console.log(schedule.lich_trinh_ngay);
     const { data, setData, post, processing, errors, reset } = useForm({
         title: schedule.tieu_de || "",
         content: schedule.noi_dung || "",
@@ -30,8 +29,10 @@ export default function Edit(props) {
             _method: "PUT",
             title: data.title,
             content: data.content,
+            schedule: data.schedule,
         });
     };
+
 
     return (
         <Authenticated
@@ -86,7 +87,8 @@ export default function Edit(props) {
                                 name="schedule"
                                 type="date"
                                 value={data.schedule}
-                                disabled
+                                handleChange={onHandleChange}
+                                // disabled
                             />
                         </div>
                         <PrimaryButton className="ml-4" processing={processing}>

@@ -264,7 +264,7 @@ export default function Profile(props) {
                                                 >
                                                     Order
                                                 </MenuItem>
-                                                <MenuItem
+                                                {/* <MenuItem
                                                     className="tablinks active"
                                                     onClick={(e) =>
                                                         openInforCustomer(
@@ -274,7 +274,7 @@ export default function Profile(props) {
                                                     }
                                                 >
                                                     Reviews
-                                                </MenuItem>
+                                                </MenuItem> */}
                                             </MenuList>
                                         </Paper>
                                     </div>

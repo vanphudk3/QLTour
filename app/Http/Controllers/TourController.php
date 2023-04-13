@@ -10,6 +10,7 @@ use App\Models\DiaDiem;
 use App\Models\Hinh_anh;
 use App\Models\KhachHang;
 use App\Models\LoaiTour;
+use App\Models\Order;
 use App\Models\Question;
 use App\Models\Tour;
 use Illuminate\Http\Request;
@@ -178,14 +179,12 @@ class TourController extends Controller
             $detailCmt['countCmt'] = $comments->count();
             $detailCmt['start'] = $start;
         }
-        // kiểm tra tour đã đặt chưa
-        $detailTour->isBooked = false;
         // kiểm tra mỗi tour chỉ cho phép được comment 1 lần
         $detailTour->isCommented = false;
         
         if (session()->has('customer')){
             $customer = KhachHang::find(session('customer'));
-            $order = $customer->orders()->get();
+            // $order = $customer->orders()->get();
         }
         if (isset($_COOKIE['remember'])){
             $remember = request()->cookie('remember');
@@ -193,12 +192,14 @@ class TourController extends Controller
         }
         if(session()->has('customer') || isset($_COOKIE['remember'])){
             $order = $customer->orders()->get();
-            $arrListTourFormCustomer = [];
-            foreach ($order as $key => $item) {
-                $arrListTourFormCustomer['status'][$key] = $item->trang_thai;
-                $order_detail = $item->order_detail()->get();
-                foreach ($order_detail as $item) {
-                    $arrListTourFormCustomer['TourID'][$key] = $item->tour()->first('id');
+            if ($order != null){
+                $arrListTourFormCustomer = [];
+                foreach ($order as $key => $item) {
+                    $arrListTourFormCustomer['status'][$key] = $item->trang_thai;
+                    $order_detail = $item->order_detail()->get();
+                    foreach ($order_detail as $item) {
+                        $arrListTourFormCustomer['TourID'][$key] = $item->tour()->first('id');
+                    }
                 }
             }
             // kiểm tra tour đã đặt chưa
@@ -206,12 +207,22 @@ class TourController extends Controller
                 foreach ($arrListTourFormCustomer as $key => $item) {
                     if($key == 'status'){
                         foreach ($item as $key => $value) {
-                            // lưu trạng thái đặt tour vào session
-                            
+                            // neu trang thai = 0 thi tour chua duoc dat
+                            if($value == 0){
+                                if ($arrListTourFormCustomer['TourID'][$key]->id == $detailTour->ma_tour){
+                                    $detailTour->isBooked = 0;
+                                }
+                            }
+                            // neu trang thai = 1 thi tour chua duoc duyet
+                            if($value == 1){
+                                if ($arrListTourFormCustomer['TourID'][$key]->id == $detailTour->ma_tour){
+                                    $detailTour->isBooked = 1;
+                                }
+                            }
                             // neu trang thai = 2 thi tour da dat thanh cong
                             if($value == 2){
                                 if ($arrListTourFormCustomer['TourID'][$key]->id == $detailTour->ma_tour){
-                                    $detailTour->isBooked = true;
+                                    $detailTour->isBooked = 2;
                                 }
                             }
                         }

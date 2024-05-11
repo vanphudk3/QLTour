@@ -20,10 +20,13 @@ class ExtraServiceController extends Controller
         $extra_services = extra_service::all();
         $tours = Tour::all();
         $schedule = LichTrinh::all();
+        $search = request()->query('search') ?? '';
         $extraServices = DB::table('extra_services')
             ->join('dia_diems', 'extra_services.ma_dia_diem', '=', 'dia_diems.id')
             ->select('extra_services.id', 'extra_services.name', 'extra_services.description', 'extra_services.price', 'dia_diems.ten as location')
-            ->get();
+            ->where('extra_services.name', 'like', '%' . $search . '%')
+            ->paginate(10)
+            ->withQueryString();
         foreach ($extraServices as $extraService) {
             $extraService->price = number_format($extraService->price, 0, ',', '.');
         }

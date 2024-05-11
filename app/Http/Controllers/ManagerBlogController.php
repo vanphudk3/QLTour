@@ -7,6 +7,7 @@ use App\Models\Blog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Illuminate\Support\Str;
 
 class ManagerBlogController extends Controller
 {
@@ -17,6 +18,7 @@ class ManagerBlogController extends Controller
             ->where('blogs.user_id', auth()->user()->id)
             ->orderBy('blogs.created_at', 'desc')
             ->paginate(10);
+        // dd($blogs);
         return Inertia::render('ManagerBlog/Index', compact('blogs'));
     }
 
@@ -30,16 +32,20 @@ class ManagerBlogController extends Controller
                 'title' => 'required',
                 'content' => 'required',
                 'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-                'slug' => 'required',
+                // 'slug' => 'required',
             ]);
             $blog = new Blog();
             $blog->title = $request->title;
             $blog->content = $request->content;
-            $blog->slug = $request->slug;
+            $blog->slug = Str::slug($request->title);
             if ($request->hasFile('image')) {
-                $img = $request->image;
-                $filename = $img->store('blogs', 'public');
-                $blog->image = $filename;
+                $image = $request->image;
+                // $filename = $img->store('blogs', 'public');
+                $new_path = public_path('storage/blogs');
+                $rename_img = time() . '_' . $image->getClientOriginalName();
+                $image->move($new_path, $rename_img);
+                $filePath = 'blogs/' . $rename_img;
+                $blog->image = $filePath;
             }else{
                 $blog->image = "";
             }
@@ -63,19 +69,22 @@ class ManagerBlogController extends Controller
             $request->validate([
                 'title' => 'required',
                 'content' => 'required',
-                'slug' => 'required',
+                // 'slug' => 'required',
             ]);
     
             $blog = Blog::find($id);
             $blog->title = $request->title;
             $blog->content = $request->content;
-            $blog->slug = $request->slug;
+            $blog->slug = Str::slug($request->title);
             $blog->image = $request->image;
             $blog->user_id = auth()->user()->id;
             if ($request->hasFile('image')) {
-                $img = $request->image;
-                $filename = $img->store('blogs', 'public');
-                $blog->image = $filename;
+                $image = $request->image;
+                $new_path = public_path('storage/blogs');
+                $rename_img = time() . '_' . $image->getClientOriginalName();
+                $image->move($new_path, $rename_img);
+                $filePath = 'blogs/' . $rename_img;
+                $blog->image = $filePath;
             }
             $blog->save();
             return redirect()->route('managerblog.index');

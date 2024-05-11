@@ -123,18 +123,18 @@ export default function Register() {
         if (Validate(data.email)) {
             msg.email = "Email is required";
         }
-        if(Validate(data.address)){
-            msg.address = "Address is required";
-        }
-        if(Validate(data.city)){
-            msg.city = "City is required";
-        }
-        if(Validate(data.district)){
-            msg.district = "District is required";
-        }
-        if(Validate(data.ward)){
-            msg.ward = "Ward is required";
-        }
+        // if(Validate(data.address)){
+        //     msg.address = "Address is required";
+        // }
+        // if(Validate(data.city)){
+        //     msg.city = "City is required";
+        // }
+        // if(Validate(data.district)){
+        //     msg.district = "District is required";
+        // }
+        // if(Validate(data.ward)){
+        //     msg.ward = "Ward is required";
+        // }
 
         setValidationMsg(msg);
         if (Object.keys(msg).length > 0) {
@@ -296,7 +296,7 @@ export default function Register() {
                     />
                 </div>
 
-                <div className="mt-4 mb-3">
+                {/* <div className="mt-4 mb-3">
                             <TextField
                                 id="address"
                                 name="address"
@@ -382,7 +382,7 @@ export default function Register() {
                                 message={validationMsg.ward}
                                 className="mt-2"
                             />
-                        </div>
+                        </div> */}
 
                 <div className="flex items-center mt-4 mb-3">
                     <Link

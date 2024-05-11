@@ -77,7 +77,7 @@ export default function Show(props) {
                                         <tr>
                                             <td>Date depart:</td>
                                             <td className="pd-l-25">
-                                                {order.tour.ngay_khoi_hanh}
+                                                {order.ngay_khoi_hanh}
                                             </td>
                                         </tr>
                                         <tr>
@@ -135,7 +135,7 @@ export default function Show(props) {
                                 </h5>
                             </div>
                         </div>
-                        {order.trang_thai === "1" && (
+                        {/* {order.trang_thai === "1" && (
                         <div
                             className="row shadow"
                             style={{ marginTop: "25px" }}
@@ -146,14 +146,8 @@ export default function Show(props) {
                             >
                                 Browse
                             </Link>
-                            {/* <Button
-                                variant="contained"
-                                color="primary"
-                            >
-                                Browse
-                            </Button> */}
                         </div>
-                        )}
+                        )} */}
                     </div>
                 </div>
             </div>

@@ -4,20 +4,6 @@ import { Breadcrumbs, Typography } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import Pagination from "@/Components/Pagination";
 
-const breadcrumbs = [
-    <Link
-        underline="hover"
-        key="1"
-        color="inherit"
-        href={route("welcome")}
-        style={{ textDecoration: "none", color: "white" }}
-    >
-        Home
-    </Link>,
-    <Typography key="2" color="text.primary" style={{ color: "white" }}>
-        Blog
-    </Typography>,
-];
 
 const Trancate = (str, n) => {
     return str?.length > n ? str.substr(0, n - 1) + "..." : str;
@@ -27,6 +13,22 @@ export default function Blog(props) {
     const specialBlogs = usePage().props.specialBlogs;
     const forcusBlogs = usePage().props.forcusBlogs;
     const blogs = usePage().props.blogs.data;
+    const lang = usePage().props.lang;
+    const _lang = usePage().props._lang;
+    const breadcrumbs = [
+        <Link
+            underline="hover"
+            key="1"
+            color="inherit"
+            href={route("welcome",{ lang: _lang })}
+            style={{ textDecoration: "none", color: "white" }}
+        >
+            {lang['Home']}
+        </Link>,
+        <Typography key="2" color="text.primary" style={{ color: "white" }}>
+            {lang['Blog']}
+        </Typography>,
+    ];
     return (
         <>
             <Head title="Blog" />
@@ -38,7 +40,7 @@ export default function Blog(props) {
                         style={{ background: "content-box" }}
                     >
                         <div className="breadcrumb-main">
-                            <h1 className="zourney-title"> Tours Booking</h1>
+                            <h1 className="zourney-title"> {lang['Tours Booking']}</h1>
                             <div className="flex justify-content-center">
                                 <Breadcrumbs
                                     separator={
@@ -76,21 +78,21 @@ export default function Blog(props) {
                                                     <Link
                                                         href={route("welcome")}
                                                     >
-                                                        Travel
+                                                        {lang['Travel']}
                                                     </Link>
                                                 </div>
                                                 <div className="posted-on">
                                                     {specialBlogs.formartDate}
                                                 </div>
                                                 <div className="post-author">
-                                                    By {specialBlogs.nameUser}
+                                                    {lang['By']} {specialBlogs.nameUser}
                                                 </div>
                                             </div>
                                             <h3 className="title">
                                                 <Link
                                                     href={route(
                                                         "blog.show",
-                                                        specialBlogs.slug
+                                                        {slug: specialBlogs.slug, lang: _lang}
                                                     )}
                                                 >
                                                     {specialBlogs.title}
@@ -111,11 +113,11 @@ export default function Blog(props) {
                                                 <Link
                                                     href={route(
                                                         "blog.show",
-                                                        specialBlogs.slug
+                                                        {slug: specialBlogs.slug, lang: _lang}
                                                     )}
                                                     className="more-link"
                                                 >
-                                                    Read More{" "}
+                                                    {lang['Read More']}{" "}
                                                     <i className="fa-solid fa-arrow-right"></i>
                                                 </Link>
                                             </div>
@@ -140,18 +142,19 @@ export default function Blog(props) {
                                                             {item.formartDate}
                                                         </div>
                                                         <div className="post-author">
-                                                            By {item.nameUser}
+                                                            {lang['By']} {item.nameUser}
                                                         </div>
                                                     </div>
                                                     <h3 className="title">
-                                                        <Link
-                                                            href={route(
-                                                                "blog.show",
-                                                                item.slug
-                                                            )}
-                                                        >
-                                                            {item.title}
-                                                        </Link>
+                                                    <Link
+    href={route(
+        "blog.show",
+        { slug: item.slug, lang: _lang } // Thêm lang vào object options thứ hai
+    )}
+>
+    {item.title}
+</Link>
+
                                                     </h3>
                                                 </div>
                                             </div>
@@ -182,7 +185,7 @@ export default function Blog(props) {
                                                     </div>
                                                     <div className="post-author">
                                                         <a href="#">
-                                                            By {item.nameUser}
+                                                            {lang['By']} {item.nameUser}
                                                         </a>
                                                     </div>
                                                 </div>
@@ -190,7 +193,7 @@ export default function Blog(props) {
                                                     <Link
                                                         href={route(
                                                             "blog.show",
-                                                            item.slug
+                                                            {slug:item.slug,lang: _lang}
                                                         )}
                                                     >
                                                         {item.title}
@@ -211,11 +214,12 @@ export default function Blog(props) {
                                                     <Link
                                                         href={route(
                                                             "blog.show",
-                                                            item.slug
+                                                            item.slug,
+                                                            {lang: _lang}
                                                         )}
                                                         className="more-link"
                                                     >
-                                                        Read More{" "}
+                                                        {lang['Read More']}{" "}
                                                         <i className="fa-solid fa-arrow-right"></i>
                                                     </Link>
                                                 </div>

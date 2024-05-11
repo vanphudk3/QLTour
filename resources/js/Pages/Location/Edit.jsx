@@ -7,6 +7,11 @@ import InputError from "@/Components/InputError";
 import PrimaryButton from "@/Components/PrimaryButton";
 import { useForm, usePage, router } from "@inertiajs/react";
 import Textarea from "@/Components/Bootstrap/Textarea";
+import Swal from "sweetalert2";
+import { isEmpty } from "lodash";
+import Validate from "validator/lib/isEmpty";
+import { useEffect, useState } from "react";
+
 
 export default function Edit(props) {
 
@@ -60,9 +65,32 @@ export default function Edit(props) {
         });
     };
 
+    const [validationMsg, setValidationMsg] = useState({});
+
+    const validateAll = () => {
+        const msg = {};
+        if (Validate(data.name)) {
+            msg.name = "Name is required";
+        }
+        if(Validate(data.address)){
+            msg.address = "Address is required";
+        }
+
+        setValidationMsg(msg);
+        if (Object.keys(msg).length > 0) {
+            return false;
+        }
+        return true;
+    };
+
 
     const submit = (e) => {
+
         e.preventDefault();
+        const isValid = validateAll();
+        if (!isValid) {
+            return;
+        }
         router.post(`/auth/location/${location.id}`, {
             _method: 'PUT',
             name: data.name,
@@ -99,11 +127,8 @@ export default function Edit(props) {
                                 handleChange={onHandleChange}
                                 required
                             />
-
-                            <InputError
-                                message={errors.name}
-                                className="mt-2"
-                            />
+                    <InputError message={validationMsg.name} className="mt-2" />
+                    <InputError message={errors.name} className="mt-2" />
                         </div>
 
                         <div className="mt-4 mb-3">
@@ -122,10 +147,8 @@ export default function Edit(props) {
                                 handleChange={onHandleChange}
                             />
 
-                            <InputError
-                                message={errors.address}
-                                className="mt-2"
-                            />
+<InputError message={validationMsg.address} className="mt-2" />
+                    <InputError message={errors.address} className="mt-2" />
                         </div>
 
                         <div className="mt-4 mb-3">

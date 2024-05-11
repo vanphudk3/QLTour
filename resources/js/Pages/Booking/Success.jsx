@@ -6,7 +6,8 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { Alert, Snackbar } from "@mui/material";
 import { useState } from "react";
 export default function Success(props) {
-
+    const lang = usePage().props.lang;
+    const _lang = usePage().props._lang;
     const getSlug = usePage().props.getSlug;
 
     const breadcrumbs = [
@@ -17,7 +18,7 @@ export default function Success(props) {
             href={route("welcome")}
             style={{ textDecoration: "none", color: "white" }}
         >
-            Home
+            {lang['Home']}
         </Link>,
         <Link
             underline="hover"
@@ -26,7 +27,7 @@ export default function Success(props) {
             href={route("tour")}
             style={{ textDecoration: "none", color: "white" }}
         >
-            Tour list
+            {lang['Tour list']}
         </Link>,
         <Link
             underline="hover"
@@ -35,16 +36,16 @@ export default function Success(props) {
             href={route("tour.show", getSlug)}
             style={{ textDecoration: "none", color: "white" }}
         >
-            Tour Details
+            {lang['Tour Details']}
         </Link>,
         <Typography key="4" color="text.primary" style={{ color: "white" }}>
-            Tour Booking
+            {lang['Tour Booking']}
         </Typography>,
             <Typography key="5" color="text.primary" style={{ color: "white" }}>
-            Checkout
+            {lang['Checkout']}
         </Typography>,
             <Typography key="6" color="text.primary" style={{ color: "white" }}>
-            Success
+            {lang['Success']}
         </Typography>,
     ];
     return (
@@ -58,7 +59,7 @@ export default function Success(props) {
                         style={{ background: "content-box" }}
                     >
                         <div className="breadcrumb-main">
-                            <h1 className="zourney-title"> Tours Booking</h1>
+                            <h1 className="zourney-title"> {lang['Tours Booking']}</h1>
                             <Breadcrumbs
                                 separator={
                                     <NavigateNextIcon
@@ -81,14 +82,13 @@ export default function Success(props) {
                                     {/* <i className="fa fa-check"></i> */}
                                     <CheckCircleOutlineIcon style={{ fontSize: 100 }} />
                                 </div>
-                                <h2 className="flex justify-content-center">Booking Success</h2>
+                                <h2 className="flex justify-content-center">{lang['Booking Success']}</h2>
                                 <p className="flex justify-content-center">
-                                    Thank you for booking with us. We will contact
-                                    you soon.
+                                    {lang['Thank you for booking with us. We will contact you soon.']}
                                 </p>
                                 <div className="flex justify-content-center">
-                                    <Link href={route('welcome')} className="btn btn-primary">
-                                        Back to Home
+                                    <Link href={route('welcome', { lang: _lang })} className="btn btn-primary">
+                                        {lang['Back to Home']}
                                     </Link>
                                 </div>
                             </div>

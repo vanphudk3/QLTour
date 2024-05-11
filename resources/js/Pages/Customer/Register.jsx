@@ -15,21 +15,7 @@ import Validate from "validator/lib/isEmpty";
 import ValidatePassword from "validator/lib/isLength";
 import InputError from "@/Components/InputError";
 import PrimaryButton from "@/Components/PrimaryButton";
-
-const breadcrumbs = [
-    <Link
-        underline="hover"
-        key="1"
-        color="inherit"
-        href={route("welcome")}
-        style={{ textDecoration: "none", color: "white" }}
-    >
-        Home
-    </Link>,
-    <Typography key="2" color="text.primary" style={{ color: "white" }}>
-        Register
-    </Typography>,
-];
+import Alert from '@mui/material/Alert';
 
 const Day = [
     { label: "1", value: 1 },
@@ -121,6 +107,8 @@ const Year = [
 
 export default function RegisterMember(props) {
     const register = usePage().props.register;
+    const lang = usePage().props.lang;
+    const _lang = usePage().props._lang;
     const [city, setcity] = useState([]);
     const [cityId, setcityId] = useState("");
     const [district, setdistrict] = useState([]);
@@ -130,10 +118,11 @@ export default function RegisterMember(props) {
     useEffect(() => {
         const getCity = async () => {
             const rescity = await fetch(
-                `https://provinces.open-api.vn/api/?depth=2`
+                `https://vapi.vnappmob.com/api/province`
             );
             const datacity = await rescity.json();
-            setcity(await datacity);
+            // console.log(datacity);
+            setcity(await datacity.results);
         };
         getCity();
     }, []);
@@ -141,10 +130,10 @@ export default function RegisterMember(props) {
     useEffect(() => {
         const getDistrict = async () => {
             const resdistrict = await fetch(
-                `https://provinces.open-api.vn/api/p/${cityId.id}?depth=2`
+                `https://vapi.vnappmob.com/api/province/district/${cityId.id}`
             );
             const datadistrict = await resdistrict.json();
-            setdistrict(await datadistrict.districts);
+            setdistrict(await datadistrict.results);
         };
         getDistrict();
     }, [cityId]);
@@ -152,22 +141,20 @@ export default function RegisterMember(props) {
     useEffect(() => {
         const getWard = async () => {
             const resward = await fetch(
-                `https://provinces.open-api.vn/api/d/${districtId.id}?depth=2`
+                `https://vapi.vnappmob.com/api/province/ward/${districtId.id}`
             );
             const dataward = await resward.json();
-            setward(await dataward.wards);
+            setward(await dataward.results);
         };
         getWard();
     }, [districtId]);
-
-    // console.log(ward);
 
     const arrCities = [];
 
     city.map((city) => {
         arrCities.push({
-            label: city.name,
-            idCity: city.code,
+            label: city.province_name,
+            idCity: city.province_id,
         });
     });
 
@@ -175,8 +162,8 @@ export default function RegisterMember(props) {
     if (!isEmpty(district)) {
         district.map((district) => {
             arrDistricts.push({
-                label: district.name,
-                idDistrict: district.code,
+                label: district.district_name,
+                idDistrict: district.district_id,
             });
         });
     }
@@ -185,8 +172,8 @@ export default function RegisterMember(props) {
     if (!isEmpty(ward)) {
         ward.map((ward) => {
             arrWards.push({
-                label: ward.name,
-                idWard: ward.id,
+                label: ward.ward_name,
+                idWard: ward.ward_id,
             });
         });
     }
@@ -209,6 +196,7 @@ export default function RegisterMember(props) {
     });
 
     // console.log(data);
+    console.log(errors);
 
     useEffect(() => {
         return () => {
@@ -312,19 +300,6 @@ export default function RegisterMember(props) {
                     >
                         <div className="breadcrumb-main">
                             <h1 className="zourney-title"> Register</h1>
-                            <div className="flex justify-content-center">
-                                <Breadcrumbs
-                                    separator={
-                                        <NavigateNextIcon
-                                            fontSize="small"
-                                            style={{ color: "white" }}
-                                        />
-                                    }
-                                    aria-label="breadcrumb"
-                                >
-                                    {breadcrumbs}
-                                </Breadcrumbs>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -353,9 +328,9 @@ export default function RegisterMember(props) {
                                                     <h3 className="heading-title">
                                                         Register
                                                     </h3>
-                                                    {!isEmpty(register.error) && (
+                                                    {!isEmpty(errors) && (
                                                         <Alert variant="outlined" severity="error">
-                                                            {register.error}
+                                                            {errors.error_register}
                                                       </Alert>
                                                     )}
                                                     <div className="row">
@@ -814,7 +789,7 @@ export default function RegisterMember(props) {
                                                                 processing
                                                             }
                                                         >
-                                                            Register
+                                                            REGISTER
                                                         </PrimaryButton>
                                                     </div>
                                                 </div>

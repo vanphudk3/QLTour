@@ -8,19 +8,21 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 export default function Destination(props) {
     const destinations1 = usePage().props.destinations1;
     const destinations2 = usePage().props.destinations2;
+    const lang = usePage().props.lang;
+    const _lang = usePage().props._lang;
 
     const breadcrumbs = [
         <Link
             underline="hover"
             key="1"
             color="inherit"
-            href={route("welcome")}
+            href={route("welcome-locale", { locale: _lang })}
             style={{ textDecoration: "none", color: "white" }}
         >
-            Home
+            {lang['Home']}
         </Link>,
         <Typography key="2" color="text.primary" style={{ color: "white" }}>
-            Destination
+            {lang['Destination']}
         </Typography>,
     ];
 
@@ -35,7 +37,7 @@ export default function Destination(props) {
                         style={{ background: "content-box" }}
                     >
                         <div className="breadcrumb-main">
-                            <h1 className="zourney-title"> Tours Booking</h1>
+                            <h1 className="zourney-title"> {lang['Tours Booking']}</h1>
                             <div className="flex justify-content-center">
                                 <Breadcrumbs
                                     separator={
@@ -61,10 +63,10 @@ export default function Destination(props) {
                             <div className="container-explore">
                                 <Explore>
                                     <p className="sectitle">
-                                        CHOOSE YOUR EXPERIENCE
+                                        {lang['CHOOSE YOUR EXPERIENCE']}
                                     </p>
                                     <h2 className="subtitle">
-                                        Top Attractions Destinations
+                                        {lang['Top Attractions Destinations']}
                                     </h2>
                                 </Explore>
                             </div>
@@ -74,7 +76,7 @@ export default function Destination(props) {
                                 {destinations1.map((destination) => (
                                     <div className="location-item">
                                         <NavLinkB
-                                            href={`/destination/${destination.slug}`}
+                                            href={`/destination?slug=${destination.slug}?lang=${_lang}`}
                                             aria-current="page"
                                         >
                                             <div className="img-location">
@@ -117,7 +119,7 @@ export default function Destination(props) {
                                 {destinations2.map((destination) => (
                                     <div className="location-item">
                                         <NavLinkB
-                                            href={`/destination/${destination.slug}`}
+                                            href={`/destination/${destination.slug}?lang=${_lang}`}
                                             aria-current="page"
                                         >
                                             <div className="img-location">

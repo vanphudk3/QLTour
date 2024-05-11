@@ -40,17 +40,17 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $getAddress = $request->address;
-        $getCity = $request->city;
-        $getdistrict = $request->district;
-        $getWard = $request->ward;
+        // $getAddress = $request->address;
+        // $getCity = $request->city;
+        // $getdistrict = $request->district;
+        // $getWard = $request->ward;
 
-        $getAddress = str_replace(' ', ' ', $getAddress);
-        $getCity = str_replace(' ', ' ', $getCity);
-        $getdistrict = str_replace(' ', ' ', $getdistrict);
-        $getWard = str_replace(' ', ' ', $getWard);
+        // $getAddress = str_replace(' ', ' ', $getAddress);
+        // $getCity = str_replace(' ', ' ', $getCity);
+        // $getdistrict = str_replace(' ', ' ', $getdistrict);
+        // $getWard = str_replace(' ', ' ', $getWard);
 
-        $getAddress = $getAddress . ', ' . $getWard . ', ' . $getdistrict . ', ' . $getCity;
+        // $getAddress = $getAddress . ', ' . $getWard . ', ' . $getdistrict . ', ' . $getCity;
 
         $request->merge(['role' => 'employee']);
         $user = User::create([
@@ -58,8 +58,8 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
-            'address' => $getAddress,
-            'role' => $request->role,
+            // 'address' => $getAddress,
+            // 'role' => $request->role,
         ]);
 
         event(new Registered($user));
@@ -68,7 +68,8 @@ class RegisteredUserController extends Controller
         if($user->role == 'admin'){
             return Inertia::render('Admin/Dashboard');
         }else{
-            return redirect(RouteServiceProvider::HOME);
+            // return redirect(RouteServiceProvider::HOME);
+            return Inertia::render('Auth/Login');
         }
     }
 }

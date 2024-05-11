@@ -14,8 +14,11 @@ use Inertia\Inertia;
 
 class DestinationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $lang = $request->query('lang')??'en';
+        $_lang = $lang;
+        $lang = $this->getLanguage($lang);
         $destinations1 = DB::table('tour_diadiems')
             ->join('dia_diems', 'tour_diadiems.ma_dia_diem', '=', 'dia_diems.id')
             ->join('hinh_anhs', 'dia_diems.id', '=', 'hinh_anhs.ma_dia_diem')
@@ -43,11 +46,14 @@ class DestinationController extends Controller
         foreach($destinations2 as $destination){
             $destination->ten = Str::substrReplace($destination->ten, '', 0, 10);
         }
-        return Inertia::render('Destination', compact('destinations1', 'destinations2'));
+        return Inertia::render('Destination', compact('destinations1', 'destinations2', 'lang', '_lang'));
     }
 
-    public function show($slug){
+    public function show(Request $request,$slug){
         // dd($slug);
+        $lang = $request->query('lang');
+        $_lang = $lang;
+        $lang = $this->getLanguage($lang);
         $categories = LoaiTour::select('ten', 'id')->get();
         $locations = DiaDiem::select('ten', 'id', 'slug')->get();
         foreach($locations as $destination){
@@ -96,9 +102,9 @@ class DestinationController extends Controller
         ->groupBy('dia_diems.id', 'dia_diems.dia_chi', 'tours.id', 'tours.slug', 'tours.ten_tour', 'tours.gia_nguoi_lon', 'tours.so_ngay', 'tours.ngay_khoi_hanh', 'hinh_anhs.ten')
         ->paginate(6)
         ->withQueryString();
-        foreach ($tours as $tour) {
-            $tour->gia_nguoi_lon = number_format($tour->gia_nguoi_lon, 0, ',', '.');
-        }
+        // foreach ($tours as $tour) {
+        //     $tour->gia_nguoi_lon = number_format($tour->gia_nguoi_lon, 0, ',', '.');
+        // }
         $lastdealsTours = DB::table('tour_diadiems')
             ->join('dia_diems', 'tour_diadiems.ma_dia_diem', '=', 'dia_diems.id')
             ->join('hinh_anhs', 'dia_diems.id', '=', 'hinh_anhs.ma_dia_diem')
@@ -110,9 +116,9 @@ class DestinationController extends Controller
             ->limit(3)
             ->get();
 
-        foreach ($lastdealsTours as $lastdealsTour) {
-            $lastdealsTour->gia_nguoi_lon = number_format($lastdealsTour->gia_nguoi_lon, 0, ',', '.');
-        }
+        // foreach ($lastdealsTours as $lastdealsTour) {
+        //     $lastdealsTour->gia_nguoi_lon = number_format($lastdealsTour->gia_nguoi_lon, 0, ',', '.');
+        // }
 
         $price = request('price');
         $category = request('category');
@@ -147,7 +153,25 @@ class DestinationController extends Controller
         ->get();
         $questions = Question::all();
 
-        return Inertia::render('Destination/Show',  compact('locations', 'categories', 'tours', 'countTour', 'category', 'price', 'budget', 'departures', 'depart', 'location', 'lastdealsTours', 'questions', 'destination'));
+        return Inertia::render('Destination/Show',  compact('locations', 'categories', 'tours', 'countTour', 'category', 'price', 'budget', 'departures', 'depart', 'location', 'lastdealsTours', 'questions', 'destination', 'lang', '_lang'));
+    }
+
+    public function getLanguage($lang)
+    {
+        $this->language = $lang??'en';
+    
+        // dd($this->language);
+        $langFilePath = base_path('lang/' . $this->language . '/home.php');
+        if (file_exists($langFilePath)) {
+            $lang = include $langFilePath;
+            $data = array();
+            foreach ($lang as $key => $value) {
+                $data[$key] = $value;
+            }
+            return $data;
+        } else {
+            return array();
+        }
     }
 }
 

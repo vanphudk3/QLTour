@@ -125,22 +125,6 @@ export default function Edit(props) {
                             />
                         </div>
                         <div className="mb-3">
-                            <InputLabel forInput="slug" value="Slug*" />
-
-                            <TextInput
-                                id="slug"
-                                name="slug"
-                                value={slugs}
-                                className="mt-1 block w-full"
-                                autoComplete="slug"
-                                handleChange={onHandleChange}
-                            />
-                            <InputError
-                                message={errors.slug || validationMsg.slug}
-                                className="mt-2"
-                            />
-                        </div>
-                        <div className="mb-3">
                             <InputLabel forInput="image" value="Image*" />
                             <br/>
                             <TextInput

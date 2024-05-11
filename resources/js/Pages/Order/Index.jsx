@@ -3,9 +3,9 @@ import Authenticated from "@/Layouts/AuthenticatedLayout";
 import { Head, router } from "@inertiajs/react";
 import { Link, usePage } from "@inertiajs/react";
 import { Alert, AlertTitle, Chip } from "@mui/material";
-import { isEmpty } from "lodash";
+import { isEmpty, set } from "lodash";
 import Swal from "sweetalert2";
-
+import { useState } from "react";
 const numberFormat = (value) => {
     return new Intl.NumberFormat("vi-VN", {
         style: "currency",
@@ -21,6 +21,8 @@ export default function Order(props) {
     const user = usePage().props;
     const data_user = user.auth.user;
     const orders = usePage().props.orders.data;
+    const error = usePage().props.error;
+    const [msgerror, setMsgerror] = useState("");
     const msg = usePage().props.msgorder;
     const deleteOrder = (id) => {
         Swal.fire({
@@ -39,6 +41,29 @@ export default function Order(props) {
                 Swal.fire("Deleted!", "Your file has been deleted.", "success");
             }
         });
+    };
+
+    const handleClick = (id) => (e) => {
+        e.preventDefault();
+        const value = e.target.getAttribute("data-value");
+        console.log(value);
+        router.put(`/auth/order/${id}`, {
+            _method: "PUT",
+            trang_thai: value,
+        });
+
+        // if (error) {
+            
+        //     Swal.fire({
+        //         icon: "error",
+        //         title: error,
+        //         showConfirmButton: false,
+        //         timer: 1500,
+        //         toast: true,
+        //         position: "top-right",
+        //     });
+        //     setMsgerror("");
+        // }
     };
 
     return (
@@ -84,12 +109,31 @@ export default function Order(props) {
                                         <td>{order.so_dien_thoai}</td>
                                         <td>{Trancate(order.dia_chi, 30)}</td>
                                         <td>{numberFormat(order.tong_tien)}</td>
-                                        <td>
+                                        {/* <td>
                                             <Chip
                                                 label={order.trang_thai}
                                                 // onClick={handleClick}
                                             />
-                                        </td>
+                                        </td> */}
+<td>
+    {order.trang_thai === "Complete" ? (
+        <Chip
+            label={order.trang_thai}
+            // onClick={handleClick}
+        />
+    ) : (
+    <div class="btn-group">
+  <button class="btn btn-secondary btn-sm dropdown-toggle "  type="button" data-bs-toggle="dropdown" aria-expanded="false" disabled={order.trang_thai === "Complete"}>
+    {order.trang_thai}
+  </button>
+  <ul class="dropdown-menu">
+    {/* <li><a class="dropdown-item" href="#" onClick={handleClick(order.id)} data-value="1">Pending</a></li> */}
+    <li><a class="dropdown-item" href="#" onClick={handleClick(order.id)} data-value="2">Success</a></li>
+    <li><a class="dropdown-item" href="#" onClick={handleClick(order.id)} data-value="0">Cancel</a></li>
+  </ul>
+</div>
+    )}
+                                            </td>
                                         <td>{order.created_at}</td>
                                         <td>
                                             {(data_user.role === "admin" || data_user.role === "manager") && (
@@ -103,6 +147,7 @@ export default function Order(props) {
                                                     >
                                                         Detail
                                                     </Link>
+                                                    {order.trang_thai !== "Complete" && (
                                                     <Link
                                                         class="btn btn-danger"
                                                         // method="delete"
@@ -116,6 +161,7 @@ export default function Order(props) {
                                                     >
                                                         Delete
                                                     </Link>
+                                                    )}
                                                 </>
                                             )}
                                         </td>

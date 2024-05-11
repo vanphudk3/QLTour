@@ -17,6 +17,8 @@ const Item = styled(Paper)(({ theme }) => ({
 export default function DetailBlog(props) {
     const blog = usePage().props.blog;
     const relatedBlogs = usePage().props.relatedBlogs;
+    const _lang = usePage().props._lang;
+    const lang  = usePage().props.lang;
     const breadcrumbs = [
         <Link
             underline="hover"
@@ -122,7 +124,7 @@ export default function DetailBlog(props) {
                             <Grid xs={4}>
                                 <div className="content-detail">
                                     <h3 className="Heading-title text-center">
-                                        Tin tức liên quan
+                                        {lang['blog_relate']}
                                     </h3>
                                     <ul className="align-justify">
                                         {relatedBlogs.map((blog) => (
@@ -130,7 +132,7 @@ export default function DetailBlog(props) {
                                                 <Link
                                                     href={route(
                                                         "blog.show",
-                                                        blog.slug
+                                                        {slug:blog.slug,lang:_lang}
                                                     )}
                                                     className="text-decor-none cl-black text-capitalize font-weight-bold d-block mb-2 cl-primary-hover"
                                                 >

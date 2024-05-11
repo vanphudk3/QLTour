@@ -37,4 +37,16 @@ class Order extends Model
     public function order_detail(){
         return $this->hasMany('App\Models\Order_detail', 'order_id', 'id');
     }
+
+    public function tour(){
+        return $this->belongsTo('App\Models\Tour', 'ma_tour', 'id');
+    }
+
+    public function ma_giam_gia(){
+        return $this->belongsTo('App\Models\KhuyenMai', 'ma_giam_gia', 'id');
+    }
+
+    public function tour_ngay(){
+        return $this->belongsTo('App\Models\Tour_Ngay', 'ma_tour_ngay', 'id');
+    }
 }

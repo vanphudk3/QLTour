@@ -32,8 +32,21 @@ class testMail extends Mailable
      */
     public function envelope()
     {
+        if ($this->data['action'] == 'booking')
+            $subject = 'Booking Tour';
+        elseif ($this->data['action'] == 'cancel')
+            $subject = 'Cancel Booking Tour';
+        elseif ($this->data['action'] == 'waitlist_accept')
+            $subject = 'Accept Waitlist Tour';
+        elseif ($this->data['action'] == 'register')
+            $subject = 'Register member';
+        elseif ($this->data['action'] == 'wishlist')
+            $subject = 'Wishlist Tour';
+        else{
+            $subject = 'Zourner - Travel';
+        }
         return new Envelope(
-            subject: 'Booking Tour',
+            subject: $subject,
         );
     }
 

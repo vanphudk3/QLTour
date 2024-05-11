@@ -29,9 +29,9 @@ export default function Blog(props) {
         <Authenticated
             auth={props.auth}
             errors={props.errors}
-            header={<h2 className="heading-title">Order</h2>}
+            header={<h2 className="heading-title">Blog</h2>}
         >
-            <Head title="Order" />
+            <Head title="Blog" />
             
             <div className="w-100">
                 <div className="ml-50 mr-50">

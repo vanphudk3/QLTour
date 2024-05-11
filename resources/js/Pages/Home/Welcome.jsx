@@ -18,7 +18,7 @@ import "swiper/css/navigation";
 import { Navigation } from "swiper";
 import InputSearchDate from "@/Components/Search/InputSearchDate";
 import Select from "@/Components/Bootstrap/Select";
-import { now } from "lodash";
+import { isSet, now } from "lodash";
 
 const Trancate = (str, n) => {
     return str?.length > n ? str.substr(0, n - 1) + "..." : str;
@@ -33,7 +33,6 @@ export default function Welcome(props) {
     const today = new Date().toISOString().split("T")[0];
     const tours = usePage().props;
     const data_tours = tours.tours;
-    console.log(data_tours);
     const locations = usePage().props.locations;
     const categories = usePage().props.categories;
     // console.log(locations);
@@ -41,14 +40,16 @@ export default function Welcome(props) {
     const destinations2 = usePage().props.destinations2;
 
     const lastMinuteTours = usePage().props.lastMinuteTours;
+    console.log(lastMinuteTours);
+    const lang = usePage().props.lang;
+    let _lang = usePage().props._lang;
+    // console.log(lang);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         date: today,
         where: 0,
         type: 0,
     });
-
-    console.log(data);
 
     const onHandleChange = (event) => {
         setData(
@@ -60,7 +61,7 @@ export default function Welcome(props) {
         if (event.target.name === "type") {
             router.get(
                 route("welcome"),
-                { type: event.target.value },
+                { type: event.target.value, lang: _lang },
                 { preserveState: true }
             );
         }
@@ -70,7 +71,7 @@ export default function Welcome(props) {
         e.preventDefault();
         router.get(
             route("tour"),
-            { type: data.type, where: data.where, date: data.date },
+            { type: data.type, where: data.where, date: data.date, lang: _lang },
             { preserveState: true }
         );
     };
@@ -88,7 +89,7 @@ export default function Welcome(props) {
                                 <div className="col">
                                     <div className="type-search-item">
                                         <i className="fa-regular fa-flag"></i>
-                                        <span>Type</span>
+                                        <span>{ lang['Type'] }</span>
                                         <Select
                                             name="type"
                                             id="type"
@@ -97,7 +98,7 @@ export default function Welcome(props) {
                                             handleChange={onHandleChange}
                                         >
                                             <option value="0">
-                                                --All type--
+                                                -- { lang['All Type'] } --
                                             </option>
                                             {categories.map((category) => (
                                                 <option value={category.id}>
@@ -110,7 +111,7 @@ export default function Welcome(props) {
                                 <div className="col">
                                     <div className="type-search-item">
                                         <i className="fa-regular fa-paper-plane"></i>
-                                        <span>Where</span>
+                                        <span>{lang['Where']}</span>
                                         <Select
                                             name="where"
                                             id="where"
@@ -119,7 +120,7 @@ export default function Welcome(props) {
                                             handleChange={onHandleChange}
                                         >
                                             <option value="0">
-                                                --All where--
+                                                -- {lang['All where']} --
                                             </option>
                                             {locations.map((location) => (
                                                 <option value={location.id}>
@@ -132,7 +133,7 @@ export default function Welcome(props) {
                                 <div className="col">
                                     <div className="type-search-item">
                                         <i className="fa-regular fa-calendar-days"></i>
-                                        <span>Date</span>
+                                        <span>{lang['Date']}</span>
                                         <InputSearchDate
                                             name="date"
                                             id="datepicker"
@@ -145,7 +146,7 @@ export default function Welcome(props) {
                                 </div>
                                 <div className="col">
                                     <button className="btn-search">
-                                        Search
+                                        {lang['Search']}
                                     </button>
                                 </div>
                             </div>
@@ -154,9 +155,9 @@ export default function Welcome(props) {
                     <div className="explore">
                         <div className="container-explore">
                             <Explore>
-                                <p className="sectitle">EXPLORE OUR TOURS</p>
+                                <p className="sectitle">{lang['EXPLORE OUR TOURS']}</p>
                                 <h2 className="subtitle">
-                                    New and Most Popular Tours
+                                    {lang['lang_explore_our_tours']}
                                 </h2>
                             </Explore>
                         </div>
@@ -179,7 +180,7 @@ export default function Welcome(props) {
                                                 </div>
                                                 <div className="title-slider">
                                                     <div className="price-tour">
-                                                        <label>From</label>
+                                                        <label>{lang['From']}</label>
                                                         <span>
                                                             {
                                                                 tours.gia_nguoi_lon
@@ -190,7 +191,7 @@ export default function Welcome(props) {
                                                     <div className="content-slider">
                                                         <p>Kathmandu, Nepal</p>
                                                         <NavLinkB
-                                                            href={`/tour/${tours.slug}`}
+                                                            href={`/tour/${tours.slug}?lang=${_lang}`}
                                                             aria-current="page"
                                                         >
                                                             {tours.ten_tour}
@@ -202,7 +203,7 @@ export default function Welcome(props) {
                                                                     {
                                                                         tours.so_ngay
                                                                     }{" "}
-                                                                    days
+                                                                    {lang['days']}
                                                                 </span>
                                                             </li>
                                                             <li>
@@ -221,10 +222,10 @@ export default function Welcome(props) {
                                                         </ul>
                                                         <div className="read-more-item">
                                                             <NavLinkB
-                                                                href={`/tour/${tours.slug}`}
+                                                                href={`/tour/${tours.slug}?lang=${_lang}`}
                                                                 aria-current="page"
                                                             >
-                                                                More Information{" "}
+                                                                {lang['More Infomation']}{" "}
                                                                 <i className="fa-solid fa-arrow-right"></i>
                                                             </NavLinkB>
                                                         </div>
@@ -243,34 +244,30 @@ export default function Welcome(props) {
                             <div className="row">
                                 <div className="col">
                                     <i className="fa-solid fa-suitcase-rolling"></i>
-                                    <h6>Memorable Experiences</h6>
+                                    <h6>{lang['Memorable Experiences']}</h6>
                                     <p>
-                                        Browse and book tours and activities so
-                                        incredible.
+                                        {lang['Browse and book tours and activities so incredible.']}
                                     </p>
                                 </div>
                                 <div className="col">
                                     <i className="fa-solid fa-campground"></i>
-                                    <h6>Ultimate flexibility</h6>
+                                    <h6>{lang['Ultimate flexibility']}</h6>
                                     <p>
-                                        You’re in control, with free
-                                        cancellation and payment options.
+                                        {lang['You’re in control, with free cancellation and payment options.']}
                                     </p>
                                 </div>
                                 <div className="col">
                                     <i className="fa-solid fa-binoculars"></i>
-                                    <h6>Extended Customization</h6>
+                                    <h6>{lang['Extended Customization']}</h6>
                                     <p>
-                                        Browse and book tours and activities so
-                                        incredible.
+                                        {lang['Browse and book tours and activities so incredible.']}
                                     </p>
                                 </div>
                                 <div className="col">
                                     <i className="fa-solid fa-stopwatch"></i>
-                                    <h6>Customer Satisfaction</h6>
+                                    <h6>{lang['Customer Satisfaction']}</h6>
                                     <p>
-                                        Browse and book tours and activities so
-                                        incredible.
+                                        {lang['Browse and book tours and activities so incredible.']}
                                     </p>
                                 </div>
                             </div>
@@ -286,10 +283,10 @@ export default function Welcome(props) {
                             <div className="container-explore">
                                 <Explore>
                                     <p className="sectitle">
-                                        CHOOSE YOUR EXPERIENCE
+                                        {lang['CHOOSE YOUR EXPERIENCE']}
                                     </p>
                                     <h2 className="subtitle">
-                                        Top Attractions Destinations
+                                        {lang['Top Attractions Destinations']}
                                     </h2>
                                 </Explore>
                             </div>
@@ -299,7 +296,7 @@ export default function Welcome(props) {
                                 {destinations1.map((destination) => (
                                     <div className="location-item">
                                         <NavLinkB
-                                            href={`/destination/${destination.slug}`}
+                                            href={`/destination/${destination.slug}?lang=${_lang}`}
                                             aria-current="page"
                                         >
                                             <div className="img-location">
@@ -324,7 +321,7 @@ export default function Welcome(props) {
                                 {destinations2.map((destination) => (
                                     <div className="location-item">
                                         <NavLinkB
-                                            href={`/destination/${destination.slug}`}
+                                            href={`/destination/${destination.slug}?lang=${_lang}`}
                                             aria-current="page"
                                         >
                                             <div className="img-location">
@@ -337,7 +334,7 @@ export default function Welcome(props) {
                                                         {destination.ten}
                                                     </span>
                                                     <span className="location-count">
-                                                        {destination.sum} Tours+
+                                                        {destination.sum} {lang['Tours']}+
                                                     </span>
                                                 </div>
                                             </div>
@@ -356,8 +353,7 @@ export default function Welcome(props) {
                                     <div className="wrap-heading">
                                         <div className="wrap-heading-container">
                                             <h4 className="wrap-heading-title">
-                                                We Create Journeys Worth Taking
-                                                For The Traveler
+                                                {lang['We Create Journeys Worth Taking For The Traveler']}
                                             </h4>
                                         </div>
                                     </div>
@@ -365,10 +361,9 @@ export default function Welcome(props) {
                             </div>
                             <div className="col">
                                 <div className="section-title">
-                                    <p className="sectitle">WHY CHOOSE US</p>
+                                    <p className="sectitle">{lang['WHY CHOOSE US']}</p>
                                     <h2 className="subtitle">
-                                        Our Experiences Meet High Quality
-                                        Standards
+                                        {lang['Our Experiences Meet High Quality Standards']}
                                     </h2>
                                     <div className="wrap-divider">
                                         <div className="container-divider">
@@ -391,7 +386,7 @@ export default function Welcome(props) {
                                                     <i className="fa-solid fa-check"></i>
                                                 </span>
                                                 <span className="icon-list-text">
-                                                    Professional Tour Guide
+                                                    {lang['Professional Tour Guide']}
                                                 </span>
                                             </li>
                                             <li className="icon-list-item">
@@ -399,7 +394,7 @@ export default function Welcome(props) {
                                                     <i className="fa-solid fa-check"></i>
                                                 </span>
                                                 <span className="icon-list-text">
-                                                    Exceptional flexibility
+                                                    {lang['Exceptional flexibility']}
                                                 </span>
                                             </li>
                                             <li className="icon-list-item">
@@ -407,7 +402,7 @@ export default function Welcome(props) {
                                                     <i className="fa-solid fa-check"></i>
                                                 </span>
                                                 <span className="icon-list-text">
-                                                    Quality you can trust
+                                                    {lang['Quality you can trust']}
                                                 </span>
                                             </li>
                                             <li className="icon-list-item">
@@ -415,7 +410,7 @@ export default function Welcome(props) {
                                                     <i className="fa-solid fa-check"></i>
                                                 </span>
                                                 <span className="icon-list-text">
-                                                    Award-winning support{" "}
+                                                    {lang['Award-winning support']}{" "}
                                                 </span>
                                             </li>
                                         </ul>
@@ -429,7 +424,7 @@ export default function Welcome(props) {
                                     >
                                         <span className="button-content">
                                             <span className="button-text">
-                                                Contact Us
+                                                {lang['Contact Us']}
                                             </span>
                                             <span className="button-icon">
                                                 <i className="fa-solid fa-arrow-right"></i>
@@ -445,9 +440,9 @@ export default function Welcome(props) {
                 <div className="category">
                     <div className="container-category">
                         <div className="section-title">
-                            <p className="sectitle">WHY CHOOSE US</p>
+                            <p className="sectitle">{lang['Discover']}</p>
                             <h2 className="subtitle">
-                                Our Experiences Meet High Quality Standards
+                                {lang['Discover Interesting Places']}
                             </h2>
                             <div className="wrap-divider">
                                 <div className="container-divider">
@@ -466,13 +461,13 @@ export default function Welcome(props) {
                                                 </div>
                                                 <div className="content-location">
                                                     <span className="location-name">
-                                                        Adventural
+                                                        {lang['Adventural']}
                                                     </span>
                                                     <span className="location-count">
-                                                        10 Tour+
+                                                        10 {lang['Tour']}+
                                                     </span>
                                                     <span className="from">
-                                                        <span>from</span>
+                                                        <span>{lang['from']}</span>
                                                         <span>$125</span>
                                                     </span>
                                                 </div>
@@ -489,13 +484,13 @@ export default function Welcome(props) {
                                                 </div>
                                                 <div className="content-location">
                                                     <span className="location-name">
-                                                        Beachs
+                                                        {lang['Beach']}
                                                     </span>
                                                     <span className="location-count">
-                                                        10 Tour+
+                                                        10 {lang['Tour']}+
                                                     </span>
                                                     <span className="from">
-                                                        <span>from</span>
+                                                        <span>{lang['from']}</span>
                                                         <span>$125</span>
                                                     </span>
                                                 </div>
@@ -512,13 +507,13 @@ export default function Welcome(props) {
                                                 </div>
                                                 <div className="content-location">
                                                     <span className="location-name">
-                                                        City Tours
+                                                        {lang['City Tours']}
                                                     </span>
                                                     <span className="location-count">
-                                                        10 Tour+
+                                                        10 {lang['Tour']}+
                                                     </span>
                                                     <span className="from">
-                                                        <span>from</span>
+                                                        <span>{lang['from']}</span>
                                                         <span>$125</span>
                                                     </span>
                                                 </div>
@@ -535,13 +530,13 @@ export default function Welcome(props) {
                                                 </div>
                                                 <div className="content-location">
                                                     <span className="location-name">
-                                                        hiking
+                                                        {lang['Hiking']}
                                                     </span>
                                                     <span className="location-count">
-                                                        10 Tour+
+                                                        10 {lang['Tour']}+
                                                     </span>
                                                     <span className="from">
-                                                        <span>from</span>
+                                                        <span>{lang['from']}</span>
                                                         <span>$125</span>
                                                     </span>
                                                 </div>
@@ -558,13 +553,13 @@ export default function Welcome(props) {
                                                 </div>
                                                 <div className="content-location">
                                                     <span className="location-name">
-                                                        Honeymoon
+                                                        {lang['Honeymoon']}
                                                     </span>
                                                     <span className="location-count">
-                                                        10 Tour+
+                                                        10 {lang['Tour']}+
                                                     </span>
                                                     <span className="from">
-                                                        <span>from</span>
+                                                        <span>{lang['from']}</span>
                                                         <span>$125</span>
                                                     </span>
                                                 </div>
@@ -581,13 +576,13 @@ export default function Welcome(props) {
                                                 </div>
                                                 <div className="content-location">
                                                     <span className="location-name">
-                                                        Museum Tours
+                                                        {lang['Museum Tours']}
                                                     </span>
                                                     <span className="location-count">
-                                                        10 Tour+
+                                                        10 {lang['Tour']}+
                                                     </span>
                                                     <span className="from">
-                                                        <span>from</span>
+                                                        <span>{lang['from']}</span>
                                                         <span>$125</span>
                                                     </span>
                                                 </div>
@@ -606,9 +601,9 @@ export default function Welcome(props) {
                     <div className="explore" style={{ paddingTop: "120px" }}>
                         <div className="container-explore">
                             <div className="section-title">
-                                <p className="sectitle">Ideal tour</p>
+                                <p className="sectitle">{lang['Ideal tour']}</p>
                                 <h2 className="subtitle">
-                                    Suggestions for your next trip
+                                    {lang['Suggestions for your next trip']}
                                 </h2>
                                 <div className="wrap-divider">
                                     <div className="container-divider">
@@ -624,7 +619,7 @@ export default function Welcome(props) {
                                 <SwiperSlide>
                                     <div className="container-book">
                                         <LogoLinkB
-                                            href={route("tour.show", tour.id)}
+                                            href={`/tour/${tour.slug}?lang=${_lang}`}
                                             className="img-book"
                                         >
                                             <img
@@ -635,10 +630,7 @@ export default function Welcome(props) {
                                         <div className="title-book">
                                             <p>{tour.dia_chi}</p>
                                             <LogoLinkB
-                                                href={route(
-                                                    "tour.show",
-                                                    tour.id
-                                                )}
+                                                href={`/tour/${tour.slug}?lang=${_lang}`}
                                                 className="content-book"
                                             >
                                                 {Trancate(tour.ten_tour, 30)}
@@ -647,7 +639,7 @@ export default function Welcome(props) {
                                                 <li>
                                                     <i className="fa-regular fa-clock"></i>
                                                     <span>
-                                                        {tour.so_ngay} days
+                                                        {tour.so_ngay} {lang['days']}
                                                     </span>
                                                 </li>
                                                 <li>
@@ -662,19 +654,16 @@ export default function Welcome(props) {
                                             </ul>
                                             <div className="read-more-item">
                                                 <div className="price-book">
-                                                    <span>From</span>
+                                                    <span>{lang['From']}</span>
                                                     <span>
                                                         {tour.gia_nguoi_lon}
                                                     </span>
                                                 </div>
                                                 <NavLinkB
-                                                    href={route(
-                                                        "tour.show",
-                                                        tour.id
-                                                    )}
+                                                    href={`/tour/${tour.slug}?lang=${_lang}`}
                                                     aria-label="More Information"
                                                 >
-                                                    More Information{" "}
+                                                    {lang['More Infomation']}{" "}
                                                     <i className="fa-solid fa-arrow-right"></i>
                                                 </NavLinkB>
                                             </div>
@@ -694,10 +683,10 @@ export default function Welcome(props) {
                             <div className="container-explore">
                                 <div className="section-title">
                                     <p className="sectitle">
-                                        CHOOSE YOUR EXPERIENCE
+                                        {lang['CHOOSE YOUR EXPERIENCE']}
                                     </p>
                                     <h2 className="subtitle">
-                                        Top Attractions Destinations
+                                        {lang['Top Attractions Destinations']}
                                     </h2>
                                     <div className="wrap-divider">
                                         <div className="container-divider">
@@ -717,10 +706,10 @@ export default function Welcome(props) {
                         <div className="container-explore">
                             <div className="section-title">
                                 <p className="sectitle">
-                                    TRAVEL INSIGHTS & IDEAS
+                                    {lang['TRAVEL INSIGHTS & IDEAS']}
                                 </p>
                                 <h2 className="subtitle">
-                                    Latest Travel Guides
+                                    {lang['Latest Travel Guides']}
                                 </h2>
                                 <div className="wrap-divider">
                                     <div className="container-divider">

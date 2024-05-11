@@ -15,54 +15,19 @@ import {
     Checkbox,
 } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import { isEmpty } from "lodash";
+import { isEmpty, set } from "lodash";
 import React, { useRef, useState, useEffect } from "react";
 import InputError from "@/Components/InputError";
 import Validate from "validator/lib/isEmpty";
 import ValidateEmail from "validator/lib/isEmail";
+import Swal from "sweetalert2";
+import Select from "@/Components/Bootstrap/Select";
 
-const breadcrumbs = [
-    <Link
-        underline="hover"
-        key="1"
-        color="inherit"
-        href={route("welcome")}
-        style={{ textDecoration: "none", color: "white" }}
-    >
-        Home
-    </Link>,
-    <Link
-        underline="hover"
-        key="1"
-        color="inherit"
-        href={route("tour")}
-        style={{ textDecoration: "none", color: "white" }}
-    >
-        Tour list
-    </Link>,
-    <Link
-        underline="hover"
-        key="1"
-        color="inherit"
-        href={route("welcome")}
-        style={{ textDecoration: "none", color: "white" }}
-    >
-        Tour Details
-    </Link>,
-    <Typography key="2" color="text.primary" style={{ color: "white" }}>
-        Tour Booking
-    </Typography>,
-];
 
-const numberFormat = (value) => {
-    return new Intl.NumberFormat("vi-VN", {
-        style: "currency",
-        currency: "VND",
-    }).format(value);
-};
 
 export default function TourBooking(props) {
     const detailTour = usePage().props.detailTour;
+    // console.log(detailTour);
     const error = usePage().props.error;
     const login = usePage().props.login;
     const customer = usePage().props.customer;
@@ -71,14 +36,24 @@ export default function TourBooking(props) {
     const [district, setdistrict] = useState([]);
     const [districtId, setdistrictId] = useState("");
     const [ward, setward] = useState([]);
-
+    const lang = usePage().props.lang;
+    const _lang = usePage().props._lang;
+    const numberFormat = (value) => {
+        if(_lang == 'en')
+        value = value * 0.000040;
+        return new Intl.NumberFormat(lang['vi-VN'], {
+            style: "currency",
+            currency: lang['VND'],
+        }).format(value);
+    };
     useEffect(() => {
         const getCity = async () => {
             const rescity = await fetch(
-                `https://provinces.open-api.vn/api/?depth=2`
+                `https://vapi.vnappmob.com/api/province`
             );
             const datacity = await rescity.json();
-            setcity(await datacity);
+            // console.log(datacity);
+            setcity(await datacity.results);
         };
         getCity();
     }, []);
@@ -86,10 +61,10 @@ export default function TourBooking(props) {
     useEffect(() => {
         const getDistrict = async () => {
             const resdistrict = await fetch(
-                `https://provinces.open-api.vn/api/p/${cityId.id}?depth=2`
+                `https://vapi.vnappmob.com/api/province/district/${cityId.id}`
             );
             const datadistrict = await resdistrict.json();
-            setdistrict(await datadistrict.districts);
+            setdistrict(await datadistrict.results);
         };
         getDistrict();
     }, [cityId]);
@@ -97,10 +72,10 @@ export default function TourBooking(props) {
     useEffect(() => {
         const getWard = async () => {
             const resward = await fetch(
-                `https://provinces.open-api.vn/api/d/${districtId.id}?depth=2`
+                `https://vapi.vnappmob.com/api/province/ward/${districtId.id}`
             );
             const dataward = await resward.json();
-            setward(await dataward.wards);
+            setward(await dataward.results);
         };
         getWard();
     }, [districtId]);
@@ -109,8 +84,8 @@ export default function TourBooking(props) {
 
     city.map((city) => {
         arrCities.push({
-            label: city.name,
-            idCity: city.code,
+            label: city.province_name,
+            idCity: city.province_id,
         });
     });
 
@@ -118,8 +93,8 @@ export default function TourBooking(props) {
     if (!isEmpty(district)) {
         district.map((district) => {
             arrDistricts.push({
-                label: district.name,
-                idDistrict: district.code,
+                label: district.district_name,
+                idDistrict: district.district_id,
             });
         });
     }
@@ -128,20 +103,20 @@ export default function TourBooking(props) {
     if (!isEmpty(ward)) {
         ward.map((ward) => {
             arrWards.push({
-                label: ward.name,
-                idWard: ward.id,
+                label: ward.ward_name,
+                idWard: ward.ward_id,
             });
         });
     }
 
     const arrCount = [
         {
-            name: "Traveller 1",
+            name: lang['Traveller'] + " 1",
         },
     ];
     for (let i = 1; i < detailTour.counttraveller; i++) {
         arrCount.push({
-            name: `Traveller ${i + 1}`,
+            name: lang['Traveller'] + " " + (i + 1),
         });
     }
 
@@ -153,6 +128,39 @@ export default function TourBooking(props) {
             });
         });
     }
+
+    const breadcrumbs = [
+        <Link
+            underline="hover"
+            key="1"
+            color="inherit"
+            href={route("welcome", { lang: _lang })}
+            style={{ textDecoration: "none", color: "white" }}
+        >
+            {lang['Home']}
+        </Link>,
+        <Link
+            underline="hover"
+            key="1"
+            color="inherit"
+            href={route("tour", { lang: _lang })}
+            style={{ textDecoration: "none", color: "white" }}
+        >
+            {lang['Tour']}
+        </Link>,
+        <Link
+            underline="hover"
+            key="1"
+            color="inherit"
+            href={"/tour/" + detailTour.slug + "?lang=" + _lang + "&adults=" + detailTour.adults + "&youth=" + detailTour.youth??0 + "&child=" + detailTour.child}
+            style={{ textDecoration: "none", color: "white" }}
+        >
+            {lang['Tour Details']}
+        </Link>,
+        <Typography key="2" color="text.primary" style={{ color: "white" }}>
+            {lang['Tour Booking']}
+        </Typography>,
+    ];
 
     const { data, setData, post, progress, processing, errors, reset } =
         useForm({
@@ -181,6 +189,8 @@ export default function TourBooking(props) {
             gatheringLocation: detailTour.noi_tap_chung,
             time: detailTour.gio_khoi_hanh,
             totalPrice: detailTour.totalPrice,
+            coupon: "",
+            coupon_id: "",
             countTraveller: detailTour.counttraveller,
             subtotal: detailTour.subtotal,
             extra: ArrExtra,
@@ -189,8 +199,12 @@ export default function TourBooking(props) {
             phone: "",
             address: "",
             note: "",
+            available: detailTour.available,
+            date_id: detailTour.date_id,
         });
-
+        useEffect(() => { //update total price when change
+        setData("totalPrice", detailTour.totalPrice);
+        }, [detailTour.totalPrice]);
     const onHandleChange = (event) => {
         setData(
             event.target.name,
@@ -221,6 +235,81 @@ export default function TourBooking(props) {
                 }
             }
         });
+    };
+
+    const applyCoupon = () => {
+        // disable button
+        document.querySelector(".coupon-block button").disabled = true;
+        const coupon = document.querySelector(".coupon-block input").value;
+        if (coupon == "") {
+            Swal.fire({
+                icon: "error",
+                title: "Vui lòng nhập mã giảm giá",
+                showConfirmButton: false,
+                timer: 1500,
+                toast: true,
+                position: "top-end",
+            });
+            // enable button
+            document.querySelector(".coupon-block button").disabled = false;
+            return;
+        }
+        // check nếu đã áp dụng coupon rồi thì không áp dụng nữa
+        if (data.coupon) {
+            Swal.fire({
+                icon: "error",
+                title: "Bạn đã áp dụng mã giảm giá rồi",
+                showConfirmButton: false,
+                timer: 1500,
+                toast: true,
+                position: "top-end",
+            });
+            // enable button
+            document.querySelector(".coupon-block button").disabled = false;
+            return;
+        }
+        if (coupon) {
+            fetch(`http://localhost:8000/api/coupon/${coupon}`)
+                .then((response) => response.json())
+                .then((datas) => {
+                    if (datas.status == 'success') {
+                        Swal.fire({
+                            icon: "success",
+                            title: datas.message,
+                            showConfirmButton: false,
+                            timer: 1500,
+                            toast: true,
+                            position: "top-end",
+                        });
+                        if (datas.coupon.giam_theo == 0) { //theo %
+                            data.coupon = datas.coupon.gia_tri + "%";
+                            data.totalPrice = data.totalPrice - (data.totalPrice * datas.coupon.gia_tri / 100);
+                        } else {
+                            data.coupon = numberFormat(datas.coupon.gia_tri);
+                            data.totalPrice = data.totalPrice - datas.coupon.gia_tri;
+                        }
+                        data.coupon_id = datas.coupon.id;
+                        // bỏ class hide để hiện ra
+                        document.querySelector("#total-old").classList.remove("hide");
+                        document.querySelector("#coupon").classList.remove("hide");
+                        // setData("coupon", data.coupon);
+                        setData("totalPrice", data.totalPrice);
+                        // enable button
+                        document.querySelector(".coupon-block button").disabled = false;
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: datas.message,
+                            showConfirmButton: false,
+                            timer: 1500,
+                            toast: true,
+                            position: "top-end",
+                        });
+                        // enable button
+                        document.querySelector(".coupon-block button").disabled = false;
+                    }
+                });
+        }
     };
 
     const [inforcustomerName, setinforcustomerName] = useState({});
@@ -274,7 +363,7 @@ export default function TourBooking(props) {
 
     const validateAll = () => {
         const msg = {};
-
+        const flag_age = {};
         if (Validate(data.name)) {
             msg.name = "Name is required";
         }
@@ -307,6 +396,14 @@ export default function TourBooking(props) {
 
         setValidationMsg(msg);
         if (Object.keys(msg).length > 0) {
+            Swal.fire({
+                icon: "error",
+                title: msg[Object.keys(msg)[0]],
+                showConfirmButton: false,
+                toast: true,
+                position: "top-end",
+                timer: 1500,
+            });
             return false;
         }
         return true;
@@ -316,7 +413,7 @@ export default function TourBooking(props) {
         event.preventDefault();
         const isValid = validateAll();
         if (!isValid) return;
-        router.visit("/checkout", { data });
+        router.visit("/checkout?lang=" + _lang, {data});
     };
 
     return (
@@ -330,7 +427,7 @@ export default function TourBooking(props) {
                         style={{ background: "content-box" }}
                     >
                         <div className="breadcrumb-main">
-                            <h1 className="zourney-title"> Tours Booking</h1>
+                            <h1 className="zourney-title"> {lang['Tours Booking']}</h1>
                             <Breadcrumbs
                                 separator={
                                     <NavigateNextIcon
@@ -371,7 +468,7 @@ export default function TourBooking(props) {
                                         <tr>
                                             <td>
                                                 <i className="fa-solid fa-id-card"></i>{" "}
-                                                Code
+                                                {lang['Code']}
                                             </td>
                                             <td>
                                                 <span>
@@ -382,7 +479,7 @@ export default function TourBooking(props) {
                                         <tr>
                                             <td>
                                                 <i className="fa-solid fa-calendar"></i>{" "}
-                                                Departure Day
+                                                {lang['Departure Day']}
                                             </td>
                                             <td>
                                                 <span>
@@ -393,19 +490,19 @@ export default function TourBooking(props) {
                                         <tr>
                                             <td>
                                                 <i className="fa-solid fa-clock"></i>{" "}
-                                                Period
+                                                {lang['Period']}
                                             </td>
                                             <td>
                                                 <span>
-                                                    {detailTour.so_ngay} Days /{" "}
-                                                    {detailTour.so_dem} Night
+                                                    {detailTour.so_ngay} {lang['days']} /{" "}
+                                                    {detailTour.so_dem} {lang['Night']}
                                                 </span>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td>
                                                 <i className="fa-solid fa-car"></i>{" "}
-                                                Vechicle
+                                                {lang['Vechicle']}
                                             </td>
                                             <td>
                                                 <span>
@@ -416,7 +513,7 @@ export default function TourBooking(props) {
                                         <tr>
                                             <td>
                                                 <i className="fa-solid fa-map-marker"></i>{" "}
-                                                Departure Location
+                                                {lang['Departure Location']}
                                             </td>
                                             <td>
                                                 <span>
@@ -427,10 +524,10 @@ export default function TourBooking(props) {
                                         <tr>
                                             <td>
                                                 <i className="fa-solid fa-person"></i>{" "}
-                                                Available
+                                                {lang['Available']}
                                             </td>
                                             <td>
-                                                <span>{detailTour.so_cho}</span>
+                                                <span>{detailTour.available}</span>
                                             </td>
                                         </tr>
                                     </table>
@@ -445,7 +542,7 @@ export default function TourBooking(props) {
                             <div className="row">
                                 <div className="col-md-8">
                                     <h3 className="heading-title">
-                                        Traveller Details
+                                        {lang['Traveller Details']}
                                     </h3>
                                     {/* errors */}
                                     <div className="row">
@@ -465,7 +562,7 @@ export default function TourBooking(props) {
                                                         type="text"
                                                         name={`first_name_${index}`}
                                                         className="form-control"
-                                                        placeholder="First name"
+                                                        placeholder={lang['First name'] + "*"}
                                                         aria-label="First name"
                                                         onChange={(e) =>
                                                             onHandleChange(e)
@@ -484,7 +581,7 @@ export default function TourBooking(props) {
                                                         type="text"
                                                         name={`last_name_${index}`}
                                                         className="form-control"
-                                                        placeholder="Last name"
+                                                        placeholder={lang['Last name']}
                                                         aria-label="Last name"
                                                         onChange={(e) =>
                                                             onHandleChange(e)
@@ -498,26 +595,27 @@ export default function TourBooking(props) {
                                                     type="text"
                                                     name={`citizen_identification_${index}`}
                                                     className="form-control"
-                                                    placeholder="Citizen Identification/Passport*"
+                                                    placeholder={lang['Citizen Identification/Passport']}
                                                     aria-label="citizen identification/passport"
                                                     onChange={(e) =>
                                                         onHandleChange(e)
                                                     }
-                                                    required
+                                                    // required
                                                     // pattern="[0-9]{9,12}"
                                                 />
                                             </div>
                                             <div className="row">
                                                 <div className="col mb-3">
-                                                    <select
+                                                    <Select
                                                         name={`age_${index}`}
                                                         className="form-select"
                                                         aria-label="Default select example"
-                                                        onChange={(e) =>
+                                                        handleChange={(e) =>
                                                             onHandleChange(e)
                                                         }
+                                                        required
                                                     >
-                                                        <option>Age*</option>
+                                                        <option value="">{lang['Age']}*</option>
                                                         <option value="1">
                                                             0-12
                                                         </option>
@@ -527,14 +625,14 @@ export default function TourBooking(props) {
                                                         <option value="3">
                                                             18+ 20
                                                         </option>
-                                                    </select>
+                                                    </Select>
                                                 </div>
                                                 <div className="col mb-3">
                                                     <input
                                                         type="text"
                                                         name={`phone_${index}`}
                                                         className="form-control"
-                                                        placeholder="Phone*"
+                                                        placeholder={lang['Phone'] + "*"}
                                                         aria-label="phone"
                                                         onChange={(e) =>
                                                             onHandleChange(e)
@@ -547,7 +645,7 @@ export default function TourBooking(props) {
                                         </div>
                                     ))}
                                     <h3 className="heading-title">
-                                        Contact Details
+                                        {lang['Contact Details']}
                                     </h3>
                                     {(login.customer != null || login.remember != null)  && (
                                         <div className="d-flex justify-content-start mb-4">
@@ -567,20 +665,20 @@ export default function TourBooking(props) {
                                                         }
                                                     />
                                                 }
-                                                label="Use account information for contact details"
+                                                label={lang['Use account information for contact details']}
                                             />
                                         </div>
                                     )}
                                     <div className="contact-form">
                                         <div className="contact-infor">
                                             <div className="contact-infor__block">
-                                                <label for="name">Name*</label>
+                                                <label for="name">{lang['Name']}*</label>
                                                 <input
                                                     type="text"
                                                     id="name"
                                                     name="name"
                                                     value={data.name}
-                                                    placeholder="Your Name"
+                                                    placeholder={lang['Name']}
                                                     onChange={(e) =>
                                                         onHandleChange(e)
                                                     }
@@ -599,7 +697,7 @@ export default function TourBooking(props) {
                                                     id="email"
                                                     name="email"
                                                     value={data.email}
-                                                    placeholder="Your Email"
+                                                    placeholder={lang['Your Email']}
                                                     onChange={(e) =>
                                                         onHandleChange(e)
                                                     }
@@ -611,14 +709,14 @@ export default function TourBooking(props) {
                                             />
                                             <div className="contact-infor__block">
                                                 <label for="phone">
-                                                    Phone*
+                                                    {lang['Phone']}*
                                                 </label>
                                                 <input
                                                     type="text"
                                                     id="phone"
                                                     name="phone"
                                                     value={data.phone}
-                                                    placeholder="Your Phone"
+                                                    placeholder={lang['Your Phone']}
                                                     onChange={(e) =>
                                                         onHandleChange(e)
                                                     }
@@ -630,14 +728,14 @@ export default function TourBooking(props) {
                                             />
                                             <div className="contact-infor__block">
                                                 <label for="address">
-                                                    Address*
+                                                    {lang['Address']}*
                                                 </label>
                                                 <input
                                                     type="text"
                                                     id="address"
                                                     name="address"
                                                     value={data.address}
-                                                    placeholder="Your Address"
+                                                    placeholder={lang['Your Address']}
                                                     onChange={(e) =>
                                                         onHandleChange(e)
                                                     }
@@ -651,7 +749,7 @@ export default function TourBooking(props) {
                                             <>
                                             <div className="contact-infor__block">
                                                 <label for="country">
-                                                    City*
+                                                    {lang['City']}*
                                                 </label>
 
                                                 <Autocomplete
@@ -676,7 +774,7 @@ export default function TourBooking(props) {
                                                     renderInput={(params) => (
                                                         <TextField
                                                             {...params}
-                                                            label="City"
+                                                            label={lang['City']}
                                                         />
                                                     )}
                                                 />
@@ -687,7 +785,7 @@ export default function TourBooking(props) {
                                             />
                                             <div className="contact-infor__block">
                                                 <label for="city">
-                                                    District*
+                                                    {lang['District']}*
                                                 </label>
                                                 <Autocomplete
                                                     disablePortal
@@ -712,7 +810,7 @@ export default function TourBooking(props) {
                                                     renderInput={(params) => (
                                                         <TextField
                                                             {...params}
-                                                            label="District"
+                                                            label={lang['District']}
                                                         />
                                                     )}
                                                 />
@@ -722,7 +820,7 @@ export default function TourBooking(props) {
                                                 className="mt-2"
                                             />
                                             <div className="contact-infor__block">
-                                                <label for="city">Ward*</label>
+                                                <label for="city">{lang['Ward']}*</label>
 
                                                 <Autocomplete
                                                     disablePortal
@@ -742,7 +840,7 @@ export default function TourBooking(props) {
                                                     renderInput={(params) => (
                                                         <TextField
                                                             {...params}
-                                                            label="Ward"
+                                                            label={lang['Ward']}
                                                         />
                                                     )}
                                                 />
@@ -755,14 +853,14 @@ export default function TourBooking(props) {
                                             )}
                                             <div className="contact-infor__block">
                                                 <label for="messenger">
-                                                    Messenger
+                                                    {lang['Messenger']}
                                                 </label>
                                                 <textarea
                                                     name="note"
                                                     id=""
                                                     cols="30"
                                                     rows="10"
-                                                    placeholder="writing something ..."
+                                                    placeholder={lang['Note']}
                                                     onChange={(e) =>
                                                         onHandleChange(e)
                                                     }
@@ -779,7 +877,7 @@ export default function TourBooking(props) {
                                         <div className="search-available">
                                             <div className="booking-form__block">
                                                 <h6 className="post-title">
-                                                    Broome To The Bungle Bungles
+                                                    {lang['Broome To The Bungle Bungles']}
                                                 </h6>
                                                 <div className="input-group">
                                                     <div className="booking-block">
@@ -790,7 +888,7 @@ export default function TourBooking(props) {
                                                                     "normal",
                                                             }}
                                                         >
-                                                            Time
+                                                            {lang['Time']}
                                                         </span>
                                                         <span className="booking-clock">
                                                             {
@@ -800,13 +898,13 @@ export default function TourBooking(props) {
                                                     </div>
                                                     <div className="booking-ticket">
                                                         <label className="booking_form">
-                                                            Tickets
+                                                            {lang['Tickets']}
                                                         </label>
                                                         <div className="booking-guests-result">
                                                             <ul>
                                                                 <li>
                                                                     <span className="booking-title">
-                                                                        Adult
+                                                                        {lang['Adult']}
                                                                     </span>
                                                                     <span className="booking-price">
                                                                         {
@@ -814,7 +912,7 @@ export default function TourBooking(props) {
                                                                         }{" "}
                                                                         x
                                                                         {numberFormat(
-                                                                            detailTour.gia_nguoi_lon
+                                                                            detailTour.get_price
                                                                         )}
                                                                     </span>
                                                                     <span className="booking-price">
@@ -828,7 +926,7 @@ export default function TourBooking(props) {
                                                                 ) && (
                                                                     <li>
                                                                         <span className="booking-title">
-                                                                            Youth
+                                                                            {lang['Youth']}
                                                                         </span>
                                                                         <span className="booking-price">
                                                                             {
@@ -836,7 +934,7 @@ export default function TourBooking(props) {
                                                                             }{" "}
                                                                             x
                                                                             {numberFormat(
-                                                                                detailTour.gia_thieu_nien
+                                                                                detailTour.get_price * 0.8
                                                                             )}
                                                                         </span>
                                                                         <span className="booking-price">
@@ -851,7 +949,7 @@ export default function TourBooking(props) {
                                                                 ) && (
                                                                     <li>
                                                                         <span className="booking-title">
-                                                                            Children
+                                                                            {lang['Children']}
                                                                         </span>
                                                                         <span className="booking-price">
                                                                             {
@@ -859,7 +957,7 @@ export default function TourBooking(props) {
                                                                             }{" "}
                                                                             x
                                                                             {numberFormat(
-                                                                                detailTour.gia_tre_em
+                                                                                detailTour.get_price * 0.5
                                                                             )}
                                                                         </span>
                                                                         <span className="booking-price">
@@ -879,8 +977,7 @@ export default function TourBooking(props) {
                                                         <>
                                                             <div className="services-block">
                                                                 <label className="booking_form">
-                                                                    Extra
-                                                                    services
+                                                                    {lang['Extra services']}
                                                                 </label>
                                                                 <div className="list-services">
                                                                     {detailTour.extra.map(
@@ -913,29 +1010,30 @@ export default function TourBooking(props) {
 
                                                     <div className="coupon">
                                                         <label className="booking_form">
-                                                            Coupon
+                                                            {lang['Coupon']}
                                                         </label>
                                                         <div className="coupon-block">
                                                             <input
                                                                 type="text"
-                                                                placeholder="Enter your coupon code"
+                                                                placeholder={lang['Enter your coupon code']}
                                                             />
                                                             <button
                                                                 type="button"
                                                                 className="coupon-btn"
+                                                                onClick={applyCoupon}
                                                             >
-                                                                Apply
+                                                                {lang['Apply']}
                                                             </button>
                                                         </div>
                                                     </div>
 
                                                     <div className="detail-price">
                                                         <label className="booking_form">
-                                                            Detail Price
+                                                            {lang['Detail Price']}
                                                         </label>
                                                         <div className="detail-price__item">
                                                             <span className="detail-price__title">
-                                                                Subtotal
+                                                                {lang['Subtotal']}
                                                             </span>
                                                             <span className="detail-price__price">
                                                                 {numberFormat(
@@ -949,8 +1047,7 @@ export default function TourBooking(props) {
                                                             <>
                                                                 <div className="detail-price__item">
                                                                     <span className="detail-price__title">
-                                                                        Extra
-                                                                        services
+                                                                        {lang['Extra services']}
                                                                     </span>
                                                                     <span className="detail-price__price">
                                                                         {numberFormat(
@@ -960,32 +1057,59 @@ export default function TourBooking(props) {
                                                                 </div>
                                                             </>
                                                         )}
-                                                        <div className="detail-price__item">
+                                                        <div id="coupon" className="detail-price__item hide">
                                                             <span className="detail-price__title">
                                                                 Coupon
                                                             </span>
-                                                            <span className="detail-price__price">
-                                                                -300.000đ
+                                                            <span className="detail-price__price" style={{color: "red",position: "absolute",right: "20px"}}>
+                                                                - {" "}
+                                                                {data.coupon}
                                                             </span>
+                                                            <a
+                                                                className="remove-coupon"
+                                                                style={{cursor: "pointer"}}
+                                                                onClick={() => {
+                                                                    data.coupon = "";
+                                                                    data.totalPrice = detailTour.totalPrice;
+                                                                    document.querySelector("#coupon").classList.add("hide");
+                                                                    document.querySelector("#total-old").classList.add("hide");
+                                                                    // enable button
+                                                                    document.querySelector(".coupon-block button").disabled = false;
+                                                                    setData("totalPrice", data.totalPrice);
+                                                                }}
+                                                            >
+                                                                <i className="fa-solid fa-times"></i>
+                                                            </a>
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <div id="total-old" className="total-group hide">
+                                                    <label className="booking_form_input_label">
+                                                        {lang['Total Price old']}
+                                                    </label>
+                                                    <del
+                                                    >
+                                                        {numberFormat(
+                                                            detailTour.totalPrice
+                                                        )}
+                                                    </del>
+                                                </div>
                                                 <div className="total-group">
                                                     <label className="booking_form_input_label">
-                                                        Total Price
+                                                        {lang['Total Price']}
                                                     </label>
                                                     <span
                                                         className="currency_amount"
                                                         data-amount="0"
                                                     >
                                                         {numberFormat(
-                                                            detailTour.totalPrice
+                                                            data.totalPrice
                                                         )}
                                                     </span>
                                                 </div>
                                                 <div className="submit-group">
                                                     <button type="submit">
-                                                        NEXT STEP{" "}
+                                                        {lang['NEXT STEP']}{" "}
                                                         <i className="fa-solid fa-arrow-right"></i>
                                                     </button>
                                                 </div>

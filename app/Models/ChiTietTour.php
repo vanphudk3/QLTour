@@ -17,4 +17,9 @@ class ChiTietTour extends Model
         'noi_tap_chung',
         'gio_khoi_hanh',
     ];
+
+    public function tour()
+    {
+        return $this->belongsTo(Tour::class, 'ma_tour', 'id');
+    }
 }

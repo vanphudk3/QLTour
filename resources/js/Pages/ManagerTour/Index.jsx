@@ -1,11 +1,12 @@
 import Pagination from "@/Components/Pagination";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link, router, usePage } from "@inertiajs/react";
-
+import BasicPagination from "@/Components/MuiPagination";
 export default function Tour(props) {
     const user = props.auth.user;
     const tours = usePage().props.tours.data;
-    // console.log(tours);
+    const error = usePage().props.error;
+    // console.log(error);
 
     const deleteTour = (id) => {
         Swal.fire({
@@ -21,7 +22,19 @@ export default function Tour(props) {
                 router.delete(`/auth/managerTour/${id}`, {
                     _method: "DELETE",
                 });
-                Swal.fire("Deleted!", "Your file has been deleted.", "success");
+                if (error) {
+                    Swal.fire({
+                        icon: "error",
+                        title: error,
+                        toast: true,
+                        position: "top-end",
+                        showConfirmButton: false,
+                        timer: 3000,
+                    });
+                    return;
+                } else {
+                    Swal.fire("Deleted!", "Your file has been deleted.", "success");
+                }
             }
         });
     };
@@ -65,32 +78,35 @@ export default function Tour(props) {
                                     <th scope="col">Name</th>
                                     <th scope="col">Tranport</th>
                                     <th scope="col">Age from</th>
-                                    <th scope="col">Amount People</th>
-                                    <th scope="col">Date</th>
+                                    <th scope="col">Seat</th>
+                                    <th scope="col">Amount Date</th>
+                                    <th scope="col">Schedule</th>
                                     <th scope="col">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {tours.map((tour) => (
                                     <tr>
-                                        <th scope="row">{tour.id}</th>
-                                        <td>{tour.ky_hieu}</td>
+                                        <th scope="row" style={{width: "5%"}}>{tour.id}</th>
+                                        <td><Link href={route("managerTour.edit", tour.id)} className="text-blue-500" style={{textDecoration: "none"}}>{tour.ky_hieu}</Link></td>
                                         <td>{tour.ten_tour}</td>
                                         <td>{tour.transpost}</td>
                                         <td>{tour.do_tuoi_tu}</td>
                                         <td>{tour.so_cho}</td>
-                                        <td>{tour.ngay_khoi_hanh}</td>
+                                        <td>{tour.so_ngay}</td>
+                                        <td>{tour.co_lich_trinh == 1 ? "updated" : "not updated"}</td>
                                         <td>
                                             {user.role == "admin" && (
                                                 <>
                                                     <Link
-                                                        href={route(
-                                                            "managerTour.edit",
-                                                            tour.id
-                                                        )}
+                                                        href={
+                                                            route("schedule.create", {
+                                                                idTour: tour.id,
+                                                            })
+                                                        }
                                                         class="btn btn-primary"
                                                     >
-                                                        Edit
+                                                        Edit schedule
                                                     </Link>
                                                     <Link
                                                         // href={route(
@@ -112,9 +128,19 @@ export default function Tour(props) {
                                         </td>
                                     </tr>
                                 ))}
-                                <Pagination
-                                    links={usePage().props.tours.links}
-                                />
+                                
+                            {/* <div class="flex justify-end m-2 p-2">
+                            <BasicPagination
+                                count={last_page}
+                                page={current_page}
+                                onChange={(event, value) => {
+                                    router.get(`/auth/category?page=${value}`);
+                                    // router.get(
+                                    //     `/auth/category?page=${value}`
+                                    // );
+                                }}
+                            />
+                        </div> */}
                                 {tours.length === 0 && (
                                     <tr>
                                         <td colspan="4" class="text-center">
@@ -124,6 +150,9 @@ export default function Tour(props) {
                                 )}
                             </tbody>
                         </table>
+                        <Pagination
+                                    links={usePage().props.tours.links}
+                                />
                     </div>
                 </div>
             </div>

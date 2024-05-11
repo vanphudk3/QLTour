@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\TranspostRole;
 use App\Models\ChiTietTour;
+use App\Models\Tour_yeu_thich;
 use App\Models\City;
 use App\Models\DiaDiem;
 use App\Models\extra_service;
@@ -12,10 +13,13 @@ use App\Models\LichTrinh;
 use App\Models\LoaiTour;
 use App\Models\Tour;
 use App\Models\Tour_DiaDiem;
+use App\Models\Tour_ngay;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
+use App\Jobs\TestMailJob;
 
 class ManagerTourController extends Controller
 {
@@ -54,7 +58,16 @@ class ManagerTourController extends Controller
         $tours = Tour::all();
         $schedule = LichTrinh::all();
         $locations = DiaDiem::all();
-        return Inertia::render('ManagerTour/Create', compact('locations', 'categories', 'extra_services', 'tours', 'schedule', 'cities'));
+        foreach($locations as $key => $value){
+            if ($value->du_lieu_map == null || $value->du_lieu_map == '') {
+                $locations->forget($key); // remove item from collection
+            }
+        }
+        $locations = $locations->values();
+
+
+        $agent = DB::table('users')->where('role', 'employee')->get();
+        return Inertia::render('ManagerTour/Create', compact('locations', 'categories', 'extra_services', 'tours', 'schedule', 'cities', 'agent'));
     }
 
     public function edit($managerTour)
@@ -64,13 +77,17 @@ class ManagerTourController extends Controller
         $tours = Tour::all();
         $schedule = LichTrinh::all();
         $tour = Tour::where('id', $managerTour)->get();
-        $tour[0]->dateStart = date("Y-m-d", strtotime($tour[0]->ngay_khoi_hanh));
+        $tour_ngay = Tour_ngay::where('ma_tour', $managerTour)->get();
+
+        foreach($tour_ngay as $key => $value){
+            $value->ngay = date('m/d/Y', $value->ngay);
+        }
         
         $detaiTour = ChiTietTour::where('ma_tour', $managerTour)->get();
         $locations = DiaDiem::all();
         $getLocations = Tour_DiaDiem::where('ma_tour', $managerTour)->get();
         $location = DiaDiem::where('id', $getLocations[0]->ma_dia_diem)->get();
-        return Inertia::render('ManagerTour/Edit', compact('tour', 'location','locations', 'detaiTour', 'categories', 'extra_services', 'tours', 'schedule'));
+        return Inertia::render('ManagerTour/Edit', compact('tour', 'location','locations', 'detaiTour', 'categories', 'extra_services', 'tours', 'schedule', 'tour_ngay'));
     }
 
     public function proccess_slug(Request $request){
@@ -92,16 +109,13 @@ class ManagerTourController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
         $request->validate([
             'code' => 'required|unique:tours,ky_hieu',
             'name' => 'required',
             'transpost' => 'required',
             'agerfrom' => 'required|numeric|min:1|max:100',
             'priceAdult' => 'required|numeric|min:1|max:100000000',
-            'priceYoung' => 'required|numeric',
-            'priceChild' => 'required|numeric|min:0|max:100000000',
-            'dateStart' => 'required|date|after:today',
+            // 'dateStart' => 'required|date|after:today',
             'amountPeople' => 'required|numeric|min:1|max:100',
             'amountDay' => 'required|numeric|min:1|max:100',
             'amountNight' => 'required|numeric|min:0|max:100',
@@ -116,23 +130,23 @@ class ManagerTourController extends Controller
         }
 
         if($request->priceAdult < 1 || $request->priceAdult > 100000000){
-            return redirect()->back()->with('error', 'Giá người lớn phải từ 1 đến 100.000.000');
+            return redirect()->back()->with('error', 'Giá phải từ 1 đến 100.000.000');
         }
 
-        if($request->priceYoung < 1 || $request->priceYoung > 100000000){
-            return redirect()->back()->with('error', 'Giá thiếu niên phải từ 1 đến 100.000.000');
-        }
+        // if($request->priceYoung < 1 || $request->priceYoung > 100000000){
+        //     return redirect()->back()->with('error', 'Giá thiếu niên phải từ 1 đến 100.000.000');
+        // }
 
-        if($request->priceChild < 0 || $request->priceChild > 100000000){
-            return redirect()->back()->with('error', 'Giá em bé phải từ 0 đến 100.000.000');
-        }
+        // if($request->priceChild < 0 || $request->priceChild > 100000000){
+        //     return redirect()->back()->with('error', 'Giá em bé phải từ 0 đến 100.000.000');
+        // }
 
-        if($request->priceYoung > $request->priceAdult){
-            return redirect()->back()->with('error', 'Giá trẻ em phải nhỏ hơn giá người lớn');
-        }
-        if($request->priceChild > $request->priceYoung){
-            return redirect()->back()->with('error', 'Giá em bé phải nhỏ hơn giá trẻ em');
-        }
+        // if($request->priceYoung > $request->priceAdult){
+        //     return redirect()->back()->with('error', 'Giá trẻ em phải nhỏ hơn giá người lớn');
+        // }
+        // if($request->priceChild > $request->priceYoung){
+        //     return redirect()->back()->with('error', 'Giá em bé phải nhỏ hơn giá trẻ em');
+        // }
 
         if($request->amountPeople < 1 || $request->amountPeople > 100){
             return redirect()->back()->with('error', 'Số người phải từ 1 đến 100');
@@ -165,6 +179,7 @@ class ManagerTourController extends Controller
                 break;
         }
 
+
         $tour = new Tour();
         $tour->ky_hieu = $request->code;
         $tour->ten_tour = $request->name;
@@ -173,14 +188,25 @@ class ManagerTourController extends Controller
         $tour->gia_nguoi_lon = $request->priceAdult;
         $tour->gia_thieu_nien = $request->priceYoung;
         $tour->gia_tre_em = $request->priceChild;
-        $tour->ngay_khoi_hanh = $request->dateStart;
+        // $tour->ngay_khoi_hanh = $request->dateStart;
         $tour->so_cho = $request->amountPeople;
-        $tour->so_ngay = $request->amountDay;
-        $tour->so_dem = $request->amountNight;
+        $tour->so_ngay = (int)$request->amountDay + 1;
+        $tour->so_dem = (int)$request->amountNight + 1;
         $tour->mo_ta = $request->description;
         $tour->yeu_cau = $request->required;
         $tour->luu_y = $request->notice;
+        $tour->slug = Str::slug($request->name);
         if($tour->save()){
+            $id_tour = $tour->id;
+            foreach($request->dateStart as $key => $value) {
+                $tour_ngay = new Tour_ngay();
+                $tour_ngay->ma_tour = $id_tour;
+                $tour_ngay->ngay    = strtotime($value);
+                $tour_ngay->gia     = $request->priceAdult;
+                $tour_ngay->so_cho  = $request->amountPeople;
+                $tour_ngay->so_ngay = (int)$request->amountDay + 1;
+                $tour_ngay->saveOrFail();
+            }
             $tour_location = new Tour_DiaDiem();
             $tour_location->ma_tour = $tour->id;
             $tour_location->ma_dia_diem = $request->location;
@@ -191,6 +217,22 @@ class ManagerTourController extends Controller
             $detail_tour->noi_khoi_hanh = $request->location_depart;
             $detail_tour->noi_tap_chung = $request->location_general;
             $detail_tour->save();
+            $newsletter = DB::table('newsletter')
+                            ->where('status', '=' , 0)
+                            ->get();
+            if($newsletter) {
+                foreach($newsletter as $value) {
+                    $message = [
+                        'action'    => 'notify',
+                        'name'      => 'Bạn',
+                        'tour'      => $request->name,
+                        'slug'      => Str::slug($request->name),
+                    ];
+                    dispatch(new TestMailJob($message, $value->email))->delay(now()->addSeconds(5));
+
+                }
+            }
+
             return redirect()->route('managerTour.index');
         }
 
@@ -206,9 +248,6 @@ class ManagerTourController extends Controller
             'transpost' => 'required',
             'agerfrom' => 'required|numeric|min:1|max:100',
             'priceAdult' => 'required|numeric|min:1|max:100000000',
-            'priceYoung' => 'required|numeric',
-            'priceChild' => 'required|numeric|min:0|max:100000000',
-            'dateStart' => 'required|date|after:today',
             'amountPeople' => 'required|numeric|min:1|max:100',
             'amountDay' => 'required|numeric|min:1|max:100',
             'amountNight' => 'required|numeric',
@@ -225,23 +264,23 @@ class ManagerTourController extends Controller
         }
 
         if($request->priceAdult < 1 || $request->priceAdult > 100000000){
-            return redirect()->back()->with('error', 'Giá người lớn phải từ 1 đến 100.000.000');
+            return redirect()->back()->with('error', 'Giá phải từ 1 đến 100.000.000');
         }
 
-        if($request->priceYoung < 1 || $request->priceYoung > 100000000){
-            return redirect()->back()->with('error', 'Giá trẻ em phải từ 1 đến 100.000.000');
-        }
+        // if($request->priceYoung < 1 || $request->priceYoung > 100000000){
+        //     return redirect()->back()->with('error', 'Giá trẻ em phải từ 1 đến 100.000.000');
+        // }
 
-        if($request->priceChild < 0 || $request->priceChild > 100000000){
-            return redirect()->back()->with('error', 'Giá em bé phải từ 0 đến 100.000.000');
-        }
+        // if($request->priceChild < 0 || $request->priceChild > 100000000){
+        //     return redirect()->back()->with('error', 'Giá em bé phải từ 0 đến 100.000.000');
+        // }
 
-        if($request->priceYoung > $request->priceAdult){
-            return redirect()->back()->with('error', 'Giá trẻ em phải nhỏ hơn giá người lớn');
-        }
-        if($request->priceChild > $request->priceYoung){
-            return redirect()->back()->with('error', 'Giá em bé phải nhỏ hơn giá trẻ em');
-        }
+        // if($request->priceYoung > $request->priceAdult){
+        //     return redirect()->back()->with('error', 'Giá trẻ em phải nhỏ hơn giá người lớn');
+        // }
+        // if($request->priceChild > $request->priceYoung){
+        //     return redirect()->back()->with('error', 'Giá em bé phải nhỏ hơn giá trẻ em');
+        // }
 
         if($request->amountPeople < 1 || $request->amountPeople > 100){
             return redirect()->back()->with('error', 'Số người phải từ 1 đến 100');
@@ -282,7 +321,7 @@ class ManagerTourController extends Controller
         $tour->gia_nguoi_lon = $request->priceAdult;
         $tour->gia_thieu_nien = $request->priceYoung;
         $tour->gia_tre_em = $request->priceChild;
-        $tour->ngay_khoi_hanh = $request->dateStart;
+        // $tour->ngay_khoi_hanh = $request->dateStart;
         $tour->so_cho = $request->amountPeople;
         $tour->so_ngay = $request->amountDay;
         $tour->so_dem = $request->amountNight;
@@ -290,6 +329,31 @@ class ManagerTourController extends Controller
         $tour->yeu_cau = $request->required;
         $tour->luu_y = $request->notice;
         if($tour->save()){
+            foreach($request->dateStart as $key => $value) {
+                $check = Tour_ngay::where('ma_tour', $managerTour)
+                ->where('ngay', strtotime($value))
+                ->first();
+                if($check){
+                    // $tour_ngay = DB::table('tour_ngay')
+                    // ->where('ma_tour', $managerTour)
+                    // ->where('ngay', strtotime($value))
+                    // ->update([
+                    //     'gia' => $request->priceAdult,
+                    //     'so_cho' => $request->amountPeople,
+                    //     'so_ngay' => (int)$request->amountDay,
+                    // ]);
+                    continue;   
+                }else{
+                    $tour_ngay = new Tour_ngay();
+                    $tour_ngay->ma_tour = $managerTour;
+                    $tour_ngay->ngay    = strtotime($value);
+                    $tour_ngay->gia     = $request->priceAdult;
+                    $tour_ngay->so_cho  = $request->amountPeople;
+                    $tour_ngay->so_ngay = (int)$request->amountDay;
+                    $tour_ngay->saveOrFail();
+                }
+
+            }
             $tour_location = new Tour_DiaDiem();
             if($tour_location->where('ma_tour', $tour->id)->delete()){
                 $tour_location->ma_tour = $tour->id;
@@ -304,6 +368,25 @@ class ManagerTourController extends Controller
                 $detail_tour->noi_tap_chung = $request->location_general;
                 $detail_tour->save();
             }
+            $tour_yeu_thich = DB::table('tour_yeu_thich')
+            ->join('khach_hangs', 'tour_yeu_thich.khach_hang_id', '=', 'khach_hangs.id')
+            ->where('tour_yeu_thich.tour_id', $managerTour)
+            ->where('tour_yeu_thich.status', 1)
+            ->get();
+            if($tour_yeu_thich){
+                foreach($tour_yeu_thich as $key => $value){
+                    $messages = [
+                        'action' => 'waitlist_accept',
+                        'tour' => $tour->ten_tour,
+                        'tour_id' => $tour->id,
+                        'slug' => $tour->slug,
+                        'name' => $value->ten_khach_hang,
+                    ];
+                    dispatch(new TestMailJob($messages, $value->email))->delay(now()->addMinutes(1));
+                    
+                }
+            }
+
             return redirect()->route('managerTour.index');
         }
 
@@ -314,8 +397,25 @@ class ManagerTourController extends Controller
     {
         // dd($id);
         $tour = Tour::find($id);
+        // nếu có người đặt tour thì khoong xóa được
+        $check = DB::table('order_details')
+        ->join('orders', 'order_details.order_id', '=', 'orders.id')
+        ->where('order_details.ma_tour', $id)
+        ->where('orders.trang_thai', '=', 2)
+        ->get();
+        if($check){
+            return redirect()->back()->with('error', 'Không thể xóa tour đã có người đặt');
+        }
+        
         $tour_location = new Tour_DiaDiem();
         $detail_tour = new ChiTietTour();
+        $tour_ngay = new Tour_ngay();
+        $tour_yeu_thich = new Tour_yeu_thich();
+        $tour_yeu_thich->where('tour_id', $id)->delete();
+
+        $hinh_anh = new Hinh_anh();
+        $hinh_anh->where('ma_tour', $id)->delete();
+        $tour_ngay->where('ma_tour', $tour->id)->delete();
         $detail_tour->where('ma_tour', $tour->id)->delete();
         $tour_location->where('ma_tour', $tour->id)->delete();
         $tour->delete();

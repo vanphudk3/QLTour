@@ -272,6 +272,7 @@ body {
 }
 
 .navbar-header .menu-navbar a {
+    white-space: nowrap;
     text-decoration: none;
     margin: 0 10px;
     color: white;
@@ -736,6 +737,7 @@ main {
 }
 
 .type-search-item span {
+    white-space: nowrap;
     font-size: 15px;
     font-weight: 500;
 }
@@ -3157,7 +3159,7 @@ main {
 
 .sidebar-form .search-available {
     margin: 0 0 30px;
-    padding: 40px 50px 50px;
+    padding: 40px 25px 50px;
     border-style: dashed;
     border-width: 1px;
     border-color: var(--border);
@@ -3252,6 +3254,7 @@ main {
     font-weight: 400;
     font-size: 14px;
     line-height: 18px;
+    /* margin-right: auto; */
 }
 
 .booking-guests-result ul li .booking-price {
@@ -3265,6 +3268,7 @@ main {
     border: 1px solid var(--border);
     padding: 0 15px;
     color: var(--text);
+    /* margin-left: 10px; */
 }
 
 .booking-guests-result ul li select option {
@@ -4365,6 +4369,7 @@ main {
     color: var(--text);
     font-size: 16px;
     background-color: transparent;
+    white-space: nowrap;
 }
 
 .booking-form__block .coupon .coupon-block .coupon-btn:hover {
@@ -6301,3 +6306,63 @@ main {
 
 /* end page Account Member */
 
+/* page Auth */
+.column {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    overflow: hidden;
+    
+}
+
+.column::-webkit-scrollbar {
+    display: none;
+}
+
+
+.mr-5 {
+    margin-right: 5px;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.css-nxo287-MuiInputBase-input-MuiOutlinedInput-input {
+    padding: 4.5px 14px;
+}
+
+.edit-contact {
+    margin-left: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--lighter);
+}
+
+.edit-contact:hover {
+    color: var(--primary);
+}
+
+.edit-contact-detail .form-select{
+    padding: 0.80rem 2.25rem 0.5rem 1.8rem;
+}
+
+.custom-day-wrapper {
+    position: relative;
+  }
+  
+  .custom-day {
+    /* Thêm kiểu CSS cho ngày */
+  }
+  
+  .custom-day-price {
+    position: absolute;
+    bottom: -20px; /* Điều chỉnh vị trí xuất hiện của giá */
+    left: 0;
+    font-size: 12px;
+    color: #888;
+  }
+
+  .hide {
+    display: none!important;
+  }
+  

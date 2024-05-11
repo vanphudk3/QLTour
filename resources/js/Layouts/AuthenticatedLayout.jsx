@@ -56,15 +56,7 @@ export default function Authenticated({ auth, header, children }) {
                                 </NavLinkB>
                             </li>
                             <li class="nav-item">
-                                {auth.user.role == "admin" ? (
-                                    <NavLinkB
-                                        aria-current="page"
-                                        href={route("role.index")}
-                                        active={route().current("role.index")}
-                                    >
-                                        Role
-                                    </NavLinkB>
-                                ) : auth.user.role == "manager" ? (
+                                {auth.user.role == "manager" || auth.user.role == "admin" ? (
                                     <NavLinkB
                                         aria-current="page"
                                         href={route("managerblog.index")}
@@ -77,13 +69,16 @@ export default function Authenticated({ auth, header, children }) {
                                 ) : (
                                     <NavLinkB
                                         aria-current="page"
-                                        href={route("dashboard")}
-                                        active={route().current("dashboard")}
+                                        href={route("managerblog.index")}
+                                        active={route().current(
+                                            "managerblog.index"
+                                        )}
                                     >
                                         Blog
                                     </NavLinkB>
                                 )}
                             </li>
+                            {auth.user.role === "admin" ? (
                             <li class="nav-item">
                                 <NavLinkB
                                     aria-current="page"
@@ -93,6 +88,21 @@ export default function Authenticated({ auth, header, children }) {
                                     Account
                                 </NavLinkB>
                             </li>
+                            )  : (
+                                <li>
+                                <NavLinkB
+                                    aria-current="page"
+                                    href={route(
+                                        "schedule.index"
+                                    )}
+                                    active={route().current(
+                                        "schedule.index"
+                                    )}
+                                >
+                                    Schedule Tour
+                                </NavLinkB>
+                            </li>
+                            )}
                             {auth.user.role === "admin" && (
                                 <>
                                     <li class="nav-item">
@@ -183,6 +193,19 @@ export default function Authenticated({ auth, header, children }) {
                                                     )}
                                                 >
                                                     Schedule Tour
+                                                </NavLinkB>
+                                            </li>
+                                            <li>
+                                                <NavLinkB
+                                                    aria-current="page"
+                                                    href={route(
+                                                        "khuyenmai.index"
+                                                    )}
+                                                    active={route().current(
+                                                        "khuyenmai.index"
+                                                    )}
+                                                >
+                                                    Promotion
                                                 </NavLinkB>
                                             </li>
                                         </ul>

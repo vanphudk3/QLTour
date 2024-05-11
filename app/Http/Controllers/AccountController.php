@@ -57,6 +57,10 @@ class AccountController extends Controller
 
     public function update(Request $request, User $account)
     {
+        if(isset($request->trang_thai)) {
+            $account->status = $request->trang_thai;
+            $account->save();
+        }
         if($request->role_id){
             $roles = Role::where('id', $request->role_id)->first('name');
             $roles->name = strtolower($roles->name);

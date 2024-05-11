@@ -1,4 +1,54 @@
+import * as React from "react";
+
+import { Link, router, usePage } from "@inertiajs/react";
+import Swal from "sweetalert2";
+
 export default function Footer() {
+    let lang = usePage().props.lang;
+
+    const handleSubscribe = (e) => {
+        e.preventDefault();
+        let email = e.target.form[0].value;
+        console.log(email);
+        fetch("/api/subscribe", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+            body: JSON.stringify({
+                email: email,
+            }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.status === "success") {
+                    // alert(data.message);
+                    Swal.fire({
+                        title: data.message,
+                        icon: "success",
+                        toast: true,
+                        position: "top-end",
+                        showConfirmButton: false,
+                        timer: 3000,
+                    })
+                } else {
+                    // alert(data.message);
+                    Swal.fire({
+                        title: data.message,
+                        icon: "error",
+                        toast: true,
+                        position: "top-end",
+                        showConfirmButton: false,
+                        timer: 3000,
+                    })
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+            });
+    };
+
     return (
         <footer className="footer">
             <div className="footer-head">
@@ -7,16 +57,16 @@ export default function Footer() {
                         <div className="col" style={{paddingRight: 0}}>
                             <div className="inner-column">
                                 <h2 className="heading-title">
-                                    Sign Up for Our Newsletter
+                                    {lang['Sign Up for Our Newsletter']}
                                 </h2>
                                 <p>
-                                    Save up to 50% on tours and trips. Get
-                                    instant access to lower prices.
+                                    {lang['Save up to 50% on tours and trips. Get instant access to lower prices.']}
                                 </p>
                                 <form action="">
                                     <div className="contact-email">
                                         <input
                                             type="email"
+                                            name="email"
                                             placeholder="Enter your Email address"
                                         />
                                     </div>
@@ -24,8 +74,9 @@ export default function Footer() {
                                         <button
                                             type="submit"
                                             className="btn-subscribe"
+                                            onClick={handleSubscribe}
                                         >
-                                            Subscribe{" "}
+                                            {lang['Subscribe']}{" "}
                                             <i className="fa-solid fa-arrow-right"></i>
                                         </button>
                                     </div>
@@ -38,11 +89,10 @@ export default function Footer() {
                                 style={{backgroundColor: "#edf1f4"}}
                             >
                                 <h2 className="heading-title">
-                                    24/7 Customer Support
+                                    {lang['24/7 Customer Support']}
                                 </h2>
                                 <p>
-                                    Contact us now to have all of your
-                                    tour-related question answered.
+                                    {lang['Contact us now to have all of your tour-related question answered.']}
                                 </p>
                                 <div className="contact">
                                     <div className="contact-us">
@@ -69,7 +119,7 @@ export default function Footer() {
                                     </div>
                                     <div className="chat-us">
                                         <a href="" className="btn-subscribe">
-                                            Subscribe{" "}
+                                            {lang['Subscribe']}{" "}
                                             <i className="fa-solid fa-arrow-right"></i>
                                         </a>
                                     </div>
@@ -85,7 +135,7 @@ export default function Footer() {
                         <div className="col-4">
                             <div className="footer-title">
                                 <h2 className="heading-title">
-                                    TOP DESTINATIONS
+                                    {lang['TOP DESTINATIONS']}
                                 </h2>
                             </div>
                             <ul className="list-items">
@@ -108,39 +158,39 @@ export default function Footer() {
                         </div>
                         <div className="col-2">
                             <div className="footer-title">
-                                <h2 className="heading-title">COMPANY</h2>
+                                <h2 className="heading-title">{lang['COMPANY']}</h2>
                             </div>
                             <ul className="list-items">
                                 <li className="list-item">
-                                    <a href="">Contact us</a>
+                                    <a href="">{lang['Contact Us']}</a>
                                 </li>
                                 <li className="list-item">
-                                    <a href="">About us</a>
+                                    <a href="">{lang['About Us']}</a>
                                 </li>
                                 <li className="list-item">
-                                    <a href="">Travel Guides</a>
+                                    <a href="">{lang['Travel Guides']}</a>
                                 </li>
                                 <li className="list-item">
-                                    <a href="">Data Policy</a>
+                                    <a href="">{lang['Data Policy']}</a>
                                 </li>
                             </ul>
                         </div>
                         <div className="col">
                             <div className="footer-title">
-                                <h2 className="heading-title">COMMUNITY</h2>
+                                <h2 className="heading-title">{lang['COMMUNITY']}</h2>
                             </div>
                             <ul className="list-items">
                                 <li className="list-item">
-                                    <a href="">Adventure</a>
+                                    <a href="">{lang['Adventure']}</a>
                                 </li>
                                 <li className="list-item">
-                                    <a href="">Celebration</a>
+                                    <a href="">{lang['Celebration']}</a>
                                 </li>
                                 <li className="list-item">
-                                    <a href="">Family</a>
+                                    <a href="">{lang['Family']}</a>
                                 </li>
                                 <li className="list-item">
-                                    <a href="">Honeymoon</a>
+                                    <a href="">{lang['Honeymoon']}</a>
                                 </li>
                             </ul>
                         </div>

@@ -3,8 +3,11 @@
 use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\ManagerTourController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\DiaDiemController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TourController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,3 +28,9 @@ Route::post('/profileMember/{id}/update', [KhachHangController::class, 'updatePr
 Route::post('/profileMember/{id}/cancelorder', [KhachHangController::class, 'cancelorder']);
 
 Route::get('/search/{search}', [SearchController::class, 'search'])->name('search');
+// Route::put('/addLocation/{location}', [DiaDiemController::class, 'addLocation'])->name('addLocation');
+
+// Route::get('/language/{locale}', [WelcomeController::class, 'changeLanguage'])->name('change-language');
+Route::get('/language/change/{locale}', [WelcomeController::class, 'changeLanguage'])->name('change-language');
+Route::post('/subscribe', [WelcomeController::class, 'subscribe'])->name('subscribe');
+Route::post('/addtoList', [TourController::class, 'add_to_list'])->name('add-to-list');

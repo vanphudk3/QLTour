@@ -14,31 +14,45 @@ import { isEmpty } from "lodash";
 import React, { Component } from 'react';
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "ckeditor5-custom-build/build/ckeditor";
-
+import { useEffect } from "react";
 
 
 export default function Create(props) {
     const tours = usePage().props.tours;
     const forcusTour = usePage().props.forcusTour;
-    const { data, setData, post, progress, processing, errors, reset } =
+    const { data, setData, post, progress, processing, errors, reset, error } =
         useForm({
+            id: forcusTour.id,
             idTour: !isEmpty(forcusTour) ? forcusTour.ten_tour : "",
             schedule: !isEmpty(forcusTour) ? forcusTour.schedule : [],
-            title: "",
-            content: "",
         });
-    const onHandleChange = (event) => {
-        setData(
-            event.target.name,
-            event.target.type === "checkbox"
-                ? event.target.checked
-                : event.target.value
-        );
-    };
+        console.log("forcusTour", forcusTour);
+        const onHandleChange = (event, index) => {
+            const { name, value } = event.target;
+            setData(name, value); // Update the form data
+        
+            if (name === `title${index}`) {
+                const updatedSchedule = [...data.schedule];
+                updatedSchedule[index].tieu_de = value;
+                setData("schedule", updatedSchedule);
+            }
+        };
+        
 
     const submit = (e) => {
         e.preventDefault();
         post(route("schedule.store"));
+        if (error) {
+            Swal.fire({
+                icon: "error",
+                title: error,
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 3000,
+            });
+            return;
+        }
     };
 
     const top100Films = [];
@@ -54,7 +68,7 @@ export default function Create(props) {
         <Authenticated
             auth={props.auth}
             errors={props.errors}
-            header={<h2 className="heading-title">Create Schedule</h2>}
+            header={<h2 className="heading-title">Edit Schedule</h2>}
         >
             <Head title="Create Schedule" />
 
@@ -79,6 +93,7 @@ export default function Create(props) {
                                 renderInput={(params) => (
                                     <TextField {...params} label="Tours" />
                                 )}
+                                disabled={true}
                             />
 
                             <InputError
@@ -94,7 +109,7 @@ export default function Create(props) {
                                         <>
 
                                             <div className="">
-                                                <div className="mt-4 mb-3">
+                                                {/* <div className="mt-4 mb-3">
                                                 <InputLabel forInput="date" value="Date:" />
                                                     <TextInput
                                                         id="schedule"
@@ -104,17 +119,21 @@ export default function Create(props) {
                                                         value={schedule}
                                                         disabled
                                                     />
-                                                </div>
+                                                </div> */}
                                                 <div className="mt-4 mb-3">
                                                     <TextField
                                                         id="outlined-basic"
                                                         label="Title schedule"
                                                         variant="outlined"
+                                                        value={schedule.tieu_de}
                                                         sx={{ width: "100%" }}
                                                         name={`title${index}`}
                                                         // value={data.title}
-                                                        onChange={
-                                                            onHandleChange
+                                                        onChange={(event) =>
+                                                            onHandleChange(
+                                                                event,
+                                                                index
+                                                            )
                                                         }
                                                         required
                                                     />
@@ -144,11 +163,14 @@ export default function Create(props) {
 
                                                     <CKEditor
                                                         editor={ClassicEditor}
-                                                        data={data.content}
+                                                        data={schedule.noi_dung}
                                                         onChange={(event, editor) => {
                                                             const data = editor.getData();
-                                                            setData(`content${index}`, data);
+                                                            // setData(`content${index}`, data);
+                                                            schedule.noi_dung = data;
+
                                                         }}
+                                            
                                                     />
 
                                                     <InputError
@@ -174,7 +196,7 @@ export default function Create(props) {
                                     className="ml-4"
                                     processing={processing}
                                 >
-                                    Create
+                                    Save
                                 </PrimaryButton>
                             </>
                         )}

@@ -11,7 +11,10 @@ import InputLabel from "@/Components/InputLabel";
 export default function Reply(props) {
     // const [rating, setRating] = useState(0);
     const detailTour = usePage().props.detailTour;
+    console.log(detailTour);
     const customer = usePage().props.customer;
+    const lang = usePage().props.lang;
+    const _lang = usePage().props._lang;
     const { data, setData, post, processing, errors, reset } = useForm({
         rate: 0,
         comment: "",
@@ -49,8 +52,8 @@ export default function Reply(props) {
 
     // chỉ comment duy nhất 1 lần cho 1 tour
     const checkCommented = () => {
-        if (detailTour.isCommented) return false;
-        return true;
+        if (detailTour.count - detailTour.iscoment > 0) return true;
+        return false;
     };
 
     const [validationMsg, setValidationMsg] = useState({});
@@ -82,7 +85,7 @@ export default function Reply(props) {
                 if (result.isConfirmed) {
                     window.location.href = route("customer.login", {
                         redirect: window.location.href,
-                        
+                        lang: _lang
                     });
                 }
             });
@@ -102,9 +105,16 @@ export default function Reply(props) {
             });
             return;
         }
+        if (detailTour.isBooked !== 3) {
+            Swal.fire({
+                title: "Vui lòng quay lại sau khi đã sử dụng tour",
+                icon: "error",
+            });
+            return;
+        }
         if (!checkCommented()) {
             Swal.fire({
-                title: "Bạn đã comment",
+                title: "Bạn đã comment rồi. Bạn có thể đặt tour này thêm để có thể comment",
                 icon: "error",
             });
             return;
@@ -113,7 +123,7 @@ export default function Reply(props) {
         if (!isValid) {
             return;
         }
-        post(route("review.store"), {
+        post(route("review.store" , {lang: _lang}), {
             onSuccess: () => {
                 setOpenEdit(true);
                 data.comment = "";
@@ -139,14 +149,14 @@ export default function Reply(props) {
 
     return (
         <div className="comment-respond">
-            <span className="comment-reply-title">Leave a Reply</span>
+            <span className="comment-reply-title">{lang['Leave a Reply']}</span>
             <form onSubmit={submit} className="comment-form">
                 <p className="comment-notes">
                     <span id="email-notes">
-                        Your email address will not be published.
+                        {lang['Your email address will not be published.']}
                     </span>{" "}
                     <span className="required-field-message" aria-hidden="true">
-                        Required fields are marked{" "}
+                        {lang['Required fields are marked']}{" "}
                         <span className="required" aria-hidden="true">
                             *
                         </span>
@@ -172,7 +182,7 @@ export default function Reply(props) {
                                     Zindex: "999",
                                 }}
                             >
-                                Comment successfully
+                                {lang['Comment successfully']}
                             </Alert>
                         </Snackbar>
                         <div className="flex booking-guests-result">
@@ -187,7 +197,7 @@ export default function Reply(props) {
                 <ul className="comment-form-rating-ul">
                     <li>
                         <span className="comment-form-rating-label">
-                            Your rating :
+                            {lang['Your rating']} :
                         </span>
                     </li>
                     <li>

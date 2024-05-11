@@ -68,6 +68,8 @@ export default function Profile(props) {
     const customer = usePage().props.customer;
     const list_order = usePage().props.list_order;
     const profile = usePage().props.profile;
+    const lang = usePage().props.lang;
+    const _lang = usePage().props._lang;
 
     const [open, setOpen] = useState(false);
     const [openEdit, setOpenEdit] = useState(false);
@@ -89,7 +91,7 @@ export default function Profile(props) {
             birthday: customer.ngay_sinh,
         });
 
-    console.log(profile);
+    // console.log(profile);
     const onHandleChange = (event) => {
         setData(
             event.target.name,
@@ -162,6 +164,7 @@ export default function Profile(props) {
             if (result.isConfirmed) {
                 setOpenEdit(true);
                 post(`/api/profileMember/${customer.id}/update`, data);
+                // router.put(`/api/profileMember/${customer.id}/update`, data);
             }
         });
     };
@@ -209,7 +212,7 @@ export default function Profile(props) {
                         style={{ background: "content-box" }}
                     >
                         <div className="breadcrumb-main">
-                            <h1 className="zourney-title"> Profile</h1>
+                            <h1 className="zourney-title"> {lang['Profile']}</h1>
                         </div>
                     </div>
                 </div>
@@ -251,7 +254,7 @@ export default function Profile(props) {
                                                         )
                                                     }
                                                 >
-                                                    Account
+                                                    {lang['Account']}
                                                 </MenuItem>
                                                 <MenuItem
                                                     className="tablinks active"
@@ -262,7 +265,7 @@ export default function Profile(props) {
                                                         )
                                                     }
                                                 >
-                                                    Order
+                                                    {lang['Order']}
                                                 </MenuItem>
                                                 {/* <MenuItem
                                                     className="tablinks active"
@@ -273,7 +276,7 @@ export default function Profile(props) {
                                                         )
                                                     }
                                                 >
-                                                    Reviews
+                                                    {lang['Wishlist']}
                                                 </MenuItem> */}
                                             </MenuList>
                                         </Paper>
@@ -287,7 +290,7 @@ export default function Profile(props) {
                                         className="search-available tabcontent"
                                     >
                                         <h6 className="heading-title">
-                                            Thông tin cá nhân
+                                            {lang['Infor']}
                                         </h6>
                                         <Snackbar
                                             open={openEdit}
@@ -307,7 +310,7 @@ export default function Profile(props) {
                                                     Zindex: "999",
                                                 }}
                                             >
-                                                Update profile success!
+                                                {lang['Update profile success!']}
                                             </Alert>
                                         </Snackbar>
                                         {/* {!isEmpty(profile.success) && (
@@ -317,7 +320,7 @@ export default function Profile(props) {
                                                 <table>
                                                     <tr>
                                                         <td scope="row">
-                                                            Name:
+                                                            {lang['Name']}:
                                                         </td>
                                                         <td>
                                                             {
@@ -351,7 +354,7 @@ export default function Profile(props) {
                                                             }}
                                                         >
                                                             <td scope="row">
-                                                                Edit name:
+                                                                {lang['Edit']} {" "} {lang['Name']}:
                                                             </td>
                                                             <td>
                                                                 {/* <InputLabel forInput="content" value="Edit name:" /> */}
@@ -386,7 +389,7 @@ export default function Profile(props) {
                                                                         onHandleSubmit
                                                                     }
                                                                 >
-                                                                    Save
+                                                                    {lang['Save']}
                                                                 </Button>
                                                             </td>
                                                         </Collapse>
@@ -425,7 +428,7 @@ export default function Profile(props) {
                                                             }}
                                                         >
                                                             <td scope="row">
-                                                                Edit email:
+                                                                {lang['Edit']} email:
                                                             </td>
                                                             <td>
                                                                 {/* <InputLabel forInput="content" value="Edit name:" /> */}
@@ -461,14 +464,14 @@ export default function Profile(props) {
                                                                         onHandleSubmit
                                                                     }
                                                                 >
-                                                                    Save
+                                                                    {lang['Save']}
                                                                 </Button>
                                                             </td>
                                                         </Collapse>
                                                     </tr>
                                                     <tr>
                                                         <td scope="row">
-                                                            Phone:
+                                                            {lang['Phone']}:
                                                         </td>
                                                         <td>
                                                             {
@@ -502,7 +505,7 @@ export default function Profile(props) {
                                                             }}
                                                         >
                                                             <td scope="row">
-                                                                Edit phone:
+                                                                {lang['Edit']} {" "} {lang['Phone']}:
                                                             </td>
                                                             <td>
                                                                 <TextInput
@@ -536,15 +539,14 @@ export default function Profile(props) {
                                                                         onHandleSubmit
                                                                     }
                                                                 >
-                                                                    Save
+                                                                    {lang['Save']}
                                                                 </Button>
                                                             </td>
                                                         </Collapse>
                                                     </tr>
                                                     <tr>
                                                         <td>
-                                                            Citiez
-                                                            identification
+                                                            {lang['Citiez identification']}
                                                         </td>
                                                         <td>
                                                             {
@@ -578,8 +580,7 @@ export default function Profile(props) {
                                                             }}
                                                         >
                                                             <td scope="row">
-                                                                Edit citizen
-                                                                identification
+                                                                {lang['Edit']} {" "} {lang['Citiez identification']}
                                                             </td>
                                                             <td>
                                                                 {/* <InputLabel forInput="content" value="Edit name:" /> */}
@@ -614,14 +615,14 @@ export default function Profile(props) {
                                                                         onHandleSubmit
                                                                     }
                                                                 >
-                                                                    Save
+                                                                    {lang['Save']}
                                                                 </Button>
                                                             </td>
                                                         </Collapse>
                                                     </tr>
                                                     <tr>
                                                         <td scope="row">
-                                                            Birthday:
+                                                            {lang['Birthday']}:
                                                         </td>
                                                         <td>
                                                             {customer.ngay_sinh}
@@ -655,7 +656,7 @@ export default function Profile(props) {
                                                             }}
                                                         >
                                                             <td scope="row">
-                                                                Edit birthday:
+                                                                {lang['Edit']} {lang['Birthday']}:
                                                             </td>
                                                             <td>
                                                                 {/* <InputLabel forInput="content" value="Edit name:" /> */}
@@ -691,14 +692,14 @@ export default function Profile(props) {
                                                                         onHandleSubmit
                                                                     }
                                                                 >
-                                                                    Save
+                                                                    {lang['Save']}
                                                                 </Button>
                                                             </td>
                                                         </Collapse>
                                                     </tr>
                                                     <tr>
                                                         <td scope="row">
-                                                            Address:
+                                                            {lang['Address']}:
                                                         </td>
                                                         <td>
                                                             {customer.dia_chi}
@@ -730,7 +731,7 @@ export default function Profile(props) {
                                                             }}
                                                         >
                                                             <td scope="row">
-                                                                Edit address:
+                                                                {lang['Edit']} {lang['Address']}:
                                                             </td>
                                                             <td>
                                                                 {/* <InputLabel forInput="content" value="Edit name:" /> */}
@@ -765,14 +766,14 @@ export default function Profile(props) {
                                                                         onHandleSubmit
                                                                     }
                                                                 >
-                                                                    Save
+                                                                    {lang['Save']}
                                                                 </Button>
                                                             </td>
                                                         </Collapse>
                                                     </tr>
                                                     <tr>
                                                         <td scope="row">
-                                                            Count tour:
+                                                            {lang['Count tour']}:
                                                         </td>
                                                         <td>
                                                             {
@@ -789,7 +790,7 @@ export default function Profile(props) {
                                         className="search-available tabcontent"
                                     >
                                         <h6 className="heading-title">
-                                            Danh sách tour đã đặt
+                                            {lang['List tour booked']}
                                         </h6>
                                         {list_order.length === 0 ? (
                                             <div className="contact-detail">
@@ -797,8 +798,7 @@ export default function Profile(props) {
                                                     <table>
                                                         <tr>
                                                             <td scope="row">
-                                                                Bạn chưa đặt
-                                                                tour nào
+                                                                {lang['No tour booked']}
                                                             </td>
                                                         </tr>
                                                     </table>
@@ -813,21 +813,19 @@ export default function Profile(props) {
                                                                 <TableRow>
                                                                     <TableCell />
                                                                     <TableCell>
-                                                                        Tên tour
+                                                                        {lang['Tour name']}
                                                                     </TableCell>
                                                                     <TableCell align="right">
-                                                                        Ngày đi
+                                                                        {lang['Start date']}
                                                                     </TableCell>
                                                                     <TableCell align="right">
-                                                                        Số lượng
+                                                                        {lang['Number of people']}
                                                                     </TableCell>
                                                                     <TableCell align="right">
-                                                                        Tổng
-                                                                        tiền
+                                                                        {lang['Total']}
                                                                     </TableCell>
                                                                     <TableCell align="right">
-                                                                        Trạng
-                                                                        thái
+                                                                        {lang['Status']}
                                                                     </TableCell>
                                                                 </TableRow>
                                                             </TableHead>
@@ -871,7 +869,7 @@ export default function Profile(props) {
                                                                             </TableCell>
                                                                             {item.tour.map(
                                                                                 (
-                                                                                    item,
+                                                                                    it,
                                                                                     index
                                                                                 ) => (
                                                                                     <>
@@ -881,17 +879,17 @@ export default function Profile(props) {
                                                                                         >
                                                                                             <NavLinkB
                                                                                                 aria-current="page"
-                                                                                                href={`/tour/${item.slug}`}
+                                                                                                href={`/tour/${it.slug}?lang=${_lang}`}
                                                                                                 className="content-book"
                                                                                             >
                                                                                                 {
-                                                                                                    item.ten_tour
+                                                                                                    it.ten_tour
                                                                                                 }
                                                                                             </NavLinkB>
                                                                                         </TableCell>
                                                                                         <TableCell align="right">
                                                                                             {
-                                                                                                item.ngay_khoi_hanh
+                                                                                                item.tour_ngay
                                                                                             }
                                                                                         </TableCell>
                                                                                     </>
@@ -916,25 +914,27 @@ export default function Profile(props) {
                                                                                 {item.trang_thai ==
                                                                                     0 && (
                                                                                     <>
-                                                                                        Đã
-                                                                                        hủy
+                                                                                        {lang['Cancel']}
                                                                                     </>
                                                                                 )}
                                                                                 {item.trang_thai ==
                                                                                     1 && (
                                                                                     <>
-                                                                                        Chờ
-                                                                                        xử
-                                                                                        lý
+                                                                                        {lang['Pending']}
                                                                                     </>
                                                                                 )}
 
                                                                                 {item.trang_thai ==
                                                                                     2 && (
                                                                                     <>
-                                                                                        Đã
-                                                                                        xử
-                                                                                        lý
+                                                                                        {lang['Approved']}
+                                                                                    </>
+                                                                                )}
+
+                                                                                {item.trang_thai ==
+                                                                                    3 && (
+                                                                                    <>
+                                                                                        {lang['Compete']}
                                                                                     </>
                                                                                 )}
                                                                             </TableCell>
@@ -953,7 +953,7 @@ export default function Profile(props) {
                                                                                                 )
                                                                                             }
                                                                                         >
-                                                                                            Cancel
+                                                                                            {lang['Cancel']}
                                                                                         </Button>
                                                                                     </TableCell>
                                                                                 </>
@@ -990,13 +990,7 @@ export default function Profile(props) {
                                                                                             gutterBottom
                                                                                             component="div"
                                                                                         >
-                                                                                            Danh
-                                                                                            sách
-                                                                                            khách
-                                                                                            hàng
-                                                                                            đăng
-                                                                                            ký
-                                                                                            tour
+                                                                                            {lang['List guest']}
                                                                                         </Typography>
                                                                                         <Table
                                                                                             size="small"
@@ -1005,24 +999,19 @@ export default function Profile(props) {
                                                                                             <TableHead>
                                                                                                 <TableRow>
                                                                                                     <TableCell>
-                                                                                                        STT
+                                                                                                        {lang['no']}
                                                                                                     </TableCell>
                                                                                                     <TableCell>
-                                                                                                        Họ
-                                                                                                        và
-                                                                                                        tên
+                                                                                                        {lang['Name']}
                                                                                                     </TableCell>
                                                                                                     <TableCell>
-                                                                                                        Số
-                                                                                                        điện
-                                                                                                        thoại
+                                                                                                        {lang['Phone']}
                                                                                                     </TableCell>
                                                                                                     <TableCell align="right">
-                                                                                                        CCCD
+                                                                                                        {lang['Citiez identification']}
                                                                                                     </TableCell>
                                                                                                     <TableCell align="right">
-                                                                                                        Độ
-                                                                                                        tuổi
+                                                                                                        {lang['Age']}
                                                                                                     </TableCell>
                                                                                                 </TableRow>
                                                                                             </TableHead>

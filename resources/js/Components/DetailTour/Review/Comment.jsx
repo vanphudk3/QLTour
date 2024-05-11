@@ -4,6 +4,8 @@ import { Rating } from "@mui/material";
 
 export default function Comment() {
     const comments = usePage().props.comments;
+    const lang = usePage().props.lang;
+    const _lang = usePage().props._lang;
 
     return (
         <ol className="comment-list">
@@ -54,7 +56,8 @@ export default function Comment() {
                         <div className="comment-content">
                             <div className="comment-text">
                                 <p>
-                                    Chưa có đánh giá nào
+                                    {/* Chưa có đánh giá nào */}
+                                    {lang['No reviews yet']}
                                 </p>
                             </div>
                         </div>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\TestMailJob;
 use App\Models\Blog;
 use App\Models\DiaDiem;
 use App\Models\KhachHang;
@@ -12,14 +13,24 @@ use App\Models\Tour_DiaDiem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class WelcomeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        // lấy từ param lang
+        $lang = $request->query('lang')??'en';
+        // dd($lang);
+        $_lang = $lang;
+        
+        $lang = $this->getLanguage($lang);
+        // dd($lang);
         $tours = DB::table('tour_diadiems')
             ->join('dia_diems', 'tour_diadiems.ma_dia_diem', '=', 'dia_diems.id')
             ->join('hinh_anhs', 'dia_diems.id', '=', 'hinh_anhs.ma_dia_diem')
@@ -127,10 +138,10 @@ class WelcomeController extends Controller
             ->join('dia_diems', 'tour_diadiems.ma_dia_diem', '=', 'dia_diems.id')
             ->join('hinh_anhs', 'dia_diems.id', '=', 'hinh_anhs.ma_dia_diem')
             ->join('tours', 'tour_diadiems.ma_tour', '=', 'tours.id')
-            ->select('dia_diems.id', 'dia_diems.dia_chi', 'tours.ten_tour', 'tours.gia_nguoi_lon', 'tours.so_ngay', 'tours.ngay_khoi_hanh', 'hinh_anhs.ten')
+            ->select('dia_diems.id', 'dia_diems.dia_chi', 'tours.ten_tour', 'tours.slug', 'tours.gia_nguoi_lon', 'tours.so_ngay', 'tours.ngay_khoi_hanh', 'hinh_anhs.ten')
             ->where(DB::raw('hinh_anhs.id'), DB::raw('(SELECT id FROM hinh_anhs WHERE hinh_anhs.ma_dia_diem = dia_diems.id LIMIT 1)'))
             ->where('tours.status', '=', 'active')
-            ->groupBy('dia_diems.id', 'dia_diems.dia_chi', 'tours.ten_tour', 'tours.gia_nguoi_lon', 'tours.so_ngay', 'tours.ngay_khoi_hanh', 'hinh_anhs.ten')
+            ->groupBy('dia_diems.id', 'dia_diems.dia_chi', 'tours.ten_tour', 'tours.slug', 'tours.gia_nguoi_lon', 'tours.so_ngay', 'tours.ngay_khoi_hanh', 'hinh_anhs.ten')
             ->orderBy('tours.ngay_khoi_hanh', 'asc')
             ->get();
         foreach($lastMinuteTours as $tour){
@@ -145,6 +156,69 @@ class WelcomeController extends Controller
             $forcusBlogs[$key]->formartDate = Carbon::parse($forcusBlog->created_at)->format('d/m/Y');
         }
         $specialBlogs->formartDate = Carbon::parse($specialBlogs->created_at)->format('d/m/Y');
-        return Inertia::render('Home/Welcome', compact('tours', 'locations', 'categories', 'destinations1', 'destinations2', 'lastMinuteTours', 'specialBlogs', 'forcusBlogs'));
+        return Inertia::render('Home/Welcome', compact('tours', 'locations', 'categories', 'destinations1', 'destinations2', 'lastMinuteTours', 'specialBlogs', 'forcusBlogs', 'lang','_lang'));
     }
+
+    public function displayImage($filename){
+        $path = storage_path('app/public/' . $filename);
+        if(!File::exists($path)){
+            abort(404);
+        }
+        $file = File::get($path);
+        $type = File::mimeType($path);
+        $response = Response::make($file, 200);
+        $response->header('Content-Type', $type);
+        return $response;
+    }
+
+    // public function changeLanguage($language)
+    // {
+    //     // thêm param lang vào trong url
+    //     $url = url()->previous();
+    //     đ
+    //     // xoá param lang cũ
+    //     $url = preg_replace('/(vi|en)/', '', $url);
+    //     $url = url()->previous().'/'.$language;
+    //     return redirect($url);
+        
+    // }
+
+    function subscribe(Request $request){
+        $newsletter = DB::table('newsletter')->where('email', $request->email)->first();
+        if($newsletter){
+            return response()->json(['status' => 'error', 'message' => 'Bạn đã đăng ký nhận bản tin rồi'], 200);
+        }
+        DB::table('newsletter')->insert([
+            'email' => $request->email,
+        ]);
+        $email = $request->email;
+        $message = [
+            'action' => 'subscribe',
+            'name' => 'Bạn',
+        ];
+        dispatch(new TestMailJob($message, $email))->delay(now()->addSeconds(5));
+        return response()->json(['status' => 'success', 'message' => 'Đăng ký thành công'], 200);
+    }
+
+    public function getLanguage($lang)
+{
+    $this->language = $lang??'en';
+    session_start();
+    session()->put('locale', $this->language);
+
+    // dd(session()->get('locale'));
+    $langFilePath = base_path('lang/' . $this->language . '/home.php');
+    if (file_exists($langFilePath)) {
+        $lang = include $langFilePath;
+        $data = array();
+        foreach ($lang as $key => $value) {
+            $data[$key] = $value;
+        }
+        return $data;
+    } else {
+        return array();
+    }
+}
+
+
 }

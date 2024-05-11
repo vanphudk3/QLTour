@@ -8,24 +8,28 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import { useForm, usePage, router } from "@inertiajs/react";
 import Textarea from "@/Components/Bootstrap/Textarea";
 import Select from "@/Components/Bootstrap/Select";
+import { useEffect, useState } from "react";
+import DatePicker, { DateObject } from "react-multi-date-picker";
+import DatePanel from "react-multi-date-picker/plugins/date_panel";
+import SelectMultipleDate from "@/Components/SelectMultipleDate";
 
 export default function Edit(props) {
 
     const location = usePage().props.location;
     const locations = usePage().props.locations;
     const tours = usePage().props.tour;
+    const tour_ngay = usePage().props.tour_ngay;
+    const arr_ngay = tour_ngay.map((date) => date.ngay);
     const detaiTour = usePage().props.detaiTour;
-
+    // console.log(arr_ngay);
     const { data, setData, post, progress, processing, errors, reset } = useForm({
         code: tours[0].ky_hieu || "",
         name: tours[0].ten_tour || "",
         transpost: tours[0].transpost || "",
         agerfrom: tours[0].do_tuoi_tu || "",
         priceAdult: tours[0].gia_nguoi_lon || "",
-        priceYoung: tours[0].gia_thieu_nien || "",
-        priceChild: tours[0].gia_tre_em || "",
         description: tours[0].mo_ta || "",
-        dateStart: tours[0].dateStart || "",
+        dateStart: arr_ngay || [],
         amountPeople: tours[0].so_cho || "",
         amountDay: tours[0].so_ngay || "",
         amountNight: tours[0].so_dem || "",
@@ -47,9 +51,25 @@ export default function Edit(props) {
         );
     };
 
+    // dates.map((date,index) => {
+    //     if (typeof date.format === 'function') {
+    //         data.dateStart.push(date?.format());
+    //     }
+    // });
+    const [dates, setDates] = useState(tour_ngay.map((date) => date.ngay));
+    const format = "MM/DD/YYYY";
+    dates.map((date,index) => {
+        if (date instanceof DateObject) {
+            data.dateStart.push(date?.format());
+        }
+    });
     
-    const submit = (e) => {
+    const onsubmit = (e) => {
+        data.dateStart = data.dateStart.filter((item, index) => {
+            return data.dateStart.indexOf(item) === index;
+    });
         e.preventDefault();
+        console.log(data);
         router.post(`/auth/managerTour/${tours[0].id}`, {
             _method: 'PUT',
             code: data.code,
@@ -74,7 +94,6 @@ export default function Edit(props) {
 
         });
     };
-    console.log(data);
 
     return (
         <Authenticated
@@ -86,7 +105,7 @@ export default function Edit(props) {
 
             <div className="w-100 shadow flex justify-center">
                 <div className="ml-50 mr-50 pd-25 w-80">
-                    <form onSubmit={submit} enctype="multipart/form-data">
+                    <form onSubmit={onsubmit} enctype="multipart/form-data" method="PUT">
                         <div className="flex justify-between">
                             <div className="w-48 mb-3">
                                 <InputLabel
@@ -296,7 +315,7 @@ export default function Edit(props) {
                             </div>
                         </div>
                         <div className="flex justify-between">
-                            <div className="w-23 mb-3">
+                            <div className="w-30 mb-3">
                                 <InputLabel
                                     forInput="agerfrom"
                                     value="Age appropriate*"
@@ -319,7 +338,26 @@ export default function Edit(props) {
                                     className="mt-2"
                                 />
                             </div>
-                            <div className="w-23 mb-3">
+                            <div className="w-30 mb-3">
+                            <InputLabel
+                                    forInput="Date"
+                                    value="Date depart *"
+                                />
+                                <br>
+                                </br>
+                                         <DatePicker
+                                            value={dates}
+                                            onChange={setDates}
+                                            style={{ padding: "18px 0px", marginTop: "5px", width: "185%" }}
+                                            multiple
+                                            sort
+                                            format={format}
+                                            calendarPosition="bottom-center"
+                                            plugins={[<DatePanel />]}
+                                            inputStyle={{ fontSize: "16px", padding: "10px", width: "300px" }}
+                                        />
+                            </div>
+                            <div className="w-30 mb-3">
                                 <InputLabel
                                     forInput="priceAdult"
                                     value="Price adult*"
@@ -342,81 +380,9 @@ export default function Edit(props) {
                                     className="mt-2"
                                 />
                             </div>
-
-                            <div className="w-23 mb-3">
-                                <InputLabel
-                                    forInput="priceYoung"
-                                    value="Price young*"
-                                />
-
-                                <TextInput
-                                    id="priceYoung"
-                                    name="priceYoung"
-                                    type="number"
-                                    value={data.priceYoung}
-                                    className="mt-1 block w-full"
-                                    autoComplete="priceYoung"
-                                    isFocused={true}
-                                    handleChange={onHandleChange}
-                                    required
-                                />
-
-                                <InputError
-                                    message={errors.priceYoung}
-                                    className="mt-2"
-                                />
-                            </div>
-
-                            <div className="w-23 mb-3">
-                                <InputLabel
-                                    forInput="priceChild"
-                                    value="Price child*"
-                                />
-
-                                <TextInput
-                                    id="priceChild"
-                                    name="priceChild"
-                                    type="number"
-                                    value={data.priceChild}
-                                    className="mt-1 block w-full"
-                                    autoComplete="priceChild"
-                                    isFocused={true}
-                                    handleChange={onHandleChange}
-                                    required
-                                />
-
-                                <InputError
-                                    message={errors.priceChild}
-                                    className="mt-2"
-                                />
-                            </div>
                         </div>
                         <div className="flex w-100 justify-between">
-                            <div className="w-23">
-                                <InputLabel
-                                    forInput="dateStart"
-                                    value="Date depart*"
-                                />
-
-                                <TextInput
-                                    id="dateStart"
-                                    type="date"
-                                    name="dateStart"
-                                    value={data.dateStart}
-                                    className="mt-1 block w-full"
-                                    autoComplete="dateStart"
-                                    isFocused={true}
-                                    handleChange={onHandleChange}
-                                    required
-                                />
-
-                                <InputError
-                                    message={errors.dateStart}
-                                    className="mt-2"
-                                />
-                            </div>
-
-                            <div className="w-23">
+                            <div className="w-30">
                                 <InputLabel
                                     forInput="amountPeople"
                                     value="Amount people*"
@@ -440,7 +406,7 @@ export default function Edit(props) {
                                 />
                             </div>
 
-                            <div className="w-23">
+                            <div className="w-30">
                                 <InputLabel
                                     forInput="amountDay"
                                     value="Amount day*"
@@ -464,7 +430,7 @@ export default function Edit(props) {
                                 />
                             </div>
 
-                            <div className="w-23">
+                            <div className="w-30">
                                 <InputLabel
                                     forInput="amountNight"
                                     value="Amount night*"
@@ -552,7 +518,7 @@ export default function Edit(props) {
                             />
                         </div>
 
-                        <PrimaryButton className="ml-4" processing={processing}>
+                        <PrimaryButton className="ml-4" type="submit">
                             Edit
                         </PrimaryButton>
                     </form>

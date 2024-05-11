@@ -12,6 +12,8 @@ use App\Models\Tour_DiaDiem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class DiaDiemController extends Controller
 {
@@ -22,9 +24,7 @@ class DiaDiemController extends Controller
      */
     public function index()
     {
-        // Request::request('category', request('category'));s
-        // dd(request('category'));
-        // dd(Request::request('category', request('category')));
+        $search = request()->query('search') ?? '';
         $extra_services = extra_service::all();
         $tours = Tour::all();
         $schedule = LichTrinh::all();
@@ -33,6 +33,9 @@ class DiaDiemController extends Controller
             ->where(function($query){
                 if(request('category')){
                     $query->where('ma_loai_tour', request('category'));
+                }
+                if(request('search')){
+                    $query->where('ten', 'like', '%'.request('search').'%');
                 }
             })
             ->paginate(10)
@@ -45,7 +48,8 @@ class DiaDiemController extends Controller
         
         $arrTour = array_values($arrTour);
         $category = request('category');
-        return Inertia::render('Location/Index', compact('locations', 'categories', 'category', 'extra_services', 'tours', 'schedule', 'arrTour'));
+
+        return Inertia::render('Location/Index', compact('locations', 'categories', 'category', 'extra_services', 'tours', 'schedule', 'arrTour', 'search'));
     }
 
 
@@ -91,7 +95,7 @@ class DiaDiemController extends Controller
         $request->validate([
             'name' => 'required|unique:dia_diems,ten',
             'address' => 'required',
-            'description' => 'required',
+            // 'description' => 'required',
             'category' => 'required',
         ]);
 
@@ -103,10 +107,14 @@ class DiaDiemController extends Controller
         $location->du_lieu_map = $request->mapdata;
         if($location->save()){
             foreach($request->images as $image){
-                $filename = $image->store('locations', 'public');
+                // $filename = $image->store('locations', 'public');
+                $new_path = public_path('storage/locations');
+                $rename_img = time() . '_' . $image->getClientOriginalName();
+                $image->move($new_path, $rename_img);
+                $filePath = 'locations/' . $rename_img;
                 $imgLocation = new Hinh_anh();
                 $imgLocation->ma_dia_diem = $location->id;
-                $imgLocation->ten = $filename;
+                $imgLocation->ten = $filePath;
                 $imgLocation->save();
             }
             return redirect()->route('location.index');
@@ -158,7 +166,7 @@ class DiaDiemController extends Controller
         $request->validate([
             'name' => 'required|unique:dia_diems,ten,' . $location->id,
             'address' => 'required',
-            'description' => 'required',
+            // 'description' => 'required',
         ]);
 
         $location->ten = $request->name;
@@ -172,10 +180,14 @@ class DiaDiemController extends Controller
                     $img->delete();
                 }
                 foreach($request->images as $image){
-                    $filename = $image->store('locations', 'public');
+                    // $filename = $image->store('locations', 'public');
+                    $new_path = public_path('storage/locations');
+                    $rename_img = time() . '_' . $image->getClientOriginalName();
+                    $image->move($new_path, $rename_img);
+                    $filePath = 'locations/' . $rename_img;
                     $imgLocation = new Hinh_anh();
                     $imgLocation->ma_dia_diem = $location->id;
-                    $imgLocation->ten = $filename;
+                    $imgLocation->ten = $filePath;
                     $imgLocation->save();
                 }
             }
@@ -201,4 +213,34 @@ class DiaDiemController extends Controller
         $location->delete();
         return redirect()->route('location.index');
     }
+
+    public function addLocation($id,Request $request) {
+        $ma_loai_tour = $request->input('ma_loai_tour'); // Get ma_loai_tour from the request body
+        $check = DiaDiem::where('id', $id)->first();
+        if($check){
+            // update
+            $check->ma_loai_tour = $ma_loai_tour;
+            $check->save();
+            $refresh = DiaDiem::where('ma_loai_tour', null)->get();
+            return response()->json(['status' => 'success', 'data' => $refresh]);
+        } else {
+            return response()->json(['status' => 'error', 'data' => $request->all()]);
+        }
+        
+    }
+
+    public function removeLocation($id) {
+        $check = DiaDiem::where('id', $id)->first();
+        if($check){
+            // update
+            $check->ma_loai_tour = null;
+            $check->save();
+            $refresh = DiaDiem::where('ma_loai_tour', null)->get();
+            return response()->json(['status' => 'success', 'data' => $refresh]);
+        } else {
+            return response()->json(['status' => 'error']);
+        }
+        
+    }
+
 }

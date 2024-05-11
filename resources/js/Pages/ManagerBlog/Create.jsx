@@ -10,6 +10,7 @@ import { useState } from "react";
 import Validate from "validator/lib/isEmpty";
 import { isEmpty } from "lodash";
 import { Alert } from "@mui/material";
+import Swal from "sweetalert2";
 
 export default function Create(props) {
     const user = usePage().props;
@@ -17,29 +18,29 @@ export default function Create(props) {
     const blog = usePage().props.blog;
     const [slugs, setSlug] = useState("");
 
-    const getSlug = (e) => {
-        var a = document.getElementById("title").value;
+    // const getSlug = (e) => {
+    //     var a = document.getElementById("title").value;
 
-        //   ho tro tieng viet
-        var b = a.toLowerCase();
-        b = b.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
-        b = b.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
-        b = b.replace(/ì|í|ị|ỉ|ĩ/g, "i");
-        b = b.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
-        b = b.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
-        b = b.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
-        b = b.replace(/đ/g, "d");
-        // Xóa ký tự đặc biệt
-        b = b.replace(/([^0-9a-z-\s])/g, "");
-        // Xóa khoảng trắng thay bằng ký tự -
-        b = b.replace(/(\s+)/g, "-");
-        // xóa phần dự - ở đầu
-        b = b.replace(/^-+/g, "");
-        // xóa phần dư - ở cuối
-        b = b.replace(/-+$/g, "");
+    //     //   ho tro tieng viet
+    //     var b = a.toLowerCase();
+    //     b = b.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+    //     b = b.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+    //     b = b.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+    //     b = b.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+    //     b = b.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+    //     b = b.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+    //     b = b.replace(/đ/g, "d");
+    //     // Xóa ký tự đặc biệt
+    //     b = b.replace(/([^0-9a-z-\s])/g, "");
+    //     // Xóa khoảng trắng thay bằng ký tự -
+    //     b = b.replace(/(\s+)/g, "-");
+    //     // xóa phần dự - ở đầu
+    //     b = b.replace(/^-+/g, "");
+    //     // xóa phần dư - ở cuối
+    //     b = b.replace(/-+$/g, "");
 
-        return (document.getElementById("slug").value = b);
-    };
+    //     return (document.getElementById("slug").value = b);
+    // };
 
     const { data, setData, post, processing, errors, reset } = useForm({
         title: "",
@@ -59,9 +60,6 @@ export default function Create(props) {
                 ? event.target.checked
                 : event.target.value
         );
-        if (event.target.name === "title") {
-            setSlug(getSlug(event));
-        }
         if (event.target.name === "image") {
             setData(event.target.name, event.target.files[0]);
         }
@@ -76,11 +74,16 @@ export default function Create(props) {
         if (Validate(data.content)) {
             msg.content = "Content is required";
         }
-        if (Validate(data.slug)) {
-            msg.slug = "Slug is required";
-        }
         setValidationMsg(msg);
         if (Object.keys(msg).length > 0) {
+            Swal.fire({
+                icon: "error",
+                title: Object.values(msg).join("<br>"),
+                showConfirmButton: false,
+                timer: 1500,
+                toast: true,
+                position: "top-end",
+            });
             return false;
         }
         return true;
@@ -131,7 +134,7 @@ export default function Create(props) {
                                 className="mt-2"
                             />
                         </div>
-                        <div className="mb-3">
+                        {/* <div className="mb-3">
                             <InputLabel forInput="slug" value="Slug*" />
 
                             <TextInput
@@ -146,7 +149,7 @@ export default function Create(props) {
                                 message={errors.slug || validationMsg.slug}
                                 className="mt-2"
                             />
-                        </div>
+                        </div> */}
                         <div className="mb-3">
                             <InputLabel forInput="image" value="Image*" />
                             <br />

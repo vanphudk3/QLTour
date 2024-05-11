@@ -9,10 +9,15 @@ import Tourplan from "@/Components/DetailTour/Tourplan/Tourplan";
 import Content from "@/Layouts/DetailTour";
 import { Link, Head, usePage, useForm, router } from "@inertiajs/react";
 import React, { useRef, useState, useEffect } from "react";
-import { Breadcrumbs, Button, Slider, Typography } from "@mui/material";
+import { Breadcrumbs, Button, Slider, Typography, Snackbar} from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 // Import Swiper React components
 import { Swiper, SwiperSlide } from "swiper/react";
+import Tooltip from "@mui/material/Tooltip";
+import BasicDatePicker from "@/Components/days";
+import DatePicker from "@mui/lab/DatePicker";
+import { forwardRef } from "react";
 
 // Import Swiper styles
 import "swiper/css";
@@ -22,8 +27,9 @@ import "swiper/css/thumbs";
 
 // import required modules
 import { FreeMode, Navigation, Thumbs } from "swiper";
-import { isEmpty } from "lodash";
+import { isEmpty, set } from "lodash";
 import Swal from "sweetalert2";
+import { event } from "jquery";
 
 const openDescription = (evt, DesName) => {
     var i, tabcontent, tablinks;
@@ -46,25 +52,136 @@ const defaultOpen = () => {
     document.getElementById("defaultOpen").click();
 };
 
+// hàm cộng ngày
+const addDays = (selectedDate, days) => {
+    const date = new Date(selectedDate.date);
+    date.setDate(date.getDate() + 1);
+    return date;
+};
+  
+const Alert = forwardRef(function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 export default function DetailTour(props) {
     const [thumbsSwiper, setThumbsSwiper] = useState(null);
-
+    const [openEdit, setOpenEdit] = useState(false);
+    
     const detailTour = usePage().props.detailTour;
+    const availableDays = detailTour.tour_ngay.map((item) => {
+        let ngay = new Date(item.ngay);
+        // cộng thêm 1 ngày vì ngày lấy từ database là ngày trước
+        ngay.setDate(ngay.getDate() + 1);
+        console.log(ngay.toISOString().split('T')[0]);
+        console.log(new Date().toISOString().split('T')[0] == ngay.toISOString().split('T')[0]);
+        if (ngay.toISOString().split('T')[0] == new Date().toISOString().split('T')[0]) {
+            // bỏ qua ngày hôm nay nếu quá giờ khởi hành
+            let time = new Date();
+            let hours = time.getHours();
+            let minutes = time.getMinutes();
+            let timeDeparture = detailTour.gio_khoi_hanh.split(":");
+            if (hours > parseInt(timeDeparture[0])) {
+                return false; // Trả về false để loại bỏ phần tử này khỏi mảng
+            } else if (hours == parseInt(timeDeparture[0])) {
+                if (minutes > parseInt(timeDeparture[1])) {
+                    return false; // Trả về false để loại bỏ phần tử này khỏi mảng
+                }
+            }
+        }
+        return item.ngay;
+    }).filter(Boolean); // Lọc bỏ các giá trị undefined từ mảng
+    console.log(availableDays);
+    
     const extraServices = usePage().props.extraServices;
     const schedule = usePage().props.lichTrinh;
-    const totalPrice = usePage().props.totalPrice;
+    const totalPrice = 0;
     const forcusAdult = usePage().props.forcusAdult;
     const forcusYouth = usePage().props.forcusYouth;
     const forcusChild = usePage().props.forcusChild;
-    const { data, setData, post, progress, processing, errors, reset } =
-        useForm({
-            adult: isEmpty(forcusAdult) ? 0 : forcusAdult,
-            youth: isEmpty(forcusYouth) ? 0 : forcusYouth,
-            child: isEmpty(forcusChild) ? 0 : forcusChild,
-            totalPrice: totalPrice,
-            extra: [],
-            timeDeparture: detailTour.gio_khoi_hanh,
+    const customer = usePage().props.customer;
+    const lang = usePage().props.lang;
+    const _lang = usePage().props._lang;
+    const today = new Date().toISOString().split('T')[0];
+    const [status_list, setStatusList] = useState(0);
+    let flag = availableDays.some((item) => {
+        let dates = new Date(item);
+        let today = new Date();
+        today.setHours(0, 0, 0, 0); // set time to 00:00:00.000
+        return dates.getTime() >= today.getTime();
+    });
+    // lấy ngày đầu tiên trong mảng ngày mà không disabled
+    const [selectedDate, setSelectedDate] = useState({
+        id: 0,
+        date: null,
+        price: 0,
+        price_adult: 0,
+        price_youth: 0,
+        price_child: 0,
+        so_cho: 0,
+    });
+    const [originalPrices, setOriginalPrices] = useState({
+        adult: selectedDate.price_adult,
+        youth: selectedDate.price_youth,
+        child: selectedDate.price_child,
+      });
+
+      const [countPrice, setCountPrice] = useState(0);
+      const handleCountPrice = (event) => {
+          extraServices.map((extraService, index) => {
+              if (event.target.name == `extra${index}`) {
+                  if (event.target.checked) {
+                      setCountPrice(countPrice + extraService.price);
+                      data.extra.push(extraService.id);
+                  } else {
+                      setCountPrice(countPrice - extraService.price);
+                  }
+              }
+          });
+      };
+      const { data, setData, post, progress, processing, errors, reset } =
+      useForm({
+          adult: 1,
+          price_adult: selectedDate.price_adult,
+          youth: 0,
+            price_youth: selectedDate.price_youth,
+          child: 0,
+            price_child: selectedDate.price_child,
+          totalPrice: countPrice,
+          available: selectedDate.so_cho,
+          extra: [],
+          timeDeparture: detailTour.gio_khoi_hanh,
+          date_id: selectedDate.id,
+          dateDeparture: selectedDate.date,
+          tourId: detailTour.slug,
+            lang: _lang,
+      });
+
+  const handleDateChange = (newDate) => {
+    const newDates = new Date(newDate);
+    newDates.toISOString().split('T')[0];
+
+    // check if the date is available
+    detailTour.tour_ngay.map((item) => {
+        if (item.ngay == newDates.toISOString().split('T')[0]) {
+            setSelectedDate({
+            id: item.id,
+            date: item.ngay,
+            date_current: newDates,
+            price: item.gia,
+            price_adult: item.gia * (data.adult == 0 ? 1 : data.adult),
+            price_youth: item.gia * 0.8 * data.youth,
+            price_child: item.gia * 0.5 * data.child,
+            so_cho: item.so_cho,
+            });
+            setOriginalPrices({
+            adult: item.gia,
+            youth: item.gia * 0.8,
+            child: item.gia * 0.5,
+            });
+            setCountPrice(item.gia * (data.adult == 0 ? 1 : data.adult) + item.gia * 0.8 * data.youth + item.gia * 0.5 * data.child);
+        }
         });
+  };
 
     const onHandleChange = (event) => {
         setData(
@@ -73,125 +190,283 @@ export default function DetailTour(props) {
                 ? event.target.checked
                 : event.target.value
         );
-        if (event.target.name == "adult") {
-            router.get(route("tour.show", detailTour.slug), {
-                adult: event.target.value,
-                youth: data.youth,
-                child: data.child,
-            });
-        }
-        if (event.target.name == "youth") {
-            router.get(route("tour.show", detailTour.slug), {
-                adult: data.adult,
-                youth: event.target.value,
-                child: data.child,
-            });
-        }
-        if (event.target.name == "child") {
-            router.get(route("tour.show", detailTour.slug), {
-                adult: data.adult,
-                youth: data.youth,
-                child: event.target.value,
-            });
+        if (selectedDate.id != 0) {
+         switch (event.target.name) {
+            case 'adult':
+                selectedDate.price_adult = originalPrices.adult * event.target.value;
+                data.adult = parseInt(event.target.value);
+                setData('price_adult', selectedDate.price_adult);
+                break;
+            case 'youth':
+                selectedDate.price_youth = originalPrices.youth * event.target.value;
+                data.youth = parseInt(event.target.value);
+                data.price_youth = selectedDate.price_youth;
+                setData('price_youth', selectedDate.price_youth);
+                break;
+            case 'child':
+                selectedDate.price_child = originalPrices.child * event.target.value;
+                data.child = parseInt(event.target.value);
+                data.price_child = selectedDate.price_child;
+                setData('price_child', selectedDate.price_child);
+                break;
+            default:
+                break;
+            }
+            setCountPrice(selectedDate.price_adult + selectedDate.price_youth + selectedDate.price_child);
+            setData('totalPrice', selectedDate.price_adult + selectedDate.price_youth + selectedDate.price_child);
         }
     };
-
     const numberFormat = (value) => {
-        return new Intl.NumberFormat("vi-VN", {
+        if(_lang == 'en')
+        value = value * 0.000040;
+        return new Intl.NumberFormat(lang['vi-VN'], {
             style: "currency",
-            currency: "VND",
+            currency: lang['VND'],
         }).format(value);
     };
-    const [countPrice, setCountPrice] = useState(totalPrice);
-    const handleCountPrice = (event) => {
-        extraServices.map((extraService, index) => {
-            if (event.target.name == `extra${index}`) {
-                if (event.target.checked) {
-                    setCountPrice(countPrice + extraService.price);
-                    data.extra.push(extraService.id);
-                } else {
-                    setCountPrice(countPrice - extraService.price);
-                }
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        // nếu ngày khởi hành rỗng hoặc ngày trong quá khứ
+        if (availableDays.length == 0) {
+            Swal.fire({
+                title: "OOps!",
+                text: "Hiện tại tour chưa lên lịch. Bạn có thể đưa vào danh sách yêu thích chúng tôi sẽ phản hồi trong thời gian sớm nhất hoặc bạn có thể kham khảo các tour liên quan!",
+                icon: "error",
+                confirmButtonText: "OK",
+            });
+            return;
+        } else {
+            if (flag == false) {
+                Swal.fire({
+                    title: "OOps!",
+                    text: "Hiện tại tour chưa lên lịch. Bạn có thể đưa vào danh sách yêu thích chúng tôi sẽ phản hồi trong thời gian sớm nhất hoặc bạn có thể kham khảo các tour liên quan!",
+                    icon: "error",
+                    confirmButtonText: "OK",
+                });
+                return;
             }
+        }
+
+        if (selectedDate.id == 0) {
+            Swal.fire({
+                title: "Bạn chưa chọn ngày khởi hành!",
+                icon: "error",
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 3000,
+            });
+            return;
+        }
+        if (selectedDate.so_cho < parseInt(data.adult) + parseInt(data.youth) + parseInt(data.child)) {
+            Swal.fire({
+                title: "OOps!",
+                text: "Số lượng người tham gia không được vượt quá số chỗ còn lại!",
+                icon: "error",
+                confirmButtonText: "OK",
+            });
+            return;
+        }
+
+        // if(detailTour.so_cho == 'Hết chỗ'){
+        //     Swal.fire({
+        //         title: "OOps!",
+        //         text: "Tour này đã hết chỗ, bạn vui lòng chọn tour khác!",
+        //         icon: "error",
+        //         confirmButtonText: "OK",
+        //     });
+        //     return;
+        // }
+        // if(detailTour.ngay_khoi_hanh == 'Đã khởi hành'){
+        //     Swal.fire({
+        //         title: "OOps!",
+        //         text: "Tour này đã hết hạn, bạn vui lòng chọn tour khác!",
+        //         icon: "error",
+        //         confirmButtonText: "OK",
+        //     });
+        //     return;
+        // }
+        // if(detailTour.isBooked == 2){
+        //     Swal.fire({
+        //         title: "OOps!",
+        //         text: "Bạn đã đặt tour này rồi, bạn vui lòng chọn tour khác!",
+        //         icon: "error",
+        //         confirmButtonText: "OK",
+        //     });
+        //     return;
+        // }else if (detailTour.isBooked == 1){
+        //     Swal.fire({
+        //         title: "OOps!",
+        //         text: "Tour bạn đặt đang trong quá trình xử lý, bạn vui lòng chọn tour khác!",
+        //         icon: "error",
+        //         confirmButtonText: "OK",
+        //     });
+        //     return;
+        // }
+
+        router.get(route("booking"), {
+            lang: _lang,
+            adult: data.adult,
+            price_adult: selectedDate.price_adult,
+            youth: data.youth,
+            price_youth: selectedDate.price_youth,
+            child: data.child,
+            price_child: selectedDate.price_child,
+            totalPrice: countPrice,
+            date: selectedDate.date,
+            date_id: selectedDate.id,
+            tourId: detailTour.slug,
+            extra: data.extra,
+            available: selectedDate.so_cho,
+            timeDeparture: detailTour.gio_khoi_hanh,
+            lang: _lang,
         });
     };
 
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        if(detailTour.so_cho == 'Hết chỗ'){
-            Swal.fire({
-                title: "OOps!",
-                text: "Tour này đã hết chỗ, bạn vui lòng chọn tour khác!",
-                icon: "error",
-                confirmButtonText: "OK",
-            });
+    const [state, setState] = useState({
+        vertical: "top",
+        horizontal: "right",
+    });
+
+    const { vertical, horizontal } = state;
+
+    const handleClose = (event, reason) => {
+        if (reason === "clickaway") {
             return;
         }
-        if(detailTour.ngay_khoi_hanh == 'Đã khởi hành'){
-            Swal.fire({
-                title: "OOps!",
-                text: "Tour này đã hết hạn, bạn vui lòng chọn tour khác!",
-                icon: "error",
-                confirmButtonText: "OK",
-            });
-            return;
-        }
-        if(detailTour.isBooked == 2){
-            Swal.fire({
-                title: "OOps!",
-                text: "Bạn đã đặt tour này rồi, bạn vui lòng chọn tour khác!",
-                icon: "error",
-                confirmButtonText: "OK",
-            });
-            return;
-        }else if (detailTour.isBooked == 1){
-            Swal.fire({
-                title: "OOps!",
-                text: "Tour bạn đặt đang trong quá trình xử lý, bạn vui lòng chọn tour khác!",
-                icon: "error",
-                confirmButtonText: "OK",
-            });
-            return;
-        }
-        router.get(route("booking"), {
-            adult: data.adult,
-            youth: data.youth,
-            child: data.child,
-            extra: data.extra,
-            timeDeparture: data.timeDeparture,
-            totalPrice: countPrice,
-            tourId: detailTour.slug,
-        });
+
+        setOpenEdit(false);
     };
+    
+    const [isAdded, setIsAdded] = useState(detailTour.isFavorite);
+
+
+    const addtoList = (event, id) => {
+        // chỉ thực hiện khi đăng nhập
+        if(isEmpty(customer)) {
+            Swal.fire({
+                title: "Bạn chưa đăng nhập",
+                text: "Bạn cần đăng nhập để thực hiện chức năng này!",
+                icon: "error",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Đăng nhập",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = route("customer.login", {
+                        redirect: window.location.href,
+                        lang: _lang,
+                        
+                    });
+                }
+            });
+            return;
+        } else {
+            let status = event.target.dataset.status;
+            event.target.dataset.status = status == 1 ? 0 : 1;
+            setStatusList(status == 1 ? 0 : 1);
+                fetch("/api/addtoList", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                        "Access-Control-Allow-Headers": "*",
+                        "Access-Control-Allow-Origin": "*",
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        
+                    },
+                    body: JSON.stringify({
+                        id_customer: customer.id,
+                        id: id,
+                        status: event.target.dataset.status,
+                    }),
+                    // cho phép handle cookie
+                    credentials: "include",
+                    // cho phep truy cap cookie
+                    mode: "cors",
+                    // cho phép handle session
+                    // credentials: "include",
+
+
+
+                })
+                    .then((res) => res.json())
+                    .then((data) => {
+                        console.log(data);
+                        if(data.error){
+                            Swal.fire({
+                                title: data.error,
+                                icon: "error",
+                                toast: true,
+                                position: "top-end",
+                                showConfirmButton: false,
+                                timer: 3000,
+                            });
+                            return;
+                        }
+                        setOpenEdit(true);
+                        if (event.target.dataset.status == 1) {
+                        setIsAdded(true);
+                        } else {
+                        setIsAdded(false);
+                        }
+                    }).
+                    catch((error) => {
+                        console.log(error);
+                    });
+                }
+    }
 
     const breadcrumbs = [
         <Link
             underline="hover"
             key="1"
             color="inherit"
-            href={route("welcome")}
+            href={route("welcome", { lang: _lang })}
             style={{ textDecoration: "none", color: "white" }}
         >
-            Home
+            {lang['Home']}
         </Link>,
         <Link
             underline="hover"
             key="2"
             color="inherit"
-            href={route("tour")}
+            href={route("tour", { lang: _lang })}
             style={{ textDecoration: "none", color: "white" }}
         >
-            Tour
+            {lang['Tour']}
         </Link>,
         <Typography key="2" color="text.primary" style={{ color: "white" }}>
             {detailTour.ten_tour}
         </Typography>,
     ];
-
+    const [value, setValue] = React.useState(null);
     return (
         <>
             <Head title="Detail Tour" />
             <Content>
+            <Snackbar
+                open={openEdit}
+                autoHideDuration={6000}
+                onClose={handleClose}
+                anchorOrigin={{
+                    vertical,
+                    horizontal,
+                }}
+                key={vertical + horizontal}
+            >
+                <Alert
+                    onClose={handleClose}
+                    severity="success"
+                    style={{
+                        width: "100%",
+                        Zindex: "999",
+                    }}
+                >
+                    {status_list == 0 ? lang['Remove from list success'] : lang['Add to list success']}
+                </Alert>
+            </Snackbar>
                 <div className="breadcrumb-layout">
                     <div className="bg-overlay"></div>
                     <div
@@ -199,7 +474,7 @@ export default function DetailTour(props) {
                         style={{ background: "content-box" }}
                     >
                         <div className="breadcrumb-main">
-                            <h1 className="zourney-title"> Tours Detail</h1>
+                            <h1 className="zourney-title"> {lang['Tours Detail']}</h1>
                             <div className="flex justify-content-center">
                                 <Breadcrumbs
                                     separator={
@@ -218,7 +493,7 @@ export default function DetailTour(props) {
                 </div>
                 <div
                     className="container-layout"
-                    style={{ paddingTop: "80px" }}
+                    style={{ paddingTop: "10px" }}
                 >
                     <div className="layout-02">
                         <div className="row">
@@ -227,10 +502,34 @@ export default function DetailTour(props) {
                                     <div className="count-post">
                                         {detailTour.dia_chi}
                                     </div>
-                                    <div className="filter-sort">
-                                        <i className="fa-regular fa-heart"></i>{" "}
-                                        Add to wishlist
+                                    {!isAdded ? (
+                                    <>
+                                    <div className="filter-sort pointer" onClick={(event) => addtoList(event, detailTour.ma_tour)} data-status="0">
+                                        <i className="fa-regular fa-heart mr-5"></i>{" "}
+                                        {lang['Add to wishlist']}
                                     </div>
+                                    </>
+                                    ) : (
+                                    <>
+                                    <div className="filter-sort pointer" onClick={(event) => addtoList(event, detailTour.ma_tour)} data-status="1">
+                                        <svg version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="30px" height="30px" viewBox="-64 -64 192.00 192.00" enable-background="new 0 0 64 64" xml:space="preserve" fill="#000000" stroke="#000000" stroke-width="0.00064">
+                                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                            <g id="SVGRepo_iconCarrier">
+                                                <g>
+                                                    <path fill="#F76D57" d="M58.714,29.977c0,0-0.612,0.75-1.823,1.961S33.414,55.414,33.414,55.414C33.023,55.805,32.512,56,32,56 s-1.023-0.195-1.414-0.586c0,0-22.266-22.266-23.477-23.477s-1.823-1.961-1.823-1.961C3.245,27.545,2,24.424,2,21 C2,13.268,8.268,7,16,7c3.866,0,7.366,1.566,9.899,4.101l0.009-0.009l4.678,4.677c0.781,0.781,2.047,0.781,2.828,0l4.678-4.677 l0.009,0.009C40.634,8.566,44.134,7,48,7c7.732,0,14,6.268,14,14C62,24.424,60.755,27.545,58.714,29.977z"></path>
+                                                    <path fill="#F76D57" d="M58.714,29.977c0,0-0.612,0.75-1.823,1.961S33.414,55.414,33.414,55.414C33.023,55.805,32.512,56,32,56 s-1.023-0.195-1.414-0.586c0,0-22.266-22.266-23.477-23.477s-1.823-1.961-1.823-1.961C3.245,27.545,2,24.424,2,21 C2,13.268,8.268,7,16,7c3.866,0,7.366,1.566,9.899,4.101l0.009-0.009l4.678,4.677c0.781,0.781,2.047,0.781,2.828,0l4.678-4.677 l0.009,0.009C40.634,8.566,44.134,7,48,7c7.732,0,14,6.268,14,14C62,24.424,60.755,27.545,58.714,29.977z"></path>
+                                                    <g>
+                                                        <path fill="#394240" d="M48,5c-4.418,0-8.418,1.791-11.313,4.687l-3.979,3.961c-0.391,0.391-1.023,0.391-1.414,0 c0,0-3.971-3.97-3.979-3.961C24.418,6.791,20.418,5,16,5C7.163,5,0,12.163,0,21c0,3.338,1.024,6.436,2.773,9 c0,0,0.734,1.164,1.602,2.031s24.797,24.797,24.797,24.797C29.953,57.609,30.977,58,32,58s2.047-0.391,2.828-1.172 c0,0,23.93-23.93,24.797-24.797S61.227,30,61.227,30C62.976,27.436,64,24.338,64,21C64,12.163,56.837,5,48,5z M58.714,29.977 c0,0-0.612,0.75-1.823,1.961S33.414,55.414,33.414,55.414C33.023,55.805,32.512,56,32,56s-1.023-0.195-1.414-0.586 c0,0-22.266-22.266-23.477-23.477s-1.823-1.961-1.823-1.961C3.245,27.545,2,24.424,2,21C2,13.268,8.268,7,16,7 c3.866,0,7.366,1.566,9.899,4.101l0.009-0.009l4.678,4.677c0.781,0.781,2.047,0.781,2.828,0l4.678-4.677l0.009,0.009 C40.634,8.566,44.134,7,48,7c7.732,0,14,6.268,14,14C62,24.424,60.755,27.545,58.714,29.977z"></path>
+                                                        <path fill="#394240" d="M48,11c-0.553,0-1,0.447-1,1s0.447,1,1,1c4.418,0,8,3.582,8,8c0,0.553,0.447,1,1,1s1-0.447,1-1 C58,15.478,53.522,11,48,11z"></path>
+                                                    </g>
+                                                </g>
+                                            </g>
+                                        </svg>{" "}
+                                        {lang['Remove from wishlist']}
+                                    </div>
+                                    </>
+                                    )}
                                 </div>
                                 <h1 className="heading-title">
                                     {detailTour.ten_tour}
@@ -238,7 +537,7 @@ export default function DetailTour(props) {
                                 <div className="row">
                                     <div className="col">
                                         <div className="inner">
-                                            <label>From</label>
+                                            <label>{lang['From']}</label>
                                             <span className="currency-amount">
                                                 {numberFormat(detailTour.gia_nguoi_lon)}
                                             </span>
@@ -246,21 +545,21 @@ export default function DetailTour(props) {
                                     </div>
                                     <div className="col">
                                         <div className="inner">
-                                            <label>From</label>
+                                            <label>{lang['From']}</label>
                                             <span>
-                                                {detailTour.so_ngay} days
+                                                {detailTour.so_ngay} {lang['days']}
                                             </span>
                                         </div>
                                     </div>
                                     <div className="col">
                                         <div className="inner">
-                                            <label>Max people</label>
-                                            <span>{detailTour.so_cho}</span>
+                                            <label>{lang['Max people']}</label>
+                                            <span>{selectedDate.so_cho}</span>
                                         </div>
                                     </div>
                                     <div className="col">
                                         <div className="inner">
-                                            <label>Min age</label>
+                                            <label>{lang['Min age']}</label>
                                             <span>
                                                 {detailTour.do_tuoi_tu}+
                                             </span>
@@ -268,7 +567,7 @@ export default function DetailTour(props) {
                                     </div>
                                     <div className="col-3">
                                         <div className="inner">
-                                            <label>Tour Type</label>
+                                            <label>{lang['Tour Type']}</label>
                                             <div className="type-tour">
                                                 <a href="">
                                                     {detailTour.loai_tour}
@@ -278,9 +577,26 @@ export default function DetailTour(props) {
                                     </div>
                                     <div className="col-2">
                                         <div className="inner">
-                                            <label>Date depart</label>
+                                            <label>{lang['Date depart']}</label>
                                             <span>
-                                                {detailTour.ngay_khoi_hanh}
+                                                {selectedDate.date != null ? (
+                                                    // cộng thêm 1 ngày vì ngày lấy từ database là ngày trước
+                                                    <>
+                                                    
+                                                    {
+                                                    new Date(selectedDate.date_current).toLocaleDateString(lang['vi-VN'], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+                                                    }
+
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                    {flag == false ? (
+                                                        <>{lang['Not update']}</>
+                                                    ) : (
+                                                    <>{lang['Choose date']}</>
+                                                    )}
+                                                    </>
+                                                )}
                                             </span>
                                             {/* <label>Reviews</label>
                                             <div className="post-rating-star">
@@ -360,7 +676,7 @@ export default function DetailTour(props) {
                                     <div className="search-available">
                                         <div className="booking-form__block">
                                             <h6 className="post-title">
-                                                Book This Tour
+                                                {lang['Book This Tour']}
                                             </h6>
                                             <form
                                                 onSubmit={handleSubmit}
@@ -368,37 +684,64 @@ export default function DetailTour(props) {
                                             >
                                                 <div className="input-group">
                                                     <div className="booking-block">
+                                                    <div>
+                                                    <BasicDatePicker
+                                                        value={selectedDate.ngay}
+                                                        onChange={handleDateChange}
+                                                        days={availableDays}
+                                                    />
+                                            </div>
+                                                    </div>
+                                                    <div className="booking-block">
                                                         <span
-                                                            class="booking_form"
+                                                            className="booking_form"
                                                             style={{
                                                                 lineHeight:
                                                                     "normal",
                                                             }}
                                                         >
-                                                            Time
+                                                            {lang['Time']}
                                                         </span>
-                                                        <span class="booking-clock">
+                                                        <span className="booking-clock">
                                                             {
                                                                 detailTour.gio_khoi_hanh
+                                                                // detailTour.gio_khoi_hanh
+                                                                // new Date(detailTour.ngay_khoi_hanh).toLocaleTimeString(lang['vi-VN'], { hour: '2-digit', minute: '2-digit' })
                                                             }
                                                         </span>
                                                     </div>
+                                                    <div className="booking-block">
+                                                            {/* <Tooltip title="Liên hệ" placement="top" arrow> */}
+                                                            <span
+                                                            className="booking_form"
+                                                            style={{
+                                                                lineHeight:
+                                                                    "normal",
+                                                            }}
+                                                        >
+                                                            {lang['Contact']}
+                                                        </span>
+                                                        <span className="booking-clock">
+                                                            0987654321
+                                                        </span>
+                                                            {/* </Tooltip> */}
+                                                    </div>
                                                     <div className="booking-ticket">
                                                         <label className="booking_form">
-                                                            Tickets
+                                                            {lang['Tickets']}
                                                         </label>
                                                         <div className="booking-guests-result">
                                                             <ul>
                                                                 <li>
                                                                     <span className="booking-title">
-                                                                        Adult
+                                                                        {lang['Adult']}
                                                                         (18+
-                                                                        years)
+                                                                        {lang['years']})
                                                                     </span>
                                                                     <span className="booking-price">
                                                                         {" "}
                                                                         {numberFormat(
-                                                                            detailTour.gia_nguoi_lon
+                                                                            selectedDate.price_adult
                                                                         )}
                                                                     </span>
                                                                     <select
@@ -411,48 +754,48 @@ export default function DetailTour(props) {
                                                                             data.adult
                                                                         }
                                                                     >
-                                                                        <option value="0">
+                                                                        <option value="1">
                                                                             1
                                                                         </option>
-                                                                        <option value="1">
+                                                                        <option value="2">
                                                                             2
                                                                         </option>
-                                                                        <option value="2">
+                                                                        <option value="3">
                                                                             3
                                                                         </option>
-                                                                        <option value="3">
+                                                                        <option value="4">
                                                                             4
                                                                         </option>
-                                                                        <option value="4">
+                                                                        <option value="5">
                                                                             5
                                                                         </option>
-                                                                        <option value="5">
+                                                                        <option value="6">
                                                                             6
                                                                         </option>
-                                                                        <option value="6">
+                                                                        <option value="7">
                                                                             7
                                                                         </option>
-                                                                        <option value="7">
+                                                                        <option value="8">
                                                                             8
                                                                         </option>
-                                                                        <option value="8">
+                                                                        <option value="9">
                                                                             9
                                                                         </option>
-                                                                        <option value="9">
+                                                                        <option value="10">
                                                                             10
                                                                         </option>
                                                                     </select>
                                                                 </li>
                                                                 <li>
                                                                     <span className="booking-title">
-                                                                        Youth
+                                                                        {lang['Youth']}
                                                                         (13-17
-                                                                        years)
+                                                                        {lang['years']})
                                                                     </span>
                                                                     <span className="booking-price">
                                                                         {" "}
                                                                         {numberFormat(
-                                                                            detailTour.gia_thieu_nien
+                                                                            selectedDate.price_youth
                                                                         )}
                                                                     </span>
                                                                     <select
@@ -502,14 +845,14 @@ export default function DetailTour(props) {
                                                                 </li>
                                                                 <li>
                                                                     <span className="booking-title">
-                                                                        Children
+                                                                        {lang['Children']}
                                                                         (0-12
                                                                         years)
                                                                     </span>
                                                                     <span className="booking-price">
                                                                         {" "}
                                                                         {numberFormat(
-                                                                            detailTour.gia_tre_em
+                                                                            selectedDate.price_child
                                                                         )}
                                                                     </span>
                                                                     <select
@@ -563,7 +906,7 @@ export default function DetailTour(props) {
 
                                                     <div className="services-block">
                                                         <label className="booking_form">
-                                                            Extra services
+                                                            {lang['Extra services']}
                                                         </label>
                                                         <div className="list-services">
                                                             {extraServices.map(
@@ -608,7 +951,7 @@ export default function DetailTour(props) {
                                                 </div>
                                                 <div className="total-group">
                                                     <label className="booking_form_input_label">
-                                                        Total
+                                                        {lang['Total']}
                                                     </label>
                                                     <span
                                                         className="currency_amount"
@@ -620,10 +963,12 @@ export default function DetailTour(props) {
                                                     </span>
                                                 </div>
                                                 <div className="submit-group">
+                                                        <Tooltip title={lang['Fill in information']} placement="top" arrow>
                                                     <button type="submit">
-                                                        Book Now{" "}
+                                                            {lang['NEXT STEP']}{" "}
                                                         <i className="fa-solid fa-arrow-right"></i>
                                                     </button>
+                                                        </Tooltip>
                                                 </div>
                                             </form>
                                         </div>
@@ -650,7 +995,7 @@ export default function DetailTour(props) {
                                             id="defaultOpen"
                                             ref={defaultOpen}
                                         >
-                                            Overview
+                                            {lang['Overview']}
                                         </button>
                                         <button
                                             className="tablinks active"
@@ -661,7 +1006,7 @@ export default function DetailTour(props) {
                                                 )
                                             }
                                         >
-                                            Tour plan
+                                            {lang['Tour plan']}
                                         </button>
                                         <button
                                             className="tablinks active"
@@ -672,7 +1017,7 @@ export default function DetailTour(props) {
                                                 )
                                             }
                                         >
-                                            Location
+                                            {lang['Location']}
                                         </button>
                                         <button
                                             className="tablinks active"
@@ -683,20 +1028,20 @@ export default function DetailTour(props) {
                                                 )
                                             }
                                         >
-                                            Reviews
+                                            {lang['Reviews']}
                                         </button>
                                     </div>
 
                                     <div id="Overview" className="tabcontent">
                                         <div className="content-tab">
                                             <h2 className="heading-title">
-                                                description
+                                                {lang['Description']}
                                             </h2>
                                             <Description>
                                                 {detailTour.mo_ta != null ? (
                                                     <>{detailTour.mo_ta}</>
                                                 ) : (
-                                                    <>Hiện chưa có mô tả</>
+                                                    <>{lang['Now we have no description']}</>
                                                 )}
                                             </Description>
                                         </div>
@@ -710,7 +1055,7 @@ export default function DetailTour(props) {
                                                 </div>
                                                 <div className="desc">
                                                     <h5 className="heading-title">
-                                                        Highlights
+                                                        {lang['Highlights']}
                                                     </h5>
                                                     <Highlight />
                                                 </div>
@@ -720,21 +1065,21 @@ export default function DetailTour(props) {
 
                                     <div id="Tourplan" className="tabcontent">
                                         <h2 className="heading-title">
-                                            Tour Plan
+                                            {lang['Tour Plan']}
                                         </h2>
                                         {isEmpty(schedule) ? (
                                             <div className="alert alert-danger">
-                                                Hiện chưa có lịch trình
+                                                {lang['Now we have no schedule']}
                                             </div>
                                         ) : (
                                             <>
                                                 {schedule.map((item, index) => (
                                                     <Tourplan>
-                                                        <div className="float-right">
+                                                        {/* <div className="float-right">
                                                             {
                                                                 item.lich_trinh_ngay
                                                             }
-                                                        </div>
+                                                        </div> */}
                                                         <h4 className="card-title">
                                                             {/* <span>Day 2</span> Sessions */}
                                                             {item.tieu_de}
@@ -756,7 +1101,7 @@ export default function DetailTour(props) {
 
                                     <div id="Location" className="tabcontent">
                                         <h2 className="heading-title">
-                                            Location
+                                            {lang['Location']}
                                         </h2>
                                         <Location
                                             src={detailTour.du_lieu_map}
@@ -765,7 +1110,7 @@ export default function DetailTour(props) {
 
                                     <div id="Reviews" className="tabcontent">
                                         <h2 className="heading-title">
-                                            Reviews
+                                            {lang['Reviews']}
                                         </h2>
                                         <Rating />
                                         <div className="comment-list__wrap">
@@ -789,10 +1134,10 @@ export default function DetailTour(props) {
                                                 </div>
                                                 <div className="cta-content">
                                                     <h2 className="cta-title">
-                                                        happy holiday
+                                                        {lang['Happy holiday']}
                                                     </h2>
                                                     <div className="cta-description">
-                                                        Stay &amp; Enjoy
+                                                        {lang['Stay']} &amp; {lang['Enjoy']}
                                                         <br />
                                                         <span
                                                             style={{
@@ -805,13 +1150,12 @@ export default function DetailTour(props) {
                                                                 color: "var(--text)",
                                                             }}
                                                         >
-                                                            15% off on all room
-                                                            types
+                                                            15% {lang['off on all room types']}
                                                         </span>
                                                     </div>
                                                     <div className="cta-button__wrapper">
                                                         <span className="cta-button">
-                                                            Book now
+                                                            {lang['Book now']}
                                                             <i className="fa-solid fa-arrow-right"></i>
                                                         </span>
                                                     </div>
@@ -828,10 +1172,10 @@ export default function DetailTour(props) {
                                                 </div>
                                                 <div className="cta-content">
                                                     <h2 className="cta-title">
-                                                        happy holiday
+                                                        {lang['Happy holiday']}
                                                     </h2>
                                                     <div className="cta-description">
-                                                        Stay &amp; Enjoy
+                                                        {lang['Stay']} &amp; {lang['Enjoy']}
                                                         <br />
                                                         <span
                                                             style={{
@@ -844,7 +1188,7 @@ export default function DetailTour(props) {
                                                                 color: "#FFFFFF",
                                                             }}
                                                         >
-                                                            starting from{" "}
+                                                            {lang['Starting from']}{" "}
                                                             <span
                                                                 style={{
                                                                     fontSize:
@@ -859,7 +1203,7 @@ export default function DetailTour(props) {
                                                     </div>
                                                     <div className="cta-button__wrapper">
                                                         <span className="cta-button">
-                                                            Book now
+                                                            {lang['Book now']}
                                                             <i className="fa-solid fa-arrow-right"></i>
                                                         </span>
                                                     </div>

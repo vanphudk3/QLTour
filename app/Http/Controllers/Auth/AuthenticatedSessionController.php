@@ -36,6 +36,18 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // // Get the currently authenticated user
+        // $user = Auth::user();
+
+        // // Generate a new token for the user
+        // $token = $user->createToken('token-name')->plainTextToken;
+
+        // // Store the token in the session
+        // $request->session()->put('api_token', $token);
+
+        // // gắn token vào header
+        // $request->headers->set('Authorization', 'Bearer ' . $token);
+
         return redirect()->intended(RouteServiceProvider::HOME);
     }
 

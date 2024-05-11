@@ -21,7 +21,8 @@ class KhachHang extends Model
         'mat_khau',
         'ngay_sinh',
         'tong_so_tour_da_di',
-        'remember_token'
+        'remember_token',
+        'created_by',
     ];
 
     protected $hidden = [

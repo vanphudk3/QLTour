@@ -7,7 +7,9 @@ const formartFloat = (number, n) => {
 
 export default function Rating() {
     const detailCmt = usePage().props.detailCmt;
-    console.log(detailCmt['start']['five']);
+    // console.log(detailCmt['start']['five']);
+    const _lang = usePage().props._lang;
+    const lang = usePage().props.lang;
     return (
         <>
         {detailCmt['countCmt'] > 0 && detailCmt['agvRate'] > 0 && (
@@ -33,7 +35,7 @@ export default function Rating() {
                         </span>
                     </div>
                     <div className="rating-users">
-                        <i className="icon-user"></i> {detailCmt['countCmt']} total
+                        <i className="icon-user"></i> {detailCmt['countCmt']} {lang['Total']}
                     </div>
                 </div>
                 <div className="histo">

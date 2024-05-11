@@ -17,29 +17,32 @@ class LoaiTourController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = LoaiTour::all();
+        // $categories = LoaiTour::all();
+        $categories = LoaiTour::paginate(10)->withQueryString()->onEachSide(2); //
+        // chuyển đổi mảng thành object
+        // $categories = json_decode(json_encode($categories));
         $arrLocation = [];
+        $arrAllLocation = [];
+        $arrLocationNotIn = [];
         foreach($categories as $key => $category){
             $arrLocation[$key] = DiaDiem::where('ma_loai_tour', $category->id)->first('ma_loai_tour');
             // $category->location = DiaDiem::where('ma_loai_tour', $category->id)->first();
+            $arrAllLocation[$key] = DiaDiem::where('ma_loai_tour', $category->id)->get();
         }
-        // dd($arrLocation);
-
         $arrLocation = array_filter($arrLocation, function($value) { return $value !== null; });
-
-
+        // nếu có 1 phần tử null thì xóa phần tử đó
+        $arrAllLocation = array_filter($arrAllLocation, function($value) { return $value !== null; });
+        $locationsNotIn = DiaDiem::where('ma_loai_tour', null)->get();
         $locations = DiaDiem::all();
-        
-
         $extra_services = extra_service::all();
         $tours = Tour::all();
         $schedule = LichTrinh::all();
-        foreach ($categories as $category){
-            $category->mo_ta = $this->Trancate($category->mo_ta, 50);
-        }
-        return Inertia::render('Category/Index', compact('categories', 'arrLocation', 'extra_services', 'tours', 'schedule'));
+        // foreach ($categories as $category){
+        //     $category->mo_ta = $this->Trancate($category->mo_ta, 50);
+        // }
+        return Inertia::render('Category/Index', compact('categories', 'arrLocation', 'arrAllLocation', 'extra_services', 'tours', 'schedule', 'locations', 'locationsNotIn'));
     }
 
     /**
@@ -68,7 +71,7 @@ class LoaiTourController extends Controller
         // dd($request->all());
         $request->validate([
             'name' => 'required|unique:loai_tours,ten',
-            'description' => 'required',
+            // 'description' => 'required',
         ]);
 
         $category = new LoaiTour();
@@ -77,6 +80,15 @@ class LoaiTourController extends Controller
         $category->save();
 
         return redirect()->route('category.index');
+        // return redirect()->back()->with('status', 'true');
+        // tra ve json
+        // return response()->json([
+        //     'message' => 'Create success',
+        //     'status' => 'success',
+        // ]); // status: success, error, warning
+
+        // return response()->json(['message' => 'Create success', 'status' => 'success']);
+
     }
 
     /**
@@ -116,9 +128,9 @@ class LoaiTourController extends Controller
     public function update(Request $request, LoaiTour $category)
     {
         $request->validate([
-            'name' => 'required|unique:loai_tours,ten',
-            'description' => 'required',
+            'name' => 'required',
         ]);
+        
 
         $category->ten = $request->name;
         $category->mo_ta = $request->description;

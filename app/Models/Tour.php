@@ -16,6 +16,10 @@ class Tour extends Model
         'deleted_at',
     ];
 
+    protected $fillable = [
+        'co_lich_trinh',
+    ];
+
     protected $casts = [
         'ngay_khoi_hanh' => 'datetime:d-m-Y',
     ];
@@ -28,5 +32,13 @@ class Tour extends Model
     public function LoaiTour()
     {
         return $this->belongsTo(LoaiTour::class, 'ma_tour', 'id');
+    }
+
+    public function tour_ngay() {
+        return $this->hasMany(Tour_ngay::class, 'ma_tour', 'id');
+    }
+
+    public function chi_tiet_tour(){
+        return $this->hasMany(ChiTietTour::class, 'ma_tour', 'id');
     }
 }

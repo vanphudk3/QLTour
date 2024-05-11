@@ -13,6 +13,15 @@ import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { isEmpty } from "lodash";
 
+import DatePicker, { DateObject } from "react-multi-date-picker";
+import DatePanel from "react-multi-date-picker/plugins/date_panel";
+import SelectMultipleDate from "@/Components/SelectMultipleDate";
+
+const formatCurrency = (value) => {
+    
+    return value.replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
+};
+
 export default function Create(props) {
     const today = new Date().toISOString().split("T")[0];
     const locations = usePage().props.locations;
@@ -69,7 +78,7 @@ export default function Create(props) {
             priceYoung: "",
             priceChild: "",
             description: "",
-            dateStart: "",
+            dateStart: [],
             amountPeople: "",
             amountDay: "",
             amountNight: "",
@@ -80,6 +89,7 @@ export default function Create(props) {
             location_depart: "",
             location_general: "",
             time_depart: "",
+            list_date: "",
         });
 
     if (slugs != "") {
@@ -98,25 +108,40 @@ export default function Create(props) {
         }
         setData(e.target.name, ArrayImage);
     };
-
+    const [dates, setDates] = useState([]);
+    const arrdates = []
+    const format = "MM/DD/YYYY";
+    dates.map((date,index) => {
+        data.dateStart.push(date.format());
+    });
+    
     const onHandleChange = (event) => {
         setData(
             event.target.name,
             event.target.type === "checkbox"
-                ? event.target.checked
-                : event.target.value
+            ? event.target.checked
+            : event.target.value
         );
+        if (event.target.name === "priceAdult") {
+            const value = event.target.value.replace(/\D/g, "");
+            const formatted = formatCurrency(value);
+            setData("priceAdult",formatted);
+        }
+        
         if (event.target.name === "name") {
             setSlug(getSlug(event));
         }
         if (event.target.name === "amountDay") {
             setamountdate(countDate(event));
+
         }
     };
-
-    // console.log(amountdate);
-
+    // setData("dateStart",arrdates);
     const submit = (e) => {
+        data.dateStart = data.dateStart.filter((item, index) => {
+            return data.dateStart.indexOf(item) === index;
+        });
+        
         e.preventDefault();
 
         post(route("managerTour.store"));
@@ -262,6 +287,7 @@ export default function Create(props) {
                                     // isFocused={true}
                                     handleChange={onHandleChange}
                                     required
+                                    disabled = {true}
                                 />
                                 <InputError
                                     message={errors.slug}
@@ -345,7 +371,7 @@ export default function Create(props) {
                             </div>
                         </div>
                         <div className="flex justify-between">
-                            <div className="w-23 mb-3">
+                            <div className="w-30 mb-3">
                                 <InputLabel
                                     forInput="agerfrom"
                                     value="Age appropriate*"
@@ -370,16 +396,35 @@ export default function Create(props) {
                                     className="mt-2"
                                 />
                             </div>
-                            <div className="w-23 mb-3">
+                            <div className="w-30 mb-3">
+                            <InputLabel
+                                    forInput="Date"
+                                    value="Date depart *"
+                                />
+                                <br>
+                                </br>
+                                         <DatePicker
+                                            value={dates}
+                                            onChange={setDates}
+                                            style={{ padding: "18px 0px", marginTop: "5px", width: "185%" }}
+                                            multiple
+                                            sort
+                                            format={format}
+                                            calendarPosition="bottom-center"
+                                            plugins={[<DatePanel />]}
+                                            inputStyle={{ fontSize: "16px", padding: "10px", width: "300px" }}
+                                        />
+                            </div>
+                            <div className="w-30 mb-3">
                                 <InputLabel
                                     forInput="priceAdult"
-                                    value="Price adult*"
+                                    value="Price *"
                                 />
 
                                 <TextInput
                                     id="priceAdult"
                                     name="priceAdult"
-                                    type="number"
+                                    type="text"
                                     value={data.priceAdult}
                                     className="mt-1 block w-full"
                                     autoComplete="priceAdult"
@@ -394,7 +439,7 @@ export default function Create(props) {
                                 />
                             </div>
 
-                            <div className="w-23 mb-3">
+                            {/* <div className="w-23 mb-3">
                                 <InputLabel
                                     forInput="priceYoung"
                                     value="Price young*"
@@ -440,35 +485,10 @@ export default function Create(props) {
                                     message={errors.priceChild}
                                     className="mt-2"
                                 />
-                            </div>
+                            </div> */}
                         </div>
                         <div className="flex w-100 justify-between">
-                            <div className="w-23">
-                                <InputLabel
-                                    forInput="dateStart"
-                                    value="Date depart*"
-                                />
-
-                                <TextInput
-                                    id="dateStart"
-                                    type="date"
-                                    name="dateStart"
-                                    value={data.dateStart}
-                                    min={today}
-                                    className="mt-1 block w-full"
-                                    autoComplete="dateStart"
-                                    // isFocused={true}
-                                    handleChange={onHandleChange}
-                                    required
-                                />
-
-                                <InputError
-                                    message={errors.dateStart}
-                                    className="mt-2"
-                                />
-                            </div>
-
-                            <div className="w-23">
+                            <div className="w-30">
                                 <InputLabel
                                     forInput="amountPeople"
                                     value="Amount people*"
@@ -492,7 +512,7 @@ export default function Create(props) {
                                 />
                             </div>
 
-                            <div className="w-23">
+                            <div className="w-30">
                                 <InputLabel
                                     forInput="amountDay"
                                     value="Amount day*"
@@ -516,7 +536,7 @@ export default function Create(props) {
                                 />
                             </div>
 
-                            <div className="w-23">
+                            <div className="w-30">
                                 <InputLabel
                                     forInput="amountNight"
                                     value="Amount night*"

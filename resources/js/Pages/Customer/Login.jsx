@@ -16,24 +16,12 @@ import InputError from "@/Components/InputError";
 import { useState } from "react";
 import Notification from "@/Components/Notification";
 
-const breadcrumbs = [
-    <Link
-        underline="hover"
-        key="1"
-        color="inherit"
-        href={route("welcome")}
-        style={{ textDecoration: "none", color: "white" }}
-    >
-        Home
-    </Link>,
-    <Typography key="2" color="text.primary" style={{ color: "white" }}>
-        Login
-    </Typography>,
-];
 
 export default function LoginMember(props) {
     const login = usePage().props.login;
     const redirect = usePage().props.redirect;
+    const lang = usePage().props.lang;
+    const _lang = usePage().props._lang;
 
     const { data, setData, post, processing, errors, reset } = useForm({
         email: "",
@@ -41,9 +29,6 @@ export default function LoginMember(props) {
         remember: "",
         redirect: redirect,
     });
-
-    console.log(data);
-
     const onHandleChange = (e) => {
         setData(
             e.target.name,
